@@ -1,7 +1,8 @@
 .venv/
 .git/
-frontend/assets/tracks/*
+frontend/assets/tracks/*.mp3
 frontend/*
+!frontend/assets/
 !frontend/assets/tracks/.keep
 !frontend/.keep
 !frontend/*.js
