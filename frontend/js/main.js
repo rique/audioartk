@@ -56,7 +56,7 @@ fileBrowser.onSongAdded(tracklistGrid.appendTrackToGrid.bind(tracklistGrid));
 PlaybackMediator.init(
     trackListBrowser, 
     tracklistGrid, 
-    tracklistGrid.getQueueGrid(), 
+    tracklistGrid.getQueueGrid(),
     audioPlayer
 );
 
