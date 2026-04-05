@@ -1,0 +1,16 @@
+Old File (static/js/),New Path (frontend/js/src/),Category
+event-manager.js,core/EventBus.js,Infrastructure
+api.js,core/HttpClient.js,Infrastructure
+"utils.js, effects.js",core/Utils.js,Infrastructure
+"tracks.js, playlists.js",domain/models/,Data Entities
+tracklistv2.js,domain/TrackList.js,Business Logic
+resources-manager.js,domain/StateManager.js,State
+track-loader.js,domain/AudioEngine.js,Audio Logic
+mediators.js,ui/PlaybackMediator.js,Orchestration
+"playerV2.js, player-controls.js",ui/player/PlayerUI.js,UI Component
+"grid.js, library.js",ui/grid/GridView.js,UI Component
+"html-items.js, components.js",ui/grid/RowTemplates.js,UI Templates
+"notifications.js, notifications-center.js",ui/feedback/Notifier.js,UI Feedback
+dragdrop.js,ui/interactions/DragDrop.js,UX Interaction
+visualizer.js,ui/visuals/Visualizer.js,Canvas/UI
+index.js,../main.js,Entry Point

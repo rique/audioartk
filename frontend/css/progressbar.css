@@ -1,0 +1,56 @@
+#progress, #main-volume-bar {
+    cursor: pointer;
+    background: transparent;
+}
+
+#progress {
+    width: 100%;
+    margin-top: 14px;
+    height: 8px;
+    position: relative;
+}
+
+#main-volume-bar {
+    width: 90%;
+    margin-top: 22px;
+    height: 1px;
+    position: relative;
+}
+
+#main-volume-bar:hover, #main-volume-bar.volume-action {
+    border: 1px solid rgba(200, 200, 200, 0.15);
+}
+
+#volume-bar-container {
+    background: transparent;
+    width: 100%;
+}
+
+#volume-bar-container, 
+#progress:hover, #prog-bar:hover, #progress:hover #prog-bar {
+    height: 10px;
+}
+
+#main-volume-bar:hover, #volume-bar:hover, #volume-bar-container:hover #volume-bar {
+    height: 7px;
+}
+
+/*#volume-bar-container, #progress:hover, #prog-bar:hover,
+#main-volume-bar:hover, #volume-bar:hover, #volume-bar-container:hover #volume-bar {
+    height: 10px;
+}*/
+
+#prog-bar {
+    height: 28%;
+    position: absolute;
+    bottom: 0;
+    background: rgb(250, 50, 50);
+}
+
+#volume-bar {
+    height: 100%;
+}
+
+#volume-bar {
+    background: rgb(216, 202, 202);
+}

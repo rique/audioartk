@@ -1,0 +1,742 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+html {
+    height: 100%;
+}
+body {
+    background: #181717;
+    font-family:  Arial, Helvetica, sans-serif!important;
+    color: #f6f6f6;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+ul {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+#player {
+    padding: 0 8px 0 8px;
+    width: 98.5%;
+    height: auto;
+    margin: auto;
+}
+
+#info-box {
+    height: 103px;
+}
+
+#foto-box, #album-art {
+    width: 100px;
+    margin-top: 5px;
+    border-radius: 2%;
+}
+
+#cotrols {
+    width: 100%;
+    height: 100%;
+}
+
+#track-box {
+    width: 66.66%;
+}
+
+#foto-box, #track-box {
+    padding: 6px 6px 0 0;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#track-box p {
+    padding: 10px 0 2px 6px;
+    font-size: 16px;
+    color: #f6f6f6;
+}
+
+#time-track {
+    cursor: pointer;
+}
+
+#time-track:hover {
+    color: #ff4949;
+}
+
+.inline-block {
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+.action-cnt {
+    width: 100px;
+    height: auto;
+    padding: 12px 12px 0 0;
+}
+
+.action-cnt a {
+    display: block;
+}
+
+.action-cnt a, .action-cnt img {
+    width: 40px;
+    position: relative;
+ }
+
+.action-cnt .fa-solid {
+    font-size: 26px;
+    text-align: center;
+    color: #f6f6f6;
+    padding: 4px 0 0;
+}
+
+.action-cnt .fa-solid:hover {
+    color: #d23939;
+}
+
+.action-cnt.repeat-active a .fa-repeat,
+#shuffle-button.repeat-active .fa-shuffle {
+    color: #bf1616;
+}
+
+
+.action-cnt a .repeat-one.repeat-active {
+    display: block;
+}
+
+.action-cnt a .repeat-one {
+    display: none;
+    position: absolute;
+    /*background: #181717;*/
+    top: 16.5px;
+    left: 12px;
+    text-align: center;
+    font-size: 17px;
+    color: #bf1616;
+    font-weight: bold;
+    height: 16px;
+    /*filter: drop-shadow(0 0 2px rgba(6, 14, 14, 0.2));*/
+}
+
+#vu-meters {
+    width: 100%;
+    height: 660px;
+}
+
+#volume-display {
+    position: absolute;
+    right: 0;
+    top: 90%;
+    width: 18%;
+    padding: 14px;
+    font-size: 60px;
+    color: #f6f6f6;
+    background: transparent;
+    text-align: center;
+    z-index: 5000;
+}
+
+#muted-display {
+    position: absolute;
+    top: 40%;
+    left: 46%;
+     width: 8%;
+    background: transparent;
+    text-align: left;
+    color: #f6f6f6;
+    z-index: 5000;
+    font-size: 176px;
+}
+
+.cnt-overlay {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: rgba(100, 100, 100, .4);
+    z-index: 100;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+.cnt-overlay .file-browser, 
+.cnt-overlay .track-browser,
+.cnt-overlay #window-content {
+    position: relative;
+    width: 72%;
+    height: 72%;
+    background: #2d2d2d;
+    border-radius: 10px;
+    padding: 16px;
+    display: none;
+    margin: 10% auto 0 auto;
+}
+
+.cnt-overlay .file-browser, 
+.cnt-overlay .track-browser {
+    overflow: hidden;
+}
+
+.cnt-overlay .file-browser {
+    overflow: auto;
+}
+
+.cnt-overlay .file-browser,
+.cnt-overlay #window-content.file-browser {
+    font-size: 18px;
+}
+
+.cnt-overlay .track-browser, #window-content.track-browser {
+    overflow: hidden!important;
+}
+
+.cnt-overlay .track-browser .tracklist-content-div, 
+#window-content.track-browser .tracklist-content-div{
+    overflow: scroll;
+    height: 92.4%;
+    width: auto;
+    margin: auto;
+}
+
+#window-content.track-browser .track-edit {
+    border: none;
+    display: block;
+    width: 98%;
+    padding: 1%;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+#window-content.track-browser .track-play {
+    cursor: pointer;
+    text-align: center;
+}
+
+#window-content.track-browser .track-play:hover, tr.queued-track table.queue-table tr:hover {
+    background: #0aa0fe;
+    color: #fff;
+}
+
+.base-path {
+    height: 30px;
+    border-bottom: 1px solid #a0a0a0;
+    margin-bottom: 15px;
+}
+
+.file-browser ul li.fld-itm,
+.file-browser ul li.fle-itm {
+    padding: 4px 2px 4px 2px;
+    cursor: pointer;
+}
+
+.file-browser ul li.fld-itm:hover,
+.file-browser ul li.fle-itm:hover {
+    background: #0e6c9f;
+    color: #fff;
+}
+
+.track-browser td, .track-browser th {
+    width: 26.88%;
+    padding: 4px;
+    border: 1px solid transparent;
+}
+
+.track-actions {
+    display: block;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.action-play, .track-actions {
+    cursor: pointer;
+}
+
+.action-play {
+    width: 100%;
+    height: 100%;
+}
+
+.cell:has(.action-play):hover {
+    background: #c7695f;
+    color: #fff;
+}
+
+.cell:has(.action-play):active {
+    background: #c75a4d;
+    color: #fff;
+}
+
+.track-actions li {
+    width: 100%;
+    height: 100%;
+}
+
+.track-actions:hover {
+    border: 1px solid #252525;
+    background: #11a4ff;
+}
+
+.track-browser td.small-cell, .track-browser th.small-cell {
+    width: 5%;
+}
+
+.track-browser td {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 11px;
+}
+
+.track-browser td:hover {
+    overflow: visible;
+    text-overflow: initial;
+    white-space: initial;
+    max-width: initial;
+}
+
+.track-browser tr.tr-white {
+    background: transparent;
+}
+
+.track-browser tr.tr-blue {
+    background: #bbe3fc;
+}
+
+.track-browser tbody tr:hover {
+    background: #16a6ff;
+    color: #f7f8f8;
+}
+
+.track-browser tbody td:hover {
+    background: #0086da;
+}
+
+.track-browser table {
+    border: 1px solid black;
+    background: #f7f8f8;
+    color: #302d2d;
+    user-select: none;
+    margin-bottom: 10px;
+}
+
+.tracklist-content thead {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background: #f7f8f8;
+    z-index: 400;
+}
+
+.tracklist-content-div {
+    height: 100%;
+    /*padding: 0 6px 6px 6px;*/
+    background: transparent;
+    overflow: auto;
+}
+
+
+.tracklist-content-div  .tracklist-info-cnt {
+    font-size: 18px;
+}
+
+.tracklist-info-cnt {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    z-index: 400;
+    background: #2d2d2d !important;
+    padding: 32px 0 0 0;
+}
+
+.tracklist-content-div .tracklist-info-nb,
+.tracklist-content-div .tracklist-info-duration {
+    width: 50%;
+    display: inline-block;
+    text-align: center;
+}
+
+.tracklist-content-div .tracklist-info-nb .nb-tracks,
+.tracklist-content-div .tracklist-info-duration .duration-tracks {
+	margin: 0 14px 0 0;
+	display: inline-block;
+}
+
+.tracklist-head {
+    height: 7%;
+    text-align: center;
+    font-size: 22px;
+}
+
+.tracklist-search {
+    width: 30%;
+    text-align: center;
+}
+
+.tracklist-title {
+    width: 70%;
+    text-align: left;
+}
+
+.tracklist-search .img-cnt {
+    width: 7%;
+    padding-top: 10px;
+    height: 25px;
+    cursor: pointer;
+}
+
+.tracklist-search .input-cnt {
+    width: 80%;
+    visibility: hidden;
+}
+
+.search-input {
+    width: 170px;
+    background: #f7f8f8;
+    color: #252525;
+    display: inline-block;
+    border-radius: 10px;
+    padding: 1px;
+    margin-left: -32%;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 1px;
+}
+
+.tracklist-search li, 
+.tracklist-search img {
+    color: #f7f8f8;
+}
+
+.tracklist-search img {
+    width: 24px;
+}
+
+tr.currently-playing {
+    background: #9ab3ff!important;
+}
+
+tr.currently-playing:hover {
+    background: #4a77ff!important;
+    color: #f7f8f8!important;
+}
+
+
+li.fa-solid.fa-folder {
+    color: #f0f000
+}
+
+li.fa-solid.fa-file {
+    color: #68d5d9
+}
+
+#file-browser-action {
+    width: 100%;
+    padding: 0 0 20px 0;
+    height: 90%;
+}
+
+#volume-control {
+    width: 100%;
+    font-size: 18px;
+    padding: 0 0 20px 0;
+}
+
+#volume-control span {
+    display: inline-block;
+    text-align: center;
+    vertical-align: bottom;
+    width: 36px;
+}
+
+#volume-control .fa-plus,
+#volume-control .fa-minus {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#volume-control .vol-val {
+    font-size: 20px;
+    margin-left: 6px;
+}
+
+#file-browser-action button {
+    border: 0;
+    padding: 7px;
+    border-radius: 4px;
+    background: #107bb4;
+    color: #fff;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    display: block;
+    margin: 0 0 24px 0;
+}
+
+#file-browser-action button:hover {
+    background: #056da5;
+}
+
+.action-menu-cnt {
+    position: absolute;
+    padding: 0;
+    z-index: 1450;
+    background: #444;
+    color: #eee;
+    width: 149px;
+    text-align: justify;
+    right: -1px;
+    margin: 30px;
+}
+
+.action-menu-cnt ul li {
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.action-menu-cnt ul {
+    width: 100%;
+}
+
+.action-menu-cnt ul li {
+    cursor: pointer;
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    width: 87%;
+}
+
+.action-menu-cnt ul li:last-child {
+    border: none;
+}
+
+.action-menu-cnt ul li:hover {
+    color: #53f7ff;
+    background: #5c5c5c;
+}
+
+.action-menu-cnt .fa-solid.fa-ellipsis {
+    width: 100%;
+    height: 100%;
+  }
+
+#main-left-menu {
+    height: 96%;
+    background: transparent;
+    width: 16%;
+    position: absolute;
+    /*right: -358px;*/
+    right: -14.2%;
+    top: 0;
+    z-index: 50;
+}
+
+#open-menu {
+    width: 12%;
+    background: #181717;
+    font-size: 25px;
+    text-align: center;
+    padding: 8px 0;
+    cursor: pointer;
+    border-radius: 5px 0 0 5px;
+}
+
+#open-menu:hover {
+    /*width: 11.95%;
+    border-left: 1px solid rgba(84, 84, 84, 0.4);
+    border-top: 0px solid rgba(84, 84, 84, 0.4);
+    border-bottom: 1px solid rgba(84, 84, 84, 0.4);*/
+}
+
+.is-open #open-menu:hover {
+    width: 12%;
+    border: none;
+}
+
+#open-menu:hover, 
+.is-open #open-menu {
+    background: #272727;
+}
+
+#left-menu {
+    width: 78%; /*80*/
+    height: 100%;
+    background: #272727;
+    padding: 6% 4%;/* 8px 16px*/
+}
+
+#notifications-cnt {
+    position: fixed;
+    width: 20%;
+    right: 1%;
+    bottom: 1.5%;
+    z-index: 2600;
+    height: auto;
+    background: transparent;
+}
+
+.notification-box {
+    margin: 6px auto 0 auto;
+    width: 95%;
+    height: 134px;
+    padding: 10px;
+    border: 1px solid #313131;
+    border-radius: 8px;
+    background: rgb(54, 54, 54);
+    color: #f4f4f4;
+    font-family: Arial, Helvetica, sans-serif;
+    filter: drop-shadow(0 0 2px #6a6a6a4a);
+    cursor: pointer;
+    font-size: 17px;
+}
+
+.notification-box .notification-head {
+    width: 100%;
+    height: 24%;
+    padding-bottom: 1%;
+}
+
+.notification-box .notification-head .notif-title {
+    width: 93%;
+    height: 100%;
+}
+
+.notification-box .notification-head .notif-close {
+    width: 5%;
+    height: 100%;
+}
+
+.notification-box .notification-head .notif-close .close-cirlce {
+    border: 1px solid rgb(54, 54, 54);
+    border-radius: 50%;
+    text-align: center;
+    cursor: pointer;
+    width: 98%;
+    height: 52%;
+}
+
+.notification-box:hover .notification-head .notif-close .close-cirlce {
+    background: #4f4f4f;
+    color: #f4f4f4;
+    border-color: #aeaeae;
+}
+
+.notification-box .notification-message {
+    width: 100%;
+    height: 62%;
+    padding-bottom: 1%;
+}
+
+.notification-box .notification-message p.no-wrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    padding: 0 0 5px 0;
+}
+
+.notification-box .notification-timer {
+    width: 100%;
+    height: 2px;
+}
+
+.notification-box .notification-timer .notif-prog-bar {
+    height: 100%;
+    width: 100%;
+    background: transparent;
+}
+
+.notification-box .notification-timer .notif-prog-bar .notif-sub-prog-bar {
+    height: 100%;
+    width: 0%;
+    background: #ff4949;
+}
+
+.dont-hide {
+    overflow: visible!important;
+}
+
+.notif-logo {
+    width: 16%;
+}
+
+.notif-logo img {
+    border-radius: 1%;
+}
+
+.notif-logo, .notif-body {
+    display: inline-block;
+    vertical-align: top;
+    padding: 0 6px 0 0;
+}
+
+
+tr.queued-track, tr.queued-track table.queue-table td {
+    border: 0;
+}
+
+
+tr.queued-track table.queue-table td {
+    width: 26.8%;
+}
+
+tr.queued-track table.queue-table tr {
+    background: #78cd7d;
+    border-bottom: 1px solid #e2e2e2;
+}
+
+tr.queued-track table.queue-table tr.currently-playing {
+    background: #68d7ff;
+}
+
+tr.queued-track td.small-cell-alt { 
+    width: 5.5% !important;
+}
+tr.queued-track table.queue-table td.medium-cell {
+    width: 26.6%;
+}
+
+tr.queued-track td.queue-td {
+    padding: 0;
+    border: 0;
+}
+
+tr.queued-track table.queue-table {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-collapse: collapse;
+}
+
+table.queue-table .small-cell {
+    width: 5%!important;
+}
+
+.playlist-form {
+    width: 22%;
+    padding: 22px;
+    border: 1px solid;
+    border-radius: 6px;
+    margin: 10% auto 0 auto;
+}
+
+.playlist-form input {
+    width: 84%;
+    padding: 6px;
+    margin-right: 16px;
+}
+
+.playlist-form button {
+    padding: 7px;
+    border-radius: 6px;
+    background-color: #107bb4;
+    color: #fff;
+    border: 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.playlist-form button:hover {
+    background: #056da5;
+}

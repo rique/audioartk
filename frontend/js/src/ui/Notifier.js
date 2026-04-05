@@ -1,0 +1,172 @@
+import { Fader, uuidv4 } from '../core/Utils.js';
+import { ResourceManager } from '../domain/StateManager.js';
+
+/**
+ * Renders the HTML for a track within a notification.
+ */
+class TrackBoxTemplate {
+    static render(track) {
+        const album = track.getAlbum() || 'N/A';
+        const artist = track.getArtist() || 'N/A';
+        const src = ResourceManager.getAlbumArtURL(track);
+
+        return `
+            <div class="notif-logo">
+                <img style="width: 100%" src="${src}">
+            </div>
+            <div style="width: 78%; font-size: 14px;" class="notif-body inline-block">
+                <p class="no-wrap">${track.getTitle()} ~ ${album}</p>
+                <p class="no-wrap">${artist}</p>
+            </div>`;
+    }
+}
+
+/**
+ * The core Notification class that can be updated and re-rendered.
+ */
+class Notification {
+    constructor(title, level) {
+        this.title = title;
+        this.level = level;
+        this.message = '';
+        this.fader = new Fader();
+        this.parentNode = document.getElementById('notifications-cnt');
+    }
+
+    update(message) {
+        this.message = message;
+    }
+
+    show(timeout = 5000) {
+        this.tplUUID = uuidv4();
+        const element = document.createElement('div');
+        element.className = `notification-box notif-${this.level}`;
+        element.dataset.tplId = this.tplUUID;
+
+        element.innerHTML = `
+            <div class="notification-head">
+                <div class="notif-title inline-block">${this.title}</div>
+                <div class="notif-close inline-block">
+                    <div class="close-circle"><i class="fa-solid fa-xmark"></i></div>
+                </div>
+            </div>
+            <div class="notification-message">${this.message}</div>
+            <div class="notification-timer">
+                <div class="notif-prog-bar">
+                    <div class="notif-sub-prog-bar"></div>
+                </div>
+            </div>`;
+
+        this.parentNode.prepend(element);
+
+        // Progress Animation
+        const progressBar = element.querySelector('.notif-sub-prog-bar');
+        const animation = new Animation(
+            new KeyframeEffect(progressBar, [{ width: '100%' }, { width: '0%' }], { duration: timeout }),
+            document.timeline
+        );
+
+        element.addEventListener('click', () => animation.finish());
+
+        this.fader.fadeIn(element, 250);
+        animation.play();
+        
+        animation.onfinish = () => {
+            this.fader.fadeOut(element, 400, 1, 0, () => element.remove());
+        };
+    }
+    hide() {
+        // We find the element in the DOM using the UUID we generated in show()
+        // If we didn't store the element reference in 'this', we use the data attribute.
+        const element = this.parentNode.querySelector(`[data-tpl-id="${this.tplUUID}"]`);
+        
+        if (element) {
+            // Use the fader for a professional exit (400ms duration)
+            this.fader.fadeOut(element, 250, 1, 0, () => {
+                element.remove();
+            });
+        }
+    }
+}
+
+/**
+ * NotificationCenter: The Singleton Registry
+ */
+export const NotificationCenter = {
+    _registry: {},
+
+    register(key, title, level) {
+        if (this._registry[key]) return;
+        this._registry[key] = new Notification(title, level);
+    },
+
+    updateAndShow(key, message, timeout) {
+        const notif = this._registry[key];
+        if (!notif) return console.error(`Notifier: Key "${key}" not found.`);
+        
+        notif.update(message);
+        notif.show(timeout);
+    },
+    hide(key) {
+        const notif = this._registry[key];
+        if (!notif) return console.error(`Notifier: Key "${key}" not found.`);
+
+        notif.hide();
+    }
+};
+
+/**
+ * DOMAIN WRAPPERS
+ * These use the NotificationCenter to keep your business logic clean.
+ */
+
+export const TracklistNotifier = {
+    keys: { ADDED: 'track.added', REMOVED: 'track.removed' },
+    init() {
+        NotificationCenter.register(this.keys.ADDED, 'Track added to queue!', 'info');
+        NotificationCenter.register(this.keys.REMOVED, '⚠️ Track removed!', 'warning');
+    },
+    showAdded(track, timeout) {
+        const html = TrackBoxTemplate.render(track);
+        NotificationCenter.updateAndShow(this.keys.ADDED, html, timeout);
+    },
+    showRemoved(track, timeout) {
+        const html = TrackBoxTemplate.render(track);
+        NotificationCenter.updateAndShow(this.keys.REMOVED, html, timeout);
+    }
+};
+
+export const PlayerNotifier = {
+    key: 'player.next',
+    init() {
+        NotificationCenter.register(this.key, 'Coming Up Next', 'info');
+    },
+    showNext(track, timeout) {
+        const html = TrackBoxTemplate.render(track);
+        NotificationCenter.updateAndShow(this.key, html, timeout);
+    },
+    hide() {
+        NotificationCenter.hide(this.key);
+    }
+};
+
+export const FileBrowserNotifier = { 
+    init() {
+        this.key = 'filebrowser.added';
+        NotificationCenter.register(this.key, 'New track successfully added!', 'info');
+    },
+    setAddedTrack(track, timeout) {
+        const html = TrackBoxTemplate.render(track);
+        NotificationCenter.updateAndShow(this.key, html, timeout);
+        // NotificationCenter.displayNotification(this.key, timeout);
+    },
+    hideAddedTrack() {
+        NotificationCenter.hide(this.key);
+    },
+}; 
+
+// Initialize the registry slots immediately
+TracklistNotifier.init();
+PlayerNotifier.init();
+FileBrowserNotifier.init();
+

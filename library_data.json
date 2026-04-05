@@ -1,0 +1,1549 @@
+[
+{
+  "model": "api.tracks",
+  "pk": 1,
+  "fields": {
+    "track_name": "ISABEL - SALSA ROMÁNTICA [d3_IFiZHrsQ].mp3",
+    "track_uuid": "359a11cc-8d5a-4051-b8cd-4fa1c778f230",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/ISABEL - SALSA ROMÁNTICA [d3_IFiZHrsQ].mp3",
+    "track_date_added": "2026-03-20T12:22:04.524Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 2,
+  "fields": {
+    "track_name": "cuando-la-mar.mp3",
+    "track_uuid": "70d6eb93-5851-4e72-a312-394ff86ddc13",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/cuando-la-mar.mp3",
+    "track_date_added": "2026-03-20T12:22:12.314Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 3,
+  "fields": {
+    "track_name": "el-cigarrillo.mp3",
+    "track_uuid": "5d16d8c0-2815-4494-821e-a3d62b73662b",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/el-cigarrillo.mp3",
+    "track_date_added": "2026-03-20T12:22:16.169Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 5,
+  "fields": {
+    "track_name": "nunca-se-sabe-corazon.mp3",
+    "track_uuid": "ba9ff3b2-8570-4d88-a4d6-24e9bd9bc592",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/nunca-se-sabe-corazon.mp3",
+    "track_date_added": "2026-03-20T12:22:24.598Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 7,
+  "fields": {
+    "track_name": "Adel Salameh & Nazila Azzouz - Le Rendez Vouz İmaginaire [QRGiVSzIA_o].mp3",
+    "track_uuid": "96c4eb85-aac5-4201-94b9-d765306dd538",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/Adel Salameh & Nazila Azzouz - Le Rendez Vouz İmaginaire [QRGiVSzIA_o].mp3",
+    "track_date_added": "2026-03-20T12:22:31.571Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 8,
+  "fields": {
+    "track_name": "01-02. かきまわされて.mp3",
+    "track_uuid": "b3d1450c-3f0d-4c65-b53b-9800c4924413",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/Shibata Hatsumi (しばたはつみ) - (1979) Blue Joke/01-02. かきまわされて.mp3",
+    "track_date_added": "2026-03-20T12:22:41.119Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 9,
+  "fields": {
+    "track_name": "01-03. さよならごめん.mp3",
+    "track_uuid": "800f56f3-d547-4fbd-b717-b06fcf03e2e8",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/music/Shibata Hatsumi (しばたはつみ) - (1979) Blue Joke/01-03. さよならごめん.mp3",
+    "track_date_added": "2026-03-20T12:22:44.926Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 10,
+  "fields": {
+    "track_name": "jerry_rivera_nada_sin_ti.mp3",
+    "track_uuid": "279eb792-f0c5-4462-b178-c9208dc9e7a6",
+    "track_original_path": "/mnt/c/Users/enrique/vm_shared_1/Nueva carpeta/jerry_rivera_nada_sin_ti.mp3",
+    "track_date_added": "2026-03-20T12:23:11.471Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 11,
+  "fields": {
+    "track_name": "01 LIGHT'N UP.mp3",
+    "track_uuid": "76021cd8-ea80-47af-8e53-06d87ea200d6",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/01 LIGHT'N UP.mp3",
+    "track_date_added": "2026-03-20T12:34:25.903Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 12,
+  "fields": {
+    "track_name": "02 頬に夜の灯.mp3",
+    "track_uuid": "0b9a1cbb-0f8e-4ff4-a2c0-8e6c0380e0f9",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/02 頬に夜の灯.mp3",
+    "track_date_added": "2026-03-20T12:34:27.834Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 13,
+  "fields": {
+    "track_name": "03 LOVE SHOWER.mp3",
+    "track_uuid": "7d926731-c76f-4d88-b336-ecd6fd9f87cc",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/03 LOVE SHOWER.mp3",
+    "track_date_added": "2026-03-20T12:34:30.229Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 14,
+  "fields": {
+    "track_name": "04 風.mp3",
+    "track_uuid": "baaa2ab2-ff90-4614-8ced-d0cc12229bf0",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/04 風.mp3",
+    "track_date_added": "2026-03-20T12:34:31.663Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 15,
+  "fields": {
+    "track_name": "05 MORNING PRAYER.mp3",
+    "track_uuid": "a07b89fa-21d3-4ad5-b31d-f850a414fdc9",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/05 MORNING PRAYER.mp3",
+    "track_date_added": "2026-03-20T12:34:34.881Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 16,
+  "fields": {
+    "track_name": "06 斜陽.mp3",
+    "track_uuid": "911b58ff-6cd1-4557-8579-ddd8d1efc398",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/06 斜陽.mp3",
+    "track_date_added": "2026-03-20T12:34:36.079Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 17,
+  "fields": {
+    "track_name": "07 時の向こう.mp3",
+    "track_uuid": "e85f449a-a847-42d8-8c84-d3281cb9cddb",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/LIGHT'N UP/07 時の向こう.mp3",
+    "track_date_added": "2026-03-20T12:34:37.166Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 18,
+  "fields": {
+    "track_name": "18-Good Morning.mp3",
+    "track_uuid": "93dae481-69b9-4c3c-a9c1-839ead579af7",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/Mystere/Lennie Hayton - 1952 - Singin' In The Rain [FLAC]/18-Good Morning.mp3",
+    "track_date_added": "2026-03-20T12:38:43.495Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 19,
+  "fields": {
+    "track_name": "04 - Conrod.mp3",
+    "track_uuid": "a87ac572-2f15-48e6-a24a-97410901ac5f",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/dohduhdah/Gambit/04 - Conrod.mp3",
+    "track_date_added": "2026-03-20T12:45:35.469Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 20,
+  "fields": {
+    "track_name": "09 - Marthe & La Jungle.mp3",
+    "track_uuid": "8cc2c767-f61b-4d45-968b-6315298b48cc",
+    "track_original_path": "/mnt/c/Users/enrique/Documents/Soulseek Downloads/complete/dohduhdah/Gambit/09 - Marthe & La Jungle.mp3",
+    "track_date_added": "2026-03-20T12:45:37.483Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 23,
+  "fields": {
+    "track_name": "silly-crush.mp3",
+    "track_uuid": "fb8b1ed7-64ae-472c-be45-a64463302079",
+    "track_original_path": "/home/enrique/Music/silly-crush.mp3",
+    "track_date_added": "2026-03-20T14:19:25.240Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 25,
+  "fields": {
+    "track_name": "imaginate.mp3",
+    "track_uuid": "dbbcf4d3-7669-42b1-920b-45f6b5c2f807",
+    "track_original_path": "/home/enrique/Music/imaginate.mp3",
+    "track_date_added": "2026-03-20T14:29:59.143Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 27,
+  "fields": {
+    "track_name": "tantei_monogatari.mp3",
+    "track_uuid": "983b3934-5652-401b-b9c0-47245758f4b0",
+    "track_original_path": "/home/enrique/Music/tantei_monogatari.mp3",
+    "track_date_added": "2026-03-20T15:27:37.288Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 29,
+  "fields": {
+    "track_name": "yamazakura.mp3",
+    "track_uuid": "b99185b2-519b-4a8b-9803-8904356bc368",
+    "track_original_path": "/home/enrique/Music/yamazakura.mp3",
+    "track_date_added": "2026-03-20T15:45:19.989Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 30,
+  "fields": {
+    "track_name": "itsuka.mp3",
+    "track_uuid": "8cf184d5-f4af-4f3b-86ac-27bdd39b5811",
+    "track_original_path": "/home/enrique/Music/itsuka.mp3",
+    "track_date_added": "2026-03-20T15:57:01.203Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 31,
+  "fields": {
+    "track_name": "simple_love.mp3",
+    "track_uuid": "4acf0bc7-ab77-4f48-81fa-ba5a9c542127",
+    "track_original_path": "/home/enrique/Music/simple_love.mp3",
+    "track_date_added": "2026-03-20T16:03:10.883Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 32,
+  "fields": {
+    "track_name": "tasogare_my_love.mp3",
+    "track_uuid": "171a99ec-d8cb-4720-8ab4-e25dcf0535ce",
+    "track_original_path": "/home/enrique/Music/tasogare_my_love.mp3",
+    "track_date_added": "2026-03-20T16:06:26.650Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 35,
+  "fields": {
+    "track_name": "sky_restaurant.mp3",
+    "track_uuid": "d3937a62-d8ea-4a93-a3e9-1926a90ded15",
+    "track_original_path": "/c/Users/enrique/Music/sky_restaurant.mp3",
+    "track_date_added": "2026-03-20T16:17:12.134Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 36,
+  "fields": {
+    "track_name": "07 突然の贈りもの (Sudden Gift).flac.mp3",
+    "track_uuid": "34763632-85cd-4080-a6c5-0db177fc34e4",
+    "track_original_path": "/c/Users/enrique/Music/Taeko Onuki/07 突然の贈りもの (Sudden Gift).flac.mp3",
+    "track_date_added": "2026-03-20T16:18:38.702Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 37,
+  "fields": {
+    "track_name": "201 - Mariya Takeuchi - 突然の贈りもの.flac.mp3",
+    "track_uuid": "8456f3da-c8b2-4c5a-97fb-f5b5f70ccdd1",
+    "track_original_path": "/c/Users/enrique/Music/Taeko Onuki/201 - Mariya Takeuchi - 突然の贈りもの.flac.mp3",
+    "track_date_added": "2026-03-20T16:18:57.539Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 38,
+  "fields": {
+    "track_name": "CACERES - Volver a casa-hd_UKQV7Zzc.mp3",
+    "track_uuid": "ab879e5c-c713-4b7a-915a-402aa9d364b2",
+    "track_original_path": "/c/Users/enrique/Music/CACERES - Volver a casa-hd_UKQV7Zzc.mp3",
+    "track_date_added": "2026-03-20T16:19:13.472Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 39,
+  "fields": {
+    "track_name": "2-15 こむぎいろの天使.mp3",
+    "track_uuid": "f9a13e2d-53a1-4edd-a6c9-fbcc0a64ddb1",
+    "track_original_path": "/c/Users/enrique/Music/SINGLESコンプリート [Disc 1]/2-15 こむぎいろの天使.mp3",
+    "track_date_added": "2026-03-20T16:20:24.215Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 40,
+  "fields": {
+    "track_name": "1-01 卒業.mp3",
+    "track_uuid": "8b092377-20d5-42ec-8e5b-9c57b39db003",
+    "track_original_path": "/c/Users/enrique/Music/SINGLESコンプリート [Disc 1]/1-01 卒業.mp3",
+    "track_date_added": "2026-03-20T16:20:27.865Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 41,
+  "fields": {
+    "track_name": "14 ~ Yokogao.mp3",
+    "track_uuid": "192718a9-7341-4e08-9af2-b8436757ca7c",
+    "track_original_path": "/c/Users/enrique/Music/imports/14 ~ Yokogao.mp3",
+    "track_date_added": "2026-03-20T16:20:43.482Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 42,
+  "fields": {
+    "track_name": "02. 極楽鳥のテーマ.mp3",
+    "track_uuid": "4a5d31fb-19a6-47a7-8a4e-87e4cb33323c",
+    "track_original_path": "/c/Users/enrique/Music/[1986.03.20] MOODS (ムーズ)/02. 極楽鳥のテーマ.mp3",
+    "track_date_added": "2026-03-20T16:22:15.313Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 43,
+  "fields": {
+    "track_name": "03. So Shine.mp3",
+    "track_uuid": "ae1d2954-09fb-4090-ac20-02b8b95fe65a",
+    "track_original_path": "/c/Users/enrique/Music/[1986.03.20] MOODS (ムーズ)/03. So Shine.mp3",
+    "track_date_added": "2026-03-20T16:22:22.482Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 44,
+  "fields": {
+    "track_name": "04 哀しみは夜の向こう.mp3",
+    "track_uuid": "a7602fab-b195-4f9d-9b37-a24b1b5e606b",
+    "track_original_path": "/c/Users/enrique/Music/iTunes/iTunes Media/Music/間宮貴子/LOVE TRIP/04 哀しみは夜の向こう.mp3",
+    "track_date_added": "2026-03-20T16:23:05.861Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 45,
+  "fields": {
+    "track_name": "06 悲しみがとまらない I CAN'T STOP THE LONELI.mp3",
+    "track_uuid": "261de34a-6f01-4aa4-9a67-5dd0268b9550",
+    "track_original_path": "/c/Users/enrique/Music/iTunes/iTunes Media/Music/杏里/TIMELY!! [Remaster]/06 悲しみがとまらない I CAN'T STOP THE LONELI.mp3",
+    "track_date_added": "2026-03-20T16:23:48.041Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 46,
+  "fields": {
+    "track_name": "11 Remember Summer Days.mp3",
+    "track_uuid": "0279a099-e9d2-4f96-b719-38bba21bc50e",
+    "track_original_path": "/c/Users/enrique/Music/iTunes/iTunes Media/Music/杏里/TIMELY!! [Remaster]/11 Remember Summer Days.mp3",
+    "track_date_added": "2026-03-20T16:23:58.348Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 47,
+  "fields": {
+    "track_name": "summer-lovers.mp3",
+    "track_uuid": "71c8e9e4-7be5-449a-b1b0-d16a10cc29fd",
+    "track_original_path": "/home/enrique/Music/summer-lovers.mp3",
+    "track_date_added": "2026-03-21T10:53:52.384Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 48,
+  "fields": {
+    "track_name": "bury_the_light.mp3",
+    "track_uuid": "51cd3fb5-b354-4ab3-86b8-2d9ad97f5a0a",
+    "track_original_path": "/home/enrique/Music/bury_the_light.mp3",
+    "track_date_added": "2026-03-21T11:26:13.326Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 50,
+  "fields": {
+    "track_name": "blue_bed.mp3",
+    "track_uuid": "44fe53c5-6070-4d98-ac2e-79047dda7855",
+    "track_original_path": "/home/enrique/Music/blue_bed.mp3",
+    "track_date_added": "2026-03-21T20:42:59.967Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 51,
+  "fields": {
+    "track_name": "silly-crush.mp3",
+    "track_uuid": "f984d59b-6459-4316-b553-d5f430a7f0ab",
+    "track_original_path": "/home/enrique/Music/silly-crush.mp3",
+    "track_date_added": "2026-03-22T02:57:53.162Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 52,
+  "fields": {
+    "track_name": "silly-crush2.mp3",
+    "track_uuid": "4fd57348-fe18-4746-9a61-3adaac0a03a5",
+    "track_original_path": "/home/enrique/Music/silly-crush2.mp3",
+    "track_date_added": "2026-03-22T02:59:24.521Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 53,
+  "fields": {
+    "track_name": "lishonile.mp3",
+    "track_uuid": "3eec1a67-ab84-4318-993b-8c48228645a4",
+    "track_original_path": "/home/enrique/Music/lishonile.mp3",
+    "track_date_added": "2026-03-22T09:09:01.641Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 54,
+  "fields": {
+    "track_name": "Tasogare My Love - Junko Ohashi ⧸⧸ Sub Español 💘 [uHBQrhmWPJ8].mp3",
+    "track_uuid": "1db69bb6-d51b-45c9-8e22-a8982506603e",
+    "track_original_path": "/home/enrique/Music/Tasogare My Love - Junko Ohashi ⧸⧸ Sub Español 💘 [uHBQrhmWPJ8].mp3",
+    "track_date_added": "2026-03-22T22:09:23.907Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 55,
+  "fields": {
+    "track_name": "simply_red_live.mp3",
+    "track_uuid": "0d5b869e-dfbf-4f16-a4ed-107c133617d9",
+    "track_original_path": "/home/enrique/Music/simply_red_live.mp3",
+    "track_date_added": "2026-03-23T00:43:14.428Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 56,
+  "fields": {
+    "track_name": "night_nurse.mp3",
+    "track_uuid": "4aa91ba5-7de4-4435-a943-013e6abc0260",
+    "track_original_path": "/home/enrique/Music/night_nurse.mp3",
+    "track_date_added": "2026-03-23T00:49:35.700Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 57,
+  "fields": {
+    "track_name": "reiko_live.mp3",
+    "track_uuid": "42058c24-bdb6-4ea4-931e-f971f05c223d",
+    "track_original_path": "/home/enrique/Music/reiko_live.mp3",
+    "track_date_added": "2026-03-23T00:53:57.856Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 58,
+  "fields": {
+    "track_name": "me_cago_en_tu_rev.mp3",
+    "track_uuid": "8f40b06b-b069-4067-bbf5-32b63df7621c",
+    "track_original_path": "/home/enrique/Music/me_cago_en_tu_rev.mp3",
+    "track_date_added": "2026-03-23T01:06:17.382Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 59,
+  "fields": {
+    "track_name": "hope.mp3",
+    "track_uuid": "a68cb55f-a7cb-4f63-a320-43c6a2efd36b",
+    "track_original_path": "/home/enrique/Music/hope.mp3",
+    "track_date_added": "2026-03-23T02:55:54.138Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 60,
+  "fields": {
+    "track_name": "caracas-2000.mp3",
+    "track_uuid": "ea918a0f-0a85-44f2-9401-2884fed66ad1",
+    "track_original_path": "/home/enrique/Music/caracas-2000.mp3",
+    "track_date_added": "2026-03-23T03:27:29.692Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 87,
+  "fields": {
+    "track_name": "dido-white-flag.mp3",
+    "track_uuid": "e7fd0dc8-ad71-4dfa-b778-3d76fd34d1a8",
+    "track_original_path": "/home/enrique/Music/dido-white-flag.mp3",
+    "track_date_added": "2026-03-23T05:50:08.706Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 88,
+  "fields": {
+    "track_name": "a_quien.mp3",
+    "track_uuid": "c3b2a1d4-cb5e-4ab4-b60c-59692e4d7e58",
+    "track_original_path": "/home/enrique/Music/a_quien.mp3",
+    "track_date_added": "2026-03-23T05:51:14.661Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 89,
+  "fields": {
+    "track_name": "permanente.mp3",
+    "track_uuid": "71dd5a09-e371-454a-8c2b-9a9bb9b0e342",
+    "track_original_path": "/home/enrique/Music/permanente.mp3",
+    "track_date_added": "2026-03-23T06:00:18.738Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 90,
+  "fields": {
+    "track_name": "para-siempre.mp3",
+    "track_uuid": "d7befad8-c99f-4977-a08c-dee2349d0d9d",
+    "track_original_path": "/home/enrique/Music/para-siempre.mp3",
+    "track_date_added": "2026-03-23T19:02:10.897Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 91,
+  "fields": {
+    "track_name": "sigo-firme.mp3",
+    "track_uuid": "9da0f725-078b-4f3b-b2f1-ba61557e06a6",
+    "track_original_path": "/home/enrique/Music/sigo-firme.mp3",
+    "track_date_added": "2026-03-23T19:07:54.310Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 92,
+  "fields": {
+    "track_name": "cada-vez-otra-vez.mp3",
+    "track_uuid": "2951f073-b9b7-450c-aa6e-76fbde9cb4d2",
+    "track_original_path": "/home/enrique/Music/cada-vez-otra-vez.mp3",
+    "track_date_added": "2026-03-23T22:05:51.049Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 93,
+  "fields": {
+    "track_name": "necesito.mp3",
+    "track_uuid": "88ea26d9-2ec0-4ef3-8664-90c2041a609c",
+    "track_original_path": "/home/enrique/Music/necesito.mp3",
+    "track_date_added": "2026-03-23T22:09:37.448Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 94,
+  "fields": {
+    "track_name": "pedacito_de_playa.mp3",
+    "track_uuid": "6b02c008-3611-426a-826c-ef0e990715ab",
+    "track_original_path": "/home/enrique/Music/pedacito_de_playa.mp3",
+    "track_date_added": "2026-03-23T22:17:56.328Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 95,
+  "fields": {
+    "track_name": "escandalo_en_tus_mejillas.mp3",
+    "track_uuid": "aa307c9b-5ce7-4bca-aefc-619b45f8f782",
+    "track_original_path": "/home/enrique/Music/escandalo_en_tus_mejillas.mp3",
+    "track_date_added": "2026-03-23T22:22:30.899Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 96,
+  "fields": {
+    "track_name": "de-vez-en-cuando.mp3",
+    "track_uuid": "36db7911-1f75-4c1e-bf14-877ca26d79d3",
+    "track_original_path": "/home/enrique/Music/de-vez-en-cuando.mp3",
+    "track_date_added": "2026-03-23T22:51:28.067Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 97,
+  "fields": {
+    "track_name": "flor_palida.mp3",
+    "track_uuid": "952475e7-b951-4fd0-aecf-ee6b8ff3b1e2",
+    "track_original_path": "/home/enrique/Music/flor_palida.mp3",
+    "track_date_added": "2026-03-23T22:56:08.029Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 98,
+  "fields": {
+    "track_name": "palabras_del_alma.mp3",
+    "track_uuid": "e4e1f688-7cb4-4b05-b481-2db4ba9a3ff6",
+    "track_original_path": "/home/enrique/Music/palabras_del_alma.mp3",
+    "track_date_added": "2026-03-24T09:03:40.165Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 99,
+  "fields": {
+    "track_name": "y-te-pienso.mp3",
+    "track_uuid": "9aafbf32-b457-48e2-a104-4e9de3f3b181",
+    "track_original_path": "/home/enrique/Music/y-te-pienso.mp3",
+    "track_date_added": "2026-03-24T09:09:18.565Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 100,
+  "fields": {
+    "track_name": "vuelto_por_ti.mp3",
+    "track_uuid": "e3f92bce-2f32-4490-b910-c0b4d3d30383",
+    "track_original_path": "/home/enrique/Music/vuelto_por_ti.mp3",
+    "track_date_added": "2026-03-24T09:14:03.145Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 101,
+  "fields": {
+    "track_name": "african_postman.mp3",
+    "track_uuid": "b5d0aae6-ab9d-4a95-8fda-817bc4cba0a3",
+    "track_original_path": "/home/enrique/Music/african_postman.mp3",
+    "track_date_added": "2026-03-24T09:21:06.393Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 102,
+  "fields": {
+    "track_name": "black_and_white.mp3",
+    "track_uuid": "326626b5-df21-4d45-b8c9-f8621cae0c89",
+    "track_original_path": "/home/enrique/Music/black_and_white.mp3",
+    "track_date_added": "2026-03-24T09:35:18.092Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 103,
+  "fields": {
+    "track_name": "music_and_me.mp3",
+    "track_uuid": "80d04325-cb50-48c4-80e2-49aaed5bb7fa",
+    "track_original_path": "/home/enrique/Music/music_and_me.mp3",
+    "track_date_added": "2026-03-24T09:44:55.202Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 104,
+  "fields": {
+    "track_name": "my_life.mp3",
+    "track_uuid": "e9619606-92b4-4a09-b774-0a7b0d20b708",
+    "track_original_path": "/home/enrique/Music/my_life.mp3",
+    "track_date_added": "2026-03-25T00:48:40.716Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 105,
+  "fields": {
+    "track_name": "朝の風景.mp3",
+    "track_uuid": "b7059087-1f24-45a0-8d79-3673aa57c900",
+    "track_original_path": "/home/enrique/Music/朝の風景.mp3",
+    "track_date_added": "2026-03-25T00:55:05.494Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 106,
+  "fields": {
+    "track_name": "mi-primera-rumba.mp3",
+    "track_uuid": "bde316ab-935a-480f-a864-744d03e93f77",
+    "track_original_path": "/home/enrique/Music/mi-primera-rumba.mp3",
+    "track_date_added": "2026-03-25T09:03:55.118Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 107,
+  "fields": {
+    "track_name": "vivir-sin-ti.mp3",
+    "track_uuid": "693e2e4a-08ad-44be-97ad-608d7bb27234",
+    "track_original_path": "/home/enrique/Music/vivir-sin-ti.mp3",
+    "track_date_added": "2026-03-25T09:07:18.199Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 108,
+  "fields": {
+    "track_name": "thousand-years.mp3",
+    "track_uuid": "01a69a89-87d7-4152-b873-b169e8b18fe9",
+    "track_original_path": "/home/enrique/Music/thousand-years.mp3",
+    "track_date_added": "2026-03-25T09:15:48.894Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 109,
+  "fields": {
+    "track_name": "azucar.mp3",
+    "track_uuid": "a32f3a6d-ac81-4b6f-a469-3b9c9cb7371d",
+    "track_original_path": "/home/enrique/Music/azucar.mp3",
+    "track_date_added": "2026-03-25T09:20:36.320Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 110,
+  "fields": {
+    "track_name": "el-dia-que-me-quieras.mp3",
+    "track_uuid": "8356bf1b-a2fb-4d2f-aee1-9b038bdd5659",
+    "track_original_path": "/home/enrique/Music/el-dia-que-me-quieras.mp3",
+    "track_date_added": "2026-03-25T09:24:21.590Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 111,
+  "fields": {
+    "track_name": "juan-pachanga.mp3",
+    "track_uuid": "d41d1f7c-ddac-477e-90cf-086830682f67",
+    "track_original_path": "/home/enrique/Music/juan-pachanga.mp3",
+    "track_date_added": "2026-03-25T09:35:50.429Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 112,
+  "fields": {
+    "track_name": "holh_my_peace_acc.mp3",
+    "track_uuid": "b0476b68-932e-4410-81b6-72e59a96dce7",
+    "track_original_path": "/home/enrique/Music/holh_my_peace_acc.mp3",
+    "track_date_added": "2026-03-25T09:55:09.984Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 113,
+  "fields": {
+    "track_name": "wonderful_world.mp3",
+    "track_uuid": "8be26aef-0ac1-4d4a-9978-1c046c472cc7",
+    "track_original_path": "/home/enrique/Music/wonderful_world.mp3",
+    "track_date_added": "2026-03-25T10:03:46.301Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 114,
+  "fields": {
+    "track_name": "its-just-begun.mp3",
+    "track_uuid": "112cb737-f020-4dea-8159-51e12c5388e2",
+    "track_original_path": "/home/enrique/Music/its-just-begun.mp3",
+    "track_date_added": "2026-03-25T10:10:43.419Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 115,
+  "fields": {
+    "track_name": "binikini.mp3",
+    "track_uuid": "afe8c90d-f8c9-4149-857f-0b02327f0410",
+    "track_original_path": "/home/enrique/Music/binikini.mp3",
+    "track_date_added": "2026-03-25T10:23:42.761Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 116,
+  "fields": {
+    "track_name": "just_like_heaven.mp3",
+    "track_uuid": "2471d7c9-0af1-4d41-8712-0821bd82f926",
+    "track_original_path": "/home/enrique/Music/just_like_heaven.mp3",
+    "track_date_added": "2026-03-26T01:44:49.987Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 117,
+  "fields": {
+    "track_name": "protection.mp3",
+    "track_uuid": "fec2e525-ae37-465f-9a7d-1bf61ca640d7",
+    "track_original_path": "/home/enrique/Music/protection.mp3",
+    "track_date_added": "2026-03-26T01:53:22.387Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 118,
+  "fields": {
+    "track_name": "better_things.mp3",
+    "track_uuid": "0a74abb8-f5a0-4688-b3a8-d70458457ccd",
+    "track_original_path": "/home/enrique/Music/better_things.mp3",
+    "track_date_added": "2026-03-26T01:58:37.294Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 119,
+  "fields": {
+    "track_name": "while_my_guitare_gently_weeps.mp3",
+    "track_uuid": "7fdd93c1-a777-4b60-a202-99f54feb6754",
+    "track_original_path": "/home/enrique/Music/while_my_guitare_gently_weeps.mp3",
+    "track_date_added": "2026-03-26T02:02:50.478Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 120,
+  "fields": {
+    "track_name": "yeats_grave.mp3",
+    "track_uuid": "1b502256-d19c-49ed-9614-1e0e297ca7b7",
+    "track_original_path": "/home/enrique/Music/yeats_grave.mp3",
+    "track_date_added": "2026-03-26T02:22:33.186Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 121,
+  "fields": {
+    "track_name": "siempre_en_mi_mente.mp3",
+    "track_uuid": "64a3242b-32dd-4518-8ed1-2b5b586881ff",
+    "track_original_path": "/home/enrique/Music/siempre_en_mi_mente.mp3",
+    "track_date_added": "2026-03-26T02:28:25.262Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 122,
+  "fields": {
+    "track_name": "lucia.mp3",
+    "track_uuid": "0e7d5e17-287a-43d2-adb4-0cfdbe8dafc0",
+    "track_original_path": "/home/enrique/Music/lucia.mp3",
+    "track_date_added": "2026-03-26T02:40:45.178Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 123,
+  "fields": {
+    "track_name": "head-over-heal-darko.mp3",
+    "track_uuid": "a97df927-4916-4b14-bab5-31d126a3eeaf",
+    "track_original_path": "/home/enrique/Music/head-over-heal-darko.mp3",
+    "track_date_added": "2026-03-26T04:53:25.682Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 124,
+  "fields": {
+    "track_name": "ten_vas_pas.mp3",
+    "track_uuid": "7a86cec9-9e51-4b45-9b11-475ffd4dee64",
+    "track_original_path": "/home/enrique/Music/ten_vas_pas.mp3",
+    "track_date_added": "2026-03-26T06:55:13.687Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 125,
+  "fields": {
+    "track_name": "guayabo-zarandiaito.mp3",
+    "track_uuid": "9537a64c-78e8-4b8b-9b9c-2c6aa5ac85a1",
+    "track_original_path": "/c/Users/enrique/Downloads/songs/guayabo-zarandiaito.mp3",
+    "track_date_added": "2026-03-26T07:01:00.127Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 126,
+  "fields": {
+    "track_name": "大貫妙子「黒のクレール」 [ChlVn6_VI9c].mp3",
+    "track_uuid": "24969dd6-5c28-4de3-bb77-4b93e6c3ad47",
+    "track_original_path": "/c/Users/enrique/Music/大貫妙子「黒のクレール」 [ChlVn6_VI9c].mp3",
+    "track_date_added": "2026-03-26T07:02:17.818Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 127,
+  "fields": {
+    "track_name": "元気を出して.mp3",
+    "track_uuid": "7088ef75-b914-4548-a981-663595569f45",
+    "track_original_path": "/home/enrique/Music/元気を出して.mp3",
+    "track_date_added": "2026-03-26T07:13:37.423Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 128,
+  "fields": {
+    "track_name": "ringo_oiwake.mp3",
+    "track_uuid": "84946570-497c-43dd-bfae-ba9dc3f60a22",
+    "track_original_path": "/home/enrique/Music/ringo_oiwake.mp3",
+    "track_date_added": "2026-03-26T12:59:10.325Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 129,
+  "fields": {
+    "track_name": "my_foolish_heart.mp3",
+    "track_uuid": "e9fac9bb-7e5e-4320-bb8c-9048666774d1",
+    "track_original_path": "/home/enrique/Music/my_foolish_heart.mp3",
+    "track_date_added": "2026-03-26T13:19:20.156Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 130,
+  "fields": {
+    "track_name": "papelote.mp3",
+    "track_uuid": "a9655270-c9de-49fc-a2a1-93f6f991a775",
+    "track_original_path": "/home/enrique/Music/papelote.mp3",
+    "track_date_added": "2026-03-26T13:19:40.649Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 131,
+  "fields": {
+    "track_name": "oh_que_sera.mp3",
+    "track_uuid": "473cd0da-1f4b-426b-9e70-127718fe11ac",
+    "track_original_path": "/home/enrique/Music/oh_que_sera.mp3",
+    "track_date_added": "2026-03-26T13:19:43.498Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 132,
+  "fields": {
+    "track_name": "boomerang.mp3",
+    "track_uuid": "83098d2a-5ba6-4341-be0d-afb7c3e77a0e",
+    "track_original_path": "/home/enrique/Music/boomerang.mp3",
+    "track_date_added": "2026-03-26T13:45:40.899Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 138,
+  "fields": {
+    "track_name": "bbs_theme.mp3",
+    "track_uuid": "26fdccbc-da5c-4984-aa46-ba486e845030",
+    "track_original_path": "/home/enrique/Music/bbs_theme.mp3",
+    "track_date_added": "2026-03-28T12:11:39.592Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 139,
+  "fields": {
+    "track_name": "gris_pt.mp3",
+    "track_uuid": "96e0997f-37bc-4da3-ba14-be9c2517b734",
+    "track_original_path": "/home/enrique/Music/gris_pt.mp3",
+    "track_date_added": "2026-03-28T12:37:33.491Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 140,
+  "fields": {
+    "track_name": "ode.mp3",
+    "track_uuid": "0003dead-92df-4f5c-b589-07d2d4c47d92",
+    "track_original_path": "/home/enrique/Music/ode.mp3",
+    "track_date_added": "2026-03-28T13:16:28.264Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 141,
+  "fields": {
+    "track_name": "tears_in_heaven.mp3",
+    "track_uuid": "08f3e172-24fd-4ecf-9b5b-6b0455d44737",
+    "track_original_path": "/home/enrique/Music/tears_in_heaven.mp3",
+    "track_date_added": "2026-03-28T14:29:58.510Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 142,
+  "fields": {
+    "track_name": "shepperds_flute.mp3",
+    "track_uuid": "142574f1-bdb4-4e11-80cf-11a82baca480",
+    "track_original_path": "/home/enrique/Music/shepperds_flute.mp3",
+    "track_date_added": "2026-03-28T14:52:29.729Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 143,
+  "fields": {
+    "track_name": "love_language.mp3",
+    "track_uuid": "c2c4ffa9-0413-4725-b524-f8f9c56d57ab",
+    "track_original_path": "/home/enrique/Music/love_language.mp3",
+    "track_date_added": "2026-03-28T18:28:18.275Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 144,
+  "fields": {
+    "track_name": "baby_can_i_hold_you.mp3",
+    "track_uuid": "bda31bcb-5104-4166-89d9-99cdb61a1905",
+    "track_original_path": "/home/enrique/Music/baby_can_i_hold_you.mp3",
+    "track_date_added": "2026-03-28T20:24:30.799Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 146,
+  "fields": {
+    "track_name": "1.04. MagicMalik - Gandhi (Live).wma.mp3.mp3",
+    "track_uuid": "c1d6b8f0-69f8-4bc7-95e0-3e05a035aa42",
+    "track_original_path": "/home/enrique/Music/slsk/share=love/Magic Malik - HWI Project/1.04. MagicMalik - Gandhi (Live).wma.mp3.mp3",
+    "track_date_added": "2026-03-29T09:32:59.805Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 147,
+  "fields": {
+    "track_name": "1.07. MagicMalik - Porque Te Vas.wma.mp3.mp3",
+    "track_uuid": "39337653-b67c-4cc4-aec2-8d1beec7dc92",
+    "track_original_path": "/home/enrique/Music/slsk/share=love/Magic Malik - HWI Project/1.07. MagicMalik - Porque Te Vas.wma.mp3.mp3",
+    "track_date_added": "2026-03-29T09:33:31.936Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 148,
+  "fields": {
+    "track_name": "lsd_live_mix.mp3",
+    "track_uuid": "161aee09-4307-40a6-af17-c5b604cae297",
+    "track_original_path": "/home/enrique/Music/lsd_live_mix.mp3",
+    "track_date_added": "2026-03-29T09:50:20.032Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 149,
+  "fields": {
+    "track_name": "lepton_head.mp3",
+    "track_uuid": "693c2612-5f94-4cfe-9ded-5ae4a01630ec",
+    "track_original_path": "/home/enrique/Music/lepton_head.mp3",
+    "track_date_added": "2026-03-29T09:55:20.707Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 150,
+  "fields": {
+    "track_name": "99.mp3",
+    "track_uuid": "efc1d6c5-31c5-4a8c-9e40-ae9fac04aee6",
+    "track_original_path": "/home/enrique/Music/99.mp3",
+    "track_date_added": "2026-03-29T18:28:25.079Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 151,
+  "fields": {
+    "track_name": "southern_cross_dreaming.mp3",
+    "track_uuid": "a2363385-e85f-4114-b53f-f89903ebaaa6",
+    "track_original_path": "/home/enrique/Music/southern_cross_dreaming.mp3",
+    "track_date_added": "2026-03-29T18:35:24.477Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 152,
+  "fields": {
+    "track_name": "amor_control.mp3",
+    "track_uuid": "4646caff-13f4-48bd-9912-1877f3f4e2a1",
+    "track_original_path": "/home/enrique/Music/amor_control.mp3",
+    "track_date_added": "2026-03-29T21:15:12.562Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 153,
+  "fields": {
+    "track_name": "adan_garcia.mp3",
+    "track_uuid": "6f4f5ba4-e8a0-4adf-90b2-e74154f709df",
+    "track_original_path": "/home/enrique/Music/adan_garcia.mp3",
+    "track_date_added": "2026-03-29T21:19:38.575Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 154,
+  "fields": {
+    "track_name": "1.03. MagicMalik - Premiere Mission.wma.mp3.mp3",
+    "track_uuid": "f45842b4-bb5b-4efd-90af-adb10740729e",
+    "track_original_path": "/home/enrique/Music/slsk/share=love/Magic Malik - HWI Project/1.03. MagicMalik - Premiere Mission.wma.mp3.mp3",
+    "track_date_added": "2026-03-30T02:11:44.506Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 155,
+  "fields": {
+    "track_name": "me_hace_dano_verte.mp3",
+    "track_uuid": "59708d86-dd40-4bc7-90ad-68541c653fba",
+    "track_original_path": "/home/enrique/Music/me_hace_dano_verte.mp3",
+    "track_date_added": "2026-03-30T02:40:24.893Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 156,
+  "fields": {
+    "track_name": "la_cura_live.mp3",
+    "track_uuid": "7e61bd78-9c5f-44e2-b726-b4fd5edeee25",
+    "track_original_path": "/home/enrique/Music/la_cura_live.mp3",
+    "track_date_added": "2026-03-31T07:42:28.639Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 157,
+  "fields": {
+    "track_name": "airport.mp3",
+    "track_uuid": "89da2362-3574-4fb7-a283-8e52e52a931c",
+    "track_original_path": "/home/enrique/Music/airport.mp3",
+    "track_date_added": "2026-03-31T07:47:17.186Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 158,
+  "fields": {
+    "track_name": "afternoon.mp3",
+    "track_uuid": "a0610cf5-5c94-4e5e-8718-a001c0b9fcec",
+    "track_original_path": "/home/enrique/Music/afternoon.mp3",
+    "track_date_added": "2026-03-31T07:51:23.264Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 159,
+  "fields": {
+    "track_name": "one_day_in_ur_life.mp3",
+    "track_uuid": "93a8d54a-46c0-48e4-9460-f92e2f4d8efc",
+    "track_original_path": "/home/enrique/Music/one_day_in_ur_life.mp3",
+    "track_date_added": "2026-03-31T07:59:21.079Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 161,
+  "fields": {
+    "track_name": "las_tres_cosas.mp3",
+    "track_uuid": "c2cff2a1-d76e-4f5d-a354-3b36527c9e0c",
+    "track_original_path": "/home/enrique/Music/las_tres_cosas.mp3",
+    "track_date_added": "2026-03-31T11:21:23.603Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 162,
+  "fields": {
+    "track_name": "historia_de_un_amor.mp3",
+    "track_uuid": "276b4140-a9fc-40c3-a246-c778f70a94c4",
+    "track_original_path": "/home/enrique/Music/historia_de_un_amor.mp3",
+    "track_date_added": "2026-03-31T11:28:40.379Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 163,
+  "fields": {
+    "track_name": "tokai.mp3",
+    "track_uuid": "36c4a1b4-5565-4927-8e13-46710c27e790",
+    "track_original_path": "/home/enrique/Music/tokai.mp3",
+    "track_date_added": "2026-03-31T18:22:43.882Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 164,
+  "fields": {
+    "track_name": "400AM.mp3",
+    "track_uuid": "d27903a5-89b3-4973-b9d2-fc7aa2c7f5ed",
+    "track_original_path": "/home/enrique/Music/400AM.mp3",
+    "track_date_added": "2026-03-31T18:27:07.823Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 165,
+  "fields": {
+    "track_name": "thats_all.mp3",
+    "track_uuid": "a302bfc5-c6d8-483c-b356-cdbdef77cb8b",
+    "track_original_path": "/home/enrique/Music/thats_all.mp3",
+    "track_date_added": "2026-04-01T07:21:46.085Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 166,
+  "fields": {
+    "track_name": "oriente.mp3",
+    "track_uuid": "8c218029-c787-47e0-ac1e-0651b726f903",
+    "track_original_path": "/home/enrique/Music/oriente.mp3",
+    "track_date_added": "2026-04-01T10:21:29.070Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 167,
+  "fields": {
+    "track_name": "mediterraneo.mp3",
+    "track_uuid": "9e8d66f6-8491-4035-ab67-8df512338558",
+    "track_original_path": "/home/enrique/Music/mediterraneo.mp3",
+    "track_date_added": "2026-04-01T10:29:35.954Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 168,
+  "fields": {
+    "track_name": "fiesta.mp3",
+    "track_uuid": "dfaff6b2-ef1e-4552-867b-2ac1930c1a26",
+    "track_original_path": "/home/enrique/Music/fiesta.mp3",
+    "track_date_added": "2026-04-01T10:44:31.976Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 169,
+  "fields": {
+    "track_name": "angel.mp3",
+    "track_uuid": "07eff9c2-99df-406a-9587-5420ecc06ab3",
+    "track_original_path": "/home/enrique/Music/angel.mp3",
+    "track_date_added": "2026-04-01T10:48:57.074Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 170,
+  "fields": {
+    "track_name": "save_your_tears.mp3",
+    "track_uuid": "90a22850-829d-4f29-8ee0-46c597dc6ae6",
+    "track_original_path": "/home/enrique/Music/save_your_tears.mp3",
+    "track_date_added": "2026-04-01T11:02:12.675Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 171,
+  "fields": {
+    "track_name": "save_your_tears_ariana.mp3",
+    "track_uuid": "da83d0aa-de85-4bc3-b64a-1cc2b7867fc0",
+    "track_original_path": "/home/enrique/Music/save_your_tears_ariana.mp3",
+    "track_date_added": "2026-04-01T11:07:52.228Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 173,
+  "fields": {
+    "track_name": "ojos_negros.mp3",
+    "track_uuid": "13d047cf-739c-46f7-bd42-54733e60b98b",
+    "track_original_path": "/home/enrique/Music/ojos_negros.mp3",
+    "track_date_added": "2026-04-01T11:14:52.535Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 175,
+  "fields": {
+    "track_name": "is_it_a_crime.mp3",
+    "track_uuid": "bf53e350-790e-4b64-823d-7341d1894e27",
+    "track_original_path": "/home/enrique/Music/is_it_a_crime.mp3",
+    "track_date_added": "2026-04-03T09:29:37.182Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 176,
+  "fields": {
+    "track_name": "torn.mp3",
+    "track_uuid": "5d4cc2eb-c634-48c9-a7bc-5967f8092972",
+    "track_original_path": "/home/enrique/Music/torn.mp3",
+    "track_date_added": "2026-04-03T09:33:30.770Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 177,
+  "fields": {
+    "track_name": "sphynx.mp3",
+    "track_uuid": "b7658a13-7776-453c-b02a-4008709be1f0",
+    "track_original_path": "/home/enrique/Music/sphynx.mp3",
+    "track_date_added": "2026-04-03T09:42:42.309Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 178,
+  "fields": {
+    "track_name": "stay_this_way.mp3",
+    "track_uuid": "1be3088e-c36a-4590-b247-659ac8c32e2f",
+    "track_original_path": "/home/enrique/Music/stay_this_way.mp3",
+    "track_date_added": "2026-04-03T09:45:43.843Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 179,
+  "fields": {
+    "track_name": "dream_come_true.mp3",
+    "track_uuid": "9fafb3cc-c653-4a95-af7d-3a4fead8eece",
+    "track_original_path": "/home/enrique/Music/dream_come_true.mp3",
+    "track_date_added": "2026-04-03T12:15:32.703Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 180,
+  "fields": {
+    "track_name": "all_I_have_in_me.mp3",
+    "track_uuid": "a7e97121-a9ad-4fbe-9e92-07640a37866e",
+    "track_original_path": "/home/enrique/Music/all_I_have_in_me.mp3",
+    "track_date_added": "2026-04-03T12:23:10.635Z"
+  }
+},
+{
+  "model": "api.tracks",
+  "pk": 181,
+  "fields": {
+    "track_name": "nothing.mp3",
+    "track_uuid": "7a589fb8-175d-44a2-ab9b-d2f884995170",
+    "track_original_path": "/home/enrique/Music/nothing.mp3",
+    "track_date_added": "2026-04-03T12:23:16.757Z"
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 1,
+  "fields": {
+    "playlist_name": "  m",
+    "playlist_type": "USER",
+    "playlist_uuid": "f6fb8b51-ba49-432b-bab6-a6ff8014708a",
+    "playlist_created_date": "2026-04-01T11:42:14.372Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 2,
+  "fields": {
+    "playlist_name": "  m",
+    "playlist_type": "USER",
+    "playlist_uuid": "f6fb8b51-ba49-432b-bab6-a6ff8014708a",
+    "playlist_created_date": "2026-04-01T11:42:19.456Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 3,
+  "fields": {
+    "playlist_name": "  m",
+    "playlist_type": "USER",
+    "playlist_uuid": "f6fb8b51-ba49-432b-bab6-a6ff8014708a",
+    "playlist_created_date": "2026-04-01T11:42:24.045Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 4,
+  "fields": {
+    "playlist_name": "mama",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T20:56:18.149Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 5,
+  "fields": {
+    "playlist_name": "k",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:00:26.560Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 6,
+  "fields": {
+    "playlist_name": "k",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:00:33.615Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 7,
+  "fields": {
+    "playlist_name": "h",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:07:25.587Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 8,
+  "fields": {
+    "playlist_name": "h",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:07:32.923Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 9,
+  "fields": {
+    "playlist_name": "fs dsqd ",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:22:35.908Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 10,
+  "fields": {
+    "playlist_name": "fs dsqd ",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:22:45.585Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 11,
+  "fields": {
+    "playlist_name": "sdds sqd s",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:23:26.687Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 12,
+  "fields": {
+    "playlist_name": "sdds sqd s",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:23:36.071Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 13,
+  "fields": {
+    "playlist_name": "sdds sqd s",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:23:41.953Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 14,
+  "fields": {
+    "playlist_name": "xcvv mmm",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:24:02.218Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 15,
+  "fields": {
+    "playlist_name": "xcvv mmm",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:24:07.420Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 16,
+  "fields": {
+    "playlist_name": "hh hh",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:24:23.501Z",
+    "tracks": []
+  }
+},
+{
+  "model": "api.playlist",
+  "pk": 17,
+  "fields": {
+    "playlist_name": "test 1",
+    "playlist_type": "USER",
+    "playlist_uuid": "62402190-356f-4694-b5c2-e4e8f407f381",
+    "playlist_created_date": "2026-04-01T21:26:47.890Z",
+    "tracks": []
+  }
+}
+]

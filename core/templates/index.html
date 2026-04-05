@@ -1,0 +1,88 @@
+{% extends "main.html" %}
+{% load static %}
+{% block user_style %}
+<link href="/static/node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
+<link href="/static/css/player.css" rel="stylesheet">
+<link href="/static/css/grid.css" rel="stylesheet">
+<link href="/static/css/progressbar.css" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript" defer src="https://cdn.jsdelivr.net/npm/luxon@3.7.2/build/global/luxon.min.js"></script>
+<script type="module" defer src="/static/js/main.js"></script>
+{% endblock %}
+{% block content %}
+<div id="content">
+  <div id="player">
+    <div id="info-box">
+      <div id="foto-box">
+        <img src="/static/images/albumart.svg" id="album-art">  
+      </div><div id="track-box">
+        <p id="track-title"><span id="name-track">No track</span><span id="name-album"></span><span id="time-track"></span></p>
+        <p id="artist-name"></p>
+      </div>
+    </div>
+    <div id="player-controls">
+    </div>
+    <!--<canvas id="vu-meters"></canvas>-->
+    <div id="main-left-menu">
+      <div id="open-menu" style="vertical-align: top;" class="inline-block">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </div><div id="left-menu" style="vertical-align: top;" class="inline-block">
+        <div id="cotrols" class="inline-block">
+          <div id="file-browser-action">
+            <button class="open-file-browser">Browse Files</button>
+            <button class="open-tracklist-browser">View tracks</button>
+            <button class="open-playlist-create">Create new playlist</button>
+          </div>
+          <div id="volume-control">
+            VOL : <span class="vol-up">
+              <i class="fa-solid fa-plus"></i>
+            </span><span class="vol-down">
+              <i class="fa-solid fa-minus"></i>
+            </span><span class="vol-val">100</span>
+            <div id="volume-bar-container">
+              <div id="main-volume-bar"><div id="volume-bar"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--<div id="progress">
+      <div id="prog-bar"></div>
+    </div>-->
+  </div>
+</div>
+<div style="display: none;" id="volume-display">
+  <span class="vol-val">100</span>
+</div>
+<div style="display: none;" id="muted-display">
+  <i id="mute-on" style="display: none;" class="fa-solid fa-volume-xmark"></i>
+  <i id="mute-off" style="display: none;" class="fa-solid fa-volume-high"></i>
+</div>
+<div style="display: none;" class="cnt-overlay">
+  <div style="display: none;" id="window-folder" class="file-browser">
+  </div>
+  <div style="display: none;" id="window-content">
+    <div class="tracklist-head">
+      <div class="tracklist-title inline-block">Track list</div><div class="tracklist-search inline-block">
+        <div class="img-cnt inline-block"><img src="/static/mag-glass2-white.svg"></div><div class="input-cnt inline-block" style="visibility: hidden;"><input class="search-input"></div>
+      </div>
+    </div>
+    <div class="tracklist-content-div">
+      <div id="table-content"></div>
+      <div class="tracklist-info-cnt">
+        <span class="tracklist-info-nb">
+          <span class="nb-tracks">0</span> Total Tracks</span><span class="tracklist-info-duration">
+            <span class="duration-tracks">00:00:00</span>Total Duration</span>
+      </div>
+    </div>
+  </div>
+  <!--<div style="display: none;" class="playlist-form">
+      <h4>Enter playlist name</h4>
+      <input type="text">
+      <button>Save</button>
+  </div>-->
+</div>
+<div id="notifications-cnt">
+</div>
+{% endblock %}
