@@ -151,18 +151,20 @@ export const PlayerControlMediator = {
             evt.stopPropagation();
 
         const {playlistCreation} = this.uiModules;
+
         this._showBackDrop();
         playlistCreation.show();
-        // this.uiModules.playlistCreation.show.bind(this.uiModules.playlistCreation)(evt);
+
         const modalElement = playlistCreation.getHTMLItem().render();
-        console.log('display creation playlist', {modalElement});
         modalElement.onclick = (evt) => evt.stopPropagation();
-        // playlistCreation.setVisible(true);
+
         playlistCreation.onPlaylistCreated((res) => {
             this._hideBackDrop();
             this._closeAllActiveWindows();
         }, this);
+
         this.overlayDiv.append(modalElement);
+        
         this.keyControls.setExclusivityCallerKeyUpV2(playlistCreation);
         this.keyControls.setExclusivityCallerKeyDownV2(playlistCreation);
     },
