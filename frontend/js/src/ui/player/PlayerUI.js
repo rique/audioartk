@@ -332,11 +332,11 @@ PlayerControls.prototype = {
         this.audioPlayer.setCurrentTime(this.audioPlayer.getCurrentTime() + 1);
         this.listEvents.trigger('onFastForward');
     },
-    increasVolume() {
-        this.audioPlayer.increasVolume();
+    increaseVolume() {
+        this.audioPlayer.increaseVolume();
     },
-    decreasVolume() {
-        this.audioPlayer.decreasVolume();
+    decreaseVolume() {
+        this.audioPlayer.decreaseVolume();
     },
     onPlayPause(cb, subscriber) {
         this.listEvents.onEventRegister({cb, subscriber}, 'onPlayPause');

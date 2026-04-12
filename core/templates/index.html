@@ -1,10 +1,16 @@
 {% extends "main.html" %}
 {% load static %}
 {% block user_style %}
+
+<link rel="icon" type="image/png" href="{% static 'assets/favicons/favicon.png' %}" sizes="32x32">
+<link rel="icon" type="image/x-icon" href="{% static 'assets/favicons/favicon.ico' %}"i
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/favicons/apple-touch-icon.png' %}">
+
 <link href="/static/node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
 <link href="/static/css/player.css" rel="stylesheet">
 <link href="/static/css/grid.css" rel="stylesheet">
 <link href="/static/css/progressbar.css" rel="stylesheet">
+
 {% endblock %}
 {% block scripts %}
 <script type="text/javascript" defer src="https://cdn.jsdelivr.net/npm/luxon@3.7.2/build/global/luxon.min.js"></script>

@@ -31,6 +31,7 @@ class Notification {
         this.message = '';
         this.fader = new Fader();
         this.parentNode = document.getElementById('notifications-cnt');
+        this.isActive = false;
     }
 
     update(message) {
@@ -38,6 +39,7 @@ class Notification {
     }
 
     show(timeout = 5000) {
+        this.isActive = true;
         this.tplUUID = uuidv4();
         const element = document.createElement('div');
         element.className = `notification-box notif-${this.level}`;
@@ -72,20 +74,29 @@ class Notification {
         animation.play();
         
         animation.onfinish = () => {
-            this.fader.fadeOut(element, 400, 1, 0, () => element.remove());
+            this.fader.fadeOut(element, 400, 1, 0, () => {
+                this.isActive = false;
+                element.remove()
+            });
         };
     }
-    hide() {
+    hide(cb) {
         // We find the element in the DOM using the UUID we generated in show()
         // If we didn't store the element reference in 'this', we use the data attribute.
         const element = this.parentNode.querySelector(`[data-tpl-id="${this.tplUUID}"]`);
         
         if (element) {
             // Use the fader for a professional exit (400ms duration)
-            this.fader.fadeOut(element, 250, 1, 0, () => {
+            this.fader.fadeOut(element, 668, 1, 0, () => {
+                this.isActive = false;
                 element.remove();
+                if (typeof cb === 'function') cb();
             });
         }
+    }
+
+    isNotificationActive() {
+        return this.isActive;
     }
 }
 
@@ -107,11 +118,14 @@ export const NotificationCenter = {
         notif.update(message);
         notif.show(timeout);
     },
-    hide(key) {
+    hide(key, cb) {
         const notif = this._registry[key];
         if (!notif) return console.error(`Notifier: Key "${key}" not found.`);
 
-        notif.hide();
+        notif.hide(cb);
+    },
+    isNotificationActive(key) {
+        return this._registry[key]?.isNotificationActive();
     }
 };
 
@@ -145,8 +159,11 @@ export const PlayerNotifier = {
         const html = TrackBoxTemplate.render(track);
         NotificationCenter.updateAndShow(this.key, html, timeout);
     },
-    hide() {
-        NotificationCenter.hide(this.key);
+    hide(cb) {
+        NotificationCenter.hide(this.key, cb);
+    },
+    isActive() {
+        return NotificationCenter.isNotificationActive(this.key);
     }
 };
 

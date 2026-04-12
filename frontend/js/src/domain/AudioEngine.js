@@ -11,11 +11,12 @@
 import Api from '../core/HttpClient.js';
 const api = new Api();
 
-const BaseLoader = function(maxCacheSize) {
-    this.map = new Map();
-    this.maxCacheSize = maxCacheSize;
-};
-BaseLoader.prototype = {
+class BaseLoader {
+    constructor(maxCacheSize) {
+        this.map = new Map();
+        this.maxCacheSize = maxCacheSize;
+    }
+
     async getByIdAsync(id) {
         console.log('cache size', this.map.size)
         if (this.map.has(id)) {
@@ -46,10 +47,12 @@ BaseLoader.prototype = {
     }
 }
 
-const AlbumArtLoader = function(maxCacheSize = 50) {
-    BaseLoader.call(this, maxCacheSize);
-};
-AlbumArtLoader.prototype = {
+class AlbumArtLoader extends BaseLoader {
+    constructor(maxCacheSize = 50) {
+        super(maxCacheSize);
+        this._defaultAlbumArt = "/static/albumart.svg";
+    }
+
     async loadAsync(track_uuid) {
         const res = await api.loadTrackAlbumArtAsync(track_uuid);
         if (res.success) {
@@ -57,23 +60,28 @@ AlbumArtLoader.prototype = {
         }
         return {object: false, loaded: false};
     }
+
+    getDefaultAlbumArt() {
+        return this._defaultAlbumArt;
+    }
 };
 
-const TrackInfoLoader = function(maxCacheSize = 1000) {
-    BaseLoader.call(this, maxCacheSize);
-};
-TrackInfoLoader.prototype = {
+class TrackInfoLoader extends BaseLoader {
+    constructor(maxCacheSize = 1000) {
+        super(maxCacheSize);
+    }
+
     async loadAsync(track_uuid) {
         const res = await api.loadTrackInfoAsync(track_uuid);
         if (res.success) {
             return {object: {id3: res.ID3}, loaded: true};
         }
         return {object: false, loaded: false};
-    },
+    }
 };
 
-Object.setPrototypeOf(AlbumArtLoader.prototype, BaseLoader.prototype);
-Object.setPrototypeOf(TrackInfoLoader.prototype, BaseLoader.prototype);
+// Object.setPrototypeOf(AlbumArtLoader.prototype, BaseLoader.prototype);
+// Object.setPrototypeOf(TrackInfoLoader.prototype, BaseLoader.prototype);
 
 const trackInfoLoader = new TrackInfoLoader();
 const albumArtLoader = new AlbumArtLoader();

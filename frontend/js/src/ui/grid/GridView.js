@@ -313,11 +313,14 @@ class GridMaker {
 
     makeRowIdx(cells, autoWidth, head, idx) {
         let row = this.buildRow(cells, autoWidth, head);
+
         if (!this.byCell && !row.isHead()) row.setDraggable(this.draggable);
         if (this.sortable) row.setIndex(idx);
         
-        if (row.isHead()) this.grid.setHead(row);
-        else this.grid.addRow(row);
+        if (row.isHead()) 
+            this.grid.setHead(row);
+        else 
+            this.grid.addRow(row);
         
         return row;
     }
@@ -354,6 +357,7 @@ class GridMaker {
             }
             
             if (c.onClick) cell.onClick(c.onClick);
+            if (c.onInput) cell.onInput(c.onInput);
             if (typeof c.data === 'object') {
                 Object.keys(c.data).forEach(k => cell.data(k, c.data[k]));
             }
@@ -361,7 +365,7 @@ class GridMaker {
             cell.innerContent(c.content);
             cell.setSearchable(c.searchable);
             if (c.textAlign) cell.textAlign(c.textAlign);
-
+            cell.setParentItem(row);
             row.addCell(cell);
         });
 
@@ -421,6 +425,7 @@ class TracklistGrid {
         this._trackListBrowser = trackListBrowser;
         this.queuelistGrid = new QueuelistGrid(this);
         this.lastMainAnchor = null;
+        this.events = new ListEvents();
         TrackListManager.onRemoveTrackFromTrackList(this.removeTrackFromGrid.bind(this));
     }
 
@@ -501,12 +506,16 @@ class TracklistGrid {
         TrackListManager.triggerGridRefresh();
     }
 
+    reloadGrid() {
+        this.reloadAsync().then(() => {
+            this._syncQueuePosition(true);
+            this._setCurrentTrack();
+        });
+    }
+
     _restoreGrid(isVisible) {
         if (!isVisible) {
-            this.reloadAsync().then(() => {
-                this._syncQueuePosition(true);
-                this._setCurrentTrack();
-            });
+            this.reloadGrid();
         }
     }
 
@@ -544,9 +553,14 @@ class TracklistGrid {
     }
 
     _getRowConfigFromTrack(track, index) {
-        console.log({track, index});
         return [
-            { content: parseInt(index) + 1, width: 5, unit: '%', type: 'int' },
+            { 
+                content: parseInt(index) + 1, 
+                width: 5, 
+                unit: '%', 
+                type: 'int',
+                onClick: evt => evt.detail.HTMLItem.getParentItem().classToggleExclusive('selected', this.getParentCnt()) 
+            },
             {
                 content: track.getTitle(),
                 editable: true,
@@ -560,6 +574,7 @@ class TracklistGrid {
                 editable: true,
                 onEdit: TrackEditor.onclickCell.bind(TrackEditor),
                 onValidate: TrackEditor.onValidate.bind(TrackEditor),
+                onInput: evt => this.events.trigger('onTrackArtistEditing', track, evt.detail.HTMLItem, evt.detail.HTMLItem.value(), evt),
                 width: 25, unit: '%', type: 'str', searchable: true,
                 data: { trackId: track.trackUUid, fieldType: 'artist' }
             },
@@ -568,6 +583,7 @@ class TracklistGrid {
                 editable: true,
                 onEdit: TrackEditor.onclickCell.bind(TrackEditor),
                 onValidate: TrackEditor.onValidate.bind(TrackEditor),
+                onInput: evt => this.events.trigger('onTrackAlbumEditing', track, evt.detail.HTMLItem, evt.detail.HTMLItem.value(), evt),
                 width: 25, unit: '%', type: 'str', searchable: true,
                 data: { trackId: track.trackUUid, fieldType: 'album' }
             },
@@ -596,6 +612,7 @@ class TracklistGrid {
                     this.draggedEndIndx = htmlItem.getParentItem().getIndex();
                     TrackListManager.switchTrackIndex(this.draggedStartIndx - 1, this.draggedEndIndx - 1);
                     this._syncQueuePosition();
+                    this.events.trigger('onDraggedTrackDropped', htmlItem);
                     htmlItem.innerContent('drag');
                 },
                 width: 4, unit: '%'
@@ -619,7 +636,19 @@ class TracklistGrid {
     _setCurrentTrack() {
         TrackListManager.triggerGridRefresh();
     }
-}
+
+    onDraggedTrackDropped(cb, subscriber) {
+        this.events.onEventRegister({cb, subscriber}, 'onDraggedTrackDropped');
+    }
+
+    onTrackArtistEditing(cb, subscriber) {
+        this.events.onEventRegister({cb, subscriber}, 'onTrackArtistEditing');
+    }
+
+    onTrackAlbumEditing(cb, subscriber) {
+        this.events.onEventRegister({cb, subscriber}, 'onTrackAlbumEditing');
+    }
+ }
 
 class QueuelistGrid {
     constructor(parentGrid) {
@@ -727,11 +756,11 @@ class QueuelistGrid {
         // This handles the "Add to Queue" click scenario
         this.parentGrid._syncQueuePosition(true);
     }
-    syncQueue(queueLength) {
+    syncQueue(queueLength, forceNotPlaying = false) {
         this.queueLength = queueLength;
         
         if (queueLength >= 0) {
-            this.isQueuePlaying = true;
+            this.isQueuePlaying = !forceNotPlaying;
             this.hasQueue = true;
             this.gridMaker.clearRows();
             this._buildBody();

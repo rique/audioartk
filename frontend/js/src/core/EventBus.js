@@ -140,10 +140,10 @@ AudioPlayerKeyControls.prototype = {
         this.playerControls.playPause();
     },
     volumeUp() {
-        this.playerControls.increasVolume();
+        this.playerControls.increaseVolume();
     },
     volumeDown() {
-        this.playerControls.decreasVolume();
+        this.playerControls.decreaseVolume();
     },
     nextTrack({ctrlKey, repeat}={}) {
         if (ctrlKey || repeat)
@@ -214,6 +214,7 @@ ListEvents.prototype = {
         const evts = this._eventsRegistered.filter(evt => evt.eventKey == eventKey);
         if (evts.length == 0)
             return;
+
         for (let i = 0; i < evts.length; ++i) {
             evts[i].event.trigger(args);
         }

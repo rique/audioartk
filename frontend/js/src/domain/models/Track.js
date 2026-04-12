@@ -19,7 +19,6 @@ export class ID3Tags {
     constructor(tags) {
         this.tags = tags;
         this.albumArtLoader = AlbumArtLoader;
-        this.defaultAlbumArt = "/static/albumart.svg";
         this._unpackTags(tags);
     }
 
@@ -40,7 +39,7 @@ export class ID3Tags {
         const data = result?.object?.id3?.picture?.data;
         const format = result?.object?.id3?.picture?.format;
 
-        return (data && format) ? `data:${format};base64,${data}` : this.defaultAlbumArt;
+        return (data && format) ? `data:${format};base64,${data}` : this.albumArtLoader.getDefaultAlbumArt();
     }
 
     setArtist(val) { this.tags.artist = val; this._unpackTags(this.tags); }
@@ -64,21 +63,12 @@ export class Track {
         this._id3Instance = null;
     }
 
-    setTrackDuration(duration) {
-        this.trackDuration = duration;
-    }
-    setIndex(index) {
-        this.index = index;
-    }
-    getIndex() {
-        return this.index;
-    }
-    getTrackUUID() {
-        return this.trackUUid;
-    }
+    setTrackDuration(duration) { this.trackDuration = duration; }
+    setIndex(index) { this.index = index; }
+    getIndex() { return this.index; }
+    getTrackUUID() { return this.trackUUid; }
     getTrackDuration(formated) {
-        if (formated)
-            return this.formatTrackDuration();
+        if (formated) return this.formatTrackDuration();
         return this.trackDuration;
     }
     setCurrentTime(val) {
@@ -115,27 +105,17 @@ export class Track {
     formatCurrentTime() {
         return this._formatTime(this.getCurrentTime());
     }
-    getArtist() {
-        return this._id3TagsInstance.getArtist();
-    }
+    getArtist() { return this._id3TagsInstance.getArtist(); }
     getTitle() {
         const title = this._id3TagsInstance.getTitle();
-        if (typeof title === 'undefined' || title.length == '')
-            return this.trackName;
-        return title;
+        return title ? title : this.trackName;
     }
-    getAlbum() {
-        return this._id3TagsInstance.getAlbum();
+    getAlbum() { return this._id3TagsInstance.getAlbum(); }
+    async getAlbumArt() { 
+        return await this._id3TagsInstance.getAlbumArt(this.trackUUid); 
     }
-    async getAlbumArt() {
-        return await this._id3TagsInstance.getAlbumArt(this.trackUUid);
-    }
-    getID3Tags() {
-        return this._id3TagsInstance;//.getTags();
-    }
-    setID3Tags(id3Tags) {
-        this._id3TagsInstance = id3Tags;
-    }
+    getID3Tags() { return this._id3TagsInstance; }
+    setID3Tags(id3Tags) { this._id3TagsInstance = id3Tags; }
     setTag(tag, value) {
         if (tag == 'title')
             this._id3TagsInstance.setTitle(value);
@@ -152,10 +132,10 @@ export class Track {
         this.events.unsubscribeEVent({eventKey: 'onTagChange', subscriber});
     }
     _formatTime(millisecTime) {
-        let secs = '0', mins = '0';
+        let mins = '0', secs = '0';
         if (!isNaN(millisecTime)) {
-            secs = parseInt(millisecTime % 60).toString(),
             mins = parseInt(millisecTime / 60).toString();
+            secs = parseInt(millisecTime % 60).toString();
         }
         return `${mins.padStart(2, '0')}:${secs.padStart(2, '0')}`
     }

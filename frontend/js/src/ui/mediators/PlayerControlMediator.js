@@ -2,9 +2,9 @@ import { TrackListManager } from "../../domain/TrackList.js";
 import { ResourceManager } from "../../domain/StateManager.js";
 
 export const PlayerControlMediator = {
-    init(player, playerDisplay, playerProgressBar, notifications, playerControls, keyControls, uiModules) {
+    init(audioPlayer, playerDisplay, playerProgressBar, notifications, playerControls, keyControls, uiModules) {
         this._comingNextFired = false;
-        this.player = player;
+        this.audioPlayer = audioPlayer;
         this.playerDisplay = playerDisplay;
         this.playerProgressBar = playerProgressBar;
         this.notifications = notifications;
@@ -25,41 +25,30 @@ export const PlayerControlMediator = {
 
     _bindCorePlayerEvents() {
         // Song Change
-        this.player.onPlayerSongChange((track) => {
+        this.audioPlayer.onPlayerSongChange((track) => {
             this.playerDisplay.setTrack(track);
             this.playerProgressBar.resetProgressBar();
-            if (this._comingNextFired) this.notifications.hide();
-            
+            this.audioPlayer.setIsNearEnd(false)
             this._comingNextFired = false;
             this._preloadNextTrackArt();
             this._updateSystemMetadata(track);
         });
 
         // Time Update (Coming Next logic)
-        this.player.audioElem.ontimeupdate = (evt) => {
+        this.audioPlayer.audioElem.ontimeupdate = (evt) => {
             const { currentTime, duration } = evt.target;
-            if (isNaN(duration) || duration === 0) return;
+            if (isNaN(duration)) return;
+            if (duration === 0)
+                return this.audioPlayer.currentTrack?.setCurrentTime(0);
 
-            if (this.player.currentTrack) {
-                this.player.currentTrack.setCurrentTime(currentTime);
-            }
-
-            if ((duration - currentTime <= 30) && !this._comingNextFired) {
-                this._handleComingNext(duration, currentTime);
+            this.audioPlayer.currentTrack?.setCurrentTime(currentTime);
+            const isNearEnd = (duration - currentTime <= 30);
+            this.audioPlayer.setIsNearEnd(isNearEnd);
+            if (isNearEnd && !this._comingNextFired) {
+                this.audioPlayer.audioPlayerEvents.trigger('onTrackNearEnd');
+                this._comingNextFired = true;
             }
         };
-    },
-
-    _handleComingNext(duration, currentTime) {
-        this._comingNextFired = true;
-        const next = (this.player.getRepeatMode() === 2) 
-            ? { track: this.player.currentTrack } 
-            : TrackListManager.getNextTrackInList();
-
-        if (next?.track) {
-            const remaining = (duration - currentTime) * 1000;
-            this.notifications.showNext(next.track, remaining);
-        }
     },
 
     _bindUIInteractions() {
@@ -87,21 +76,12 @@ export const PlayerControlMediator = {
         this.playlistCreationElement.addEventListener('click', this._displayPlaylistCreationUI.bind(this));
 
         // Player state sync
-        this.player.onPlayPause((isPaused, track) => {
+        this.audioPlayer.onPlayPause((isPaused, track) => {
             this.playerProgressBar.togglePauseProgress(isPaused);
             this._updateSystemMetadata(track);
         });
 
-        this.player.onStop(this.playerProgressBar.resetProgressBar.bind(this.playerProgressBar));
-        
-        this.playerControls.onPrevTrack(() => {
-            this._hideIfComingNext();
-        }, this);
-        
-        this.playerProgressBar.progressBar.onSeek((percent, mouseDown) => {
-            this._hideIfComingNext();
-            this.playerProgressBar.seek(percent, mouseDown);
-        }, this);
+        this.audioPlayer.onStop(this.playerProgressBar.resetProgressBar.bind(this.playerProgressBar));
         
         this.playerControls.onRepeat((repeatMode) => {
             this._preloadNextTrackArt();
@@ -109,27 +89,31 @@ export const PlayerControlMediator = {
     },
 
     _setAudioElementEvents() {
-        this.player.audioElem.onloadedmetadata = () => {
-            this.playerProgressBar.doProgress(this.player.getCurrentTime(), this.player.getDuration());
+        this.audioPlayer.audioElem.onloadedmetadata = () => {
+            this.playerProgressBar.doProgress(this.audioPlayer.getCurrentTime(), this.audioPlayer.getDuration());
         };
     },
 
     _bindKeyboardShortcuts() {
          this.keyControls.registerKeyDownAction('m', () => {
-            this.player.mute();
-            this.playerDisplay.showMuteOverlay(this.player.isMuted());
+            this.audioPlayer.mute();
+            this.playerDisplay.showMuteOverlay(this.audioPlayer.isMuted());
         }, this);
         
         ['+', '-'].forEach(key => {
             this.keyControls.registerKeyDownAction(key, () => {
                 // When key is held down, just show/reset the UI
-                this.playerDisplay.showVolumeOverlay(this.player.getVolume());
+                this.playerDisplay.showVolumeOverlay(this.audioPlayer.getVolume());
             }, this);
 
             this.keyControls.registerKeyUpAction(key, () => {
                 // When key is released, start the fade out
                 this.playerDisplay.hideVolumeOverlay();
             }, this);
+        });
+
+        this.keyControls.registerKeyDownAction('t', () => {
+            this.playerDisplay.changeTrackTimeDisplayMode();
         });
 
         const {tracklistGrid, playlistCreation} = this.uiModules;
@@ -164,7 +148,7 @@ export const PlayerControlMediator = {
         }, this);
 
         this.overlayDiv.append(modalElement);
-        
+
         this.keyControls.setExclusivityCallerKeyUpV2(playlistCreation);
         this.keyControls.setExclusivityCallerKeyDownV2(playlistCreation);
     },
@@ -172,10 +156,10 @@ export const PlayerControlMediator = {
     _bindSystemMediaSession() {
         if (!('mediaSession' in navigator)) return;
         
-        navigator.mediaSession.setActionHandler('play', () => this.player.playPause());
-        navigator.mediaSession.setActionHandler('pause', () => this.player.playPause());
-        navigator.mediaSession.setActionHandler('previoustrack', () => this.player.prev());
-        navigator.mediaSession.setActionHandler('nexttrack', () => this.player.next());
+        navigator.mediaSession.setActionHandler('play', () => this.audioPlayer.playPause());
+        navigator.mediaSession.setActionHandler('pause', () => this.audioPlayer.playPause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => this.audioPlayer.prev());
+        navigator.mediaSession.setActionHandler('nexttrack', () => this.audioPlayer.next());
     },
 
     _showBackDrop() {
@@ -211,12 +195,5 @@ export const PlayerControlMediator = {
     _preloadNextTrackArt() {
         const next = TrackListManager.getNextTrackInList();
         if (next?.track) ResourceManager.preloadAlbumArt(next.track);
-    },
-
-    _hideIfComingNext() {
-        if (this._comingNextFired === true) {
-            this.notifications.hide();
-            this._comingNextFired = false;
-        }
     },
 }

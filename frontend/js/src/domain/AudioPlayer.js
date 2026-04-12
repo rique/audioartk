@@ -13,6 +13,8 @@ export class AudioPlayer {
         this.isPaused = true;
         this.repeatMode = 0; // 0: no repeat, 1: all, 2: one
 
+        this._isNearEnd = false;
+
         // DOM Elements
         this.mainVolumeBarElem = document.getElementById('main-volume-bar');
         this.volumeBarElem = document.getElementById('volume-bar');
@@ -35,6 +37,14 @@ export class AudioPlayer {
             this.setCurrentTrackFromTrackList(false);
             this.play();
         });
+    }
+
+    setIsNearEnd(val) {
+        this._isNearEnd = !!val;
+    }
+
+    isNearEnd() {
+        return this._isNearEnd;
     }
 
     _setUpPlayer() {
@@ -146,14 +156,6 @@ export class AudioPlayer {
     isPlayerPaused() {
         return this.isPaused;
     }
-    /*increasVolume() {
-        let volume = this.audioElem.volume + this.volumeStep;
-        this.setVolume(volume); 
-    }
-    decreasVolume() {
-        let volume = this.audioElem.volume - this.volumeStep;
-        this.setVolume(volume);
-    }*/
 
     setCurrentTrackFromTrackList(autoPlay, prev = false, trackToPlay = null) {
         let track, index;
@@ -176,6 +178,10 @@ export class AudioPlayer {
         this.audioPlayerEvents.trigger('onPlayerSongChange', track, trackIdx);
         
         return autoPlay ? this.play() : this.stop();
+    }
+
+    getCurrentTrack() {
+        return this.currentTrack;
     }
 
     audioEnded() {
@@ -222,7 +228,8 @@ export class AudioPlayer {
         return (clientX - rect.left) / rect.width;
     }
 
-    onPlayerSongChange(cb, sub) { this.audioPlayerEvents.onEventRegister({cb, subscriber: sub}, 'onPlayerSongChange'); }
-    onPlayPause(cb, sub) { this.audioPlayerEvents.onEventRegister({cb, subscriber: sub}, 'onPlayPause'); }
-    onStop(cb, sub) { this.audioPlayerEvents.onEventRegister({cb, subscriber: sub}, 'onStop'); }
+    onPlayerSongChange(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onPlayerSongChange'); }
+    onPlayPause(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onPlayPause'); }
+    onStop(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onStop'); }
+    onTrackNearEnd(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onTrackNearEnd'); }
 }

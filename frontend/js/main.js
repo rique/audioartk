@@ -13,7 +13,10 @@
 import {NotificationCenter, PlayerNotifier} from './src/ui/Notifier.js';
 import {PlaybackMediator} from './src/ui/mediators/PlaybackMediator.js';
 import {PlayerControlMediator} from './src/ui/mediators/PlayerControlMediator.js'
+import {AutocompleteMediator} from './src/ui/mediators/AutoCompleteMediator.js';
+import {PlaybackNotificationMediator} from './src/ui/mediators/PlaybackNotificationMediator.js'
 import {TrackListManager} from './src/domain/TrackList.js';
+import {MetadataIndex} from './src/domain/MetadataIndex.js';
 import {TracklistGrid, library} from './src/ui/grid/GridView.js';
 import draw from './src/ui/visuals/Visualizer.js';
 import {AudioPlayerDisplay, PlayerControls, PlayerButtons} from './src/ui/player/PlayerUI.js';
@@ -70,6 +73,14 @@ PlayerControlMediator.init(
     {tracklistGrid, playlistCreation, fileBrowser, trackListBrowser}
 );
 
+PlaybackNotificationMediator.init(
+    audioPlayer,
+    playerControls,
+    audioPlayerProgressBar
+);
+
+AutocompleteMediator.init(tracklistGrid);
+
 const leftMenu = new LeftMenu();
 leftMenu.init();
 
@@ -85,8 +96,10 @@ api.loadTrackList((res) => {
     library.bootstrap(res['tracklist']).then(() => {
         TrackListManager.setPlaylist(library.getPlaylist());
     
-        if (TrackListManager.getTracksNumber() > 0)
+        if (TrackListManager.getTracksNumber() > 0) {
             audioPlayer.setCurrentTrackFromTrackList(false);
+            MetadataIndex.initialize(TrackListManager.getTrackList());
+        }
         
         NotificationCenter.updateAndShow('tracks.loaded', `<p>${TrackListManager.getTracksNumber()} tracks have been loaded!!<p>`, 6200);
         // NotificationCenter.displayNotification('tracks.loaded', 6000);

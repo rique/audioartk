@@ -28,3 +28,6 @@ library_data.json
 .my_pgpass
 new_tracks.json
 new_tracks10.json
+*/**/repomix-output.xml
+*/**/repomix-output.json
+repomix-output.json

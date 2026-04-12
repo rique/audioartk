@@ -26,11 +26,15 @@ export const PlaybackMediator = {
     },
 
     async handleTrackChange(track, index, isQueue, hasQueue) {
+        console.log('handleTrackChange', {track, index, isQueue, hasQueue});
         if (isQueue) {
             this.queueGrid.syncQueue(TrackListManager.queueList.length());
             this.browser.setGrid(this.queueGrid);
         } else {
-            if (!hasQueue) this.queueGrid.deactivate();
+            if (!hasQueue) 
+                this.queueGrid.deactivate();
+            else
+                this.mainGrid._syncQueuePosition();
             this.browser.setGrid(this.mainGrid);
         }
         this.browser.setCurrentlyPlayingTrack(index);

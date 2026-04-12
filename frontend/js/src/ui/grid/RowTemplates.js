@@ -219,6 +219,10 @@ export class HTMLItems {
         this.css({ display: 'none' }, true);
     }
 
+    hasClass(className) {
+        return this.render().classList.contains(className);
+    }
+
     classAdd(className) {
         this.render().classList.add(className);
     }
@@ -233,6 +237,13 @@ export class HTMLItems {
 
     classToggle(className) {
         this.render().classList.toggle(className);
+    }
+
+    classToggleExclusive(className, fromParent = document) {
+        fromParent.querySelectorAll(`.${className}`).forEach(el => {
+            if (el !== this.render()) el.classList.remove(className);
+        });
+        this.classToggle(className);
     }
 
     setClassName(className) {
@@ -254,6 +265,10 @@ export class HTMLItems {
         } else {
             return this.render().dataset;
         }
+    }
+
+    setSelectionRange(start, end) {
+        this.render().setSelectionRange(start, end);
     }
 
     insertItemAfter(htmlItem) {
@@ -488,6 +503,10 @@ export class EditInput extends HTMLItems {
     constructor() {
         super('input');
         this.render().setAttribute('type', 'text');
+        this.createCustomEvent('myInput')
+        this.addEventListener('input', () => {            
+            this.dispatchEvent('myInput');
+        });
     }
 
     hidden(hidden) {
@@ -498,6 +517,10 @@ export class EditInput extends HTMLItems {
             this.isHidden = false;
             this.render().setAttribute('type', 'text');
         }
+    }
+
+    onInput(cb) {
+        this.addEventListener('myInput', cb);
     }
 
     value(value) {
@@ -564,6 +587,10 @@ export class Cell extends HTMLDraggableItems {
         this.addEventListener('myClick', cb);
     }
 
+    onInput(cb) {
+        this.onInputCb = cb;
+    }
+
     setSearchable(searchable) {
         this.searchable = searchable;
     }
@@ -590,6 +617,7 @@ export class Cell extends HTMLDraggableItems {
 
         this.isEditing = true;
         this.input = new EditInput();
+        if (this.onInputCb) this.input.onInput(this.onInputCb);
         this.hidden = new EditInput();
         this.input.hidden(false);
         this.hidden.hidden(true);
@@ -1084,7 +1112,6 @@ TrackListBrowser.prototype = {
         document.querySelectorAll('.action-menu-cnt').forEach(el => el.style.display = 'none');
     },
     addToQueueAction(divElem, trackUUid) {
-        console.log('Adding track to queue with UUID:', trackUUid);
         TrackListManager.addToQueue(TrackListManager.getTrackByUUID(trackUUid));
         divElem.style.display = 'none';
     },
@@ -1105,7 +1132,6 @@ TrackListBrowser.prototype = {
         if (!this.grid)
             return console.warn("TrackListBrowser: No grid set for the browser, cannot highlight currently playing track.");
         
-        console.log('TrackListBrowser: Setting currently playing track index', {index}, this.grid);
         const row = this.grid.getRowByIndex(index);
         this.clearAllCurrentlyPlaying();
         
