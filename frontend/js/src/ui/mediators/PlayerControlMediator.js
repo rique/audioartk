@@ -3,7 +3,6 @@ import { ResourceManager } from "../../domain/StateManager.js";
 
 export const PlayerControlMediator = {
     init(audioPlayer, playerDisplay, playerProgressBar, notifications, playerControls, keyControls, uiModules) {
-        this._comingNextFired = false;
         this.audioPlayer = audioPlayer;
         this.playerDisplay = playerDisplay;
         this.playerProgressBar = playerProgressBar;
@@ -12,6 +11,8 @@ export const PlayerControlMediator = {
         this.keyControls = keyControls;
         this.uiModules = uiModules;
         this.overlayDiv = document.querySelector('.cnt-overlay');
+
+        this._trackNearEndFired = false;
 
         this._bindEvents();
     },
@@ -29,13 +30,13 @@ export const PlayerControlMediator = {
             this.playerDisplay.setTrack(track);
             this.playerProgressBar.resetProgressBar();
             this.audioPlayer.setIsNearEnd(false)
-            this._comingNextFired = false;
+            this._trackNearEndFired = false;
             this._preloadNextTrackArt();
             this._updateSystemMetadata(track);
         });
 
         // Time Update (Coming Next logic)
-        this.audioPlayer.audioElem.ontimeupdate = (evt) => {
+        this.audioPlayer.onTimeUpdate((evt) => {
             const { currentTime, duration } = evt.target;
             if (isNaN(duration)) return;
             if (duration === 0)
@@ -44,11 +45,11 @@ export const PlayerControlMediator = {
             this.audioPlayer.currentTrack?.setCurrentTime(currentTime);
             const isNearEnd = (duration - currentTime <= 30);
             this.audioPlayer.setIsNearEnd(isNearEnd);
-            if (isNearEnd && !this._comingNextFired) {
+            if (isNearEnd && !this._trackNearEndFired) {
                 this.audioPlayer.audioPlayerEvents.trigger('onTrackNearEnd');
-                this._comingNextFired = true;
+                this._trackNearEndFired = true;
             }
-        };
+        });
     },
 
     _bindUIInteractions() {
@@ -122,6 +123,7 @@ export const PlayerControlMediator = {
             this._showBackDrop();
             tracklistGrid.open();
         }, tracklistGrid);
+
         this.keyControls.registerKeyDownAction('n', this._displayPlaylistCreationUI.bind(this), playlistCreation);
         this.keyControls.registerKeyDownAction('Escape', (evt) => {
             this._hideBackDrop();

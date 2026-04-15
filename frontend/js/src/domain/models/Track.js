@@ -51,6 +51,7 @@ export class ID3Tags {
  * The core Track entity
  */
 export class Track {
+    static eventBus = new ListEvents();
     constructor(trackInfo) {
         this.trackName = trackInfo.track_name;
         this.trackUUid = trackInfo.track_uuid;
@@ -71,27 +72,33 @@ export class Track {
         if (formated) return this.formatTrackDuration();
         return this.trackDuration;
     }
+    
     setCurrentTime(val) {
         this.currentTime = val;
         this.events.trigger('onCurrentTimeUpdate', val);
     }
+    
     onCurrentTimeUpdate(cb, subscriber) {
         this.events.onEventRegister({cb, subscriber},'onCurrentTimeUpdate');
     }
+    
     onCurrentTimeUpdateUnsub(subscriber) {
         this.events.unsubscribeEVent({eventKey: 'onCurrentTimeUpdate', subscriber})
     }
+    
     getCurrentTime(formated) {
         if (formated)
             return this.formatCurrentTime();
         return this.currentTime;
     }
+    
     getTimeRemaining(formated) {
         let remainigTime = this.getTrackDuration() - this.getCurrentTime();
         if (formated)
             return this._formatTime(remainigTime);
         return remainigTime;
     }
+    
     formatTrackDuration() {
         if (typeof this.trackDuration === 'undefined') {
             const id3Tags = this.getID3Tags();
@@ -102,20 +109,30 @@ export class Track {
         
         return this._formatTime(this.trackDuration); 
     }
+    
     formatCurrentTime() {
         return this._formatTime(this.getCurrentTime());
     }
-    getArtist() { return this._id3TagsInstance.getArtist(); }
+    
     getTitle() {
         const title = this._id3TagsInstance.getTitle();
         return title ? title : this.trackName;
     }
+
+    getArtist() { return this._id3TagsInstance.getArtist(); }
     getAlbum() { return this._id3TagsInstance.getAlbum(); }
+    
+    get album() { return this.getAlbum(); }
+    get artist() { return this.getArtist(); }
+    
     async getAlbumArt() { 
         return await this._id3TagsInstance.getAlbumArt(this.trackUUid); 
     }
+    
     getID3Tags() { return this._id3TagsInstance; }
+    
     setID3Tags(id3Tags) { this._id3TagsInstance = id3Tags; }
+    
     setTag(tag, value) {
         if (tag == 'title')
             this._id3TagsInstance.setTitle(value);
@@ -123,10 +140,11 @@ export class Track {
             this._id3TagsInstance.setArtist(value);
         else if (tag == 'album')
             this._id3TagsInstance.setAlbum(value);
-        this.events.trigger('onTagChange', tag, value);
+        console.log('setTag triggers onTagChange', {tag, value});
+        Track.eventBus.trigger('onTagChange', tag, value, this);
     }
-    onTagChange(cb, subscriber) {
-        this.events.onEventRegister({cb, subscriber}, 'onTagChange');
+   static onTagChange(cb, subscriber) {
+        Track.eventBus.onEventRegister({cb, subscriber}, 'onTagChange');
     }
     onTagChangeUnsub(subscriber) {
         this.events.unsubscribeEVent({eventKey: 'onTagChange', subscriber});

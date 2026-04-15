@@ -18,7 +18,7 @@ export const PlaybackMediator = {
         
         TrackListManager.onShuffleTracklist((track, index) => {
             this.mainGrid.redrawGrid();
-            this.handleTrackChange(track, index, false, false);
+            this.handleTrackChange(track, index, false, TrackListManager.queueList.length() > 0);
             if (this.audioPlayer.isPlayerPaused()) {
                 this.audioPlayer.setCurrentTrackFromTrackList(true, undefined, {track, index});
             }

@@ -8,7 +8,11 @@ export class AudioPlayer {
         this.audioElem = new Audio();
         this.audioPlayerEvents = new ListEvents();
         this.audioPlayerProgressBar = audioPlayerProgressBar;
-        
+        /*this.events = {
+            onTimeUpdate: this.onTimeUpdate.bind(this),
+            onTimeUpdateUnsub: this.onTimeUpdateUnsub.bind(this),
+
+        }*/
         this.volumeStep = 0.02;
         this.isPaused = true;
         this.repeatMode = 0; // 0: no repeat, 1: all, 2: one
@@ -228,6 +232,8 @@ export class AudioPlayer {
         return (clientX - rect.left) / rect.width;
     }
 
+    onTimeUpdate(handler) { this.audioElem.addEventListener('timeupdate', handler); }
+    onTimeUpdateUnsub(handler) { this.audioElem.removeEventListener('timeupdate', handler); }
     onPlayerSongChange(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onPlayerSongChange'); }
     onPlayPause(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onPlayPause'); }
     onStop(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onStop'); }

@@ -311,6 +311,9 @@ TrackList.prototype = {
         
         return track;
     },
+    filterBy(key, value) {
+        return this.items.filter(track => track[key] === value);
+    },
     _formatTime(secTime) {
         if (isNaN(secTime)) return '00:00:00';
 
@@ -399,6 +402,7 @@ const TrackListManager =  {
         this.tracklist.addItem(track);
         if (this.isShuffle())
             this.shuffledTracklist.addItem(track);
+        this.trackListEvents.trigger('onTrackAddedToTrackList', track, this.tracklist.length());
     },
     addToQueue(track) {
         this.queueList.addToQueue(track);
@@ -637,6 +641,9 @@ const TrackListManager =  {
     },
     onRemoveTrackFromTrackList(cb, subscriber) {
         this.trackListEvents.onEventRegister({cb, subscriber}, 'onRemoveTrackFromTrackList');
+    },
+    onTrackAddedToTrackList(cb, subscriber) {
+        this.trackListEvents.onEventRegister({cb, subscriber}, 'onTrackAddedToTrackList');
     },
     onTrackChanged(cb, subscriber) {
         this.trackListEvents.onEventRegister({cb, subscriber}, 'onTrackChanged');

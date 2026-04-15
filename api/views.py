@@ -172,10 +172,10 @@ def fileBrowser(request):
     # print('errors :', res3.stderr.decode())
     res_str = res.decode().strip()
     file_list = []
-    print('res_str', res_str)
+
     if len(res_str) > 0:
         file_list = res_str.split('\n')
-    print('file_list', file_list)# [ "08 Minha' All Mine.mp3" ]
+    # print('file_list', file_list)# [ "08 Minha' All Mine.mp3" ]
     return JsonResponse(data={'success': True, 'base_dir': base_dir, 'dir_list': dir_list, 'file_list': file_list})
 
 
@@ -258,6 +258,23 @@ def trackArtProxy(request, track_uuid):
             raise Http404("Default artwork file not found on disk")
 
     return HttpResponse(apic_data, content_type=mime_type)
+
+
+def trackFileProxy(request, track_uuid):
+    try:
+        track = Tracks.objects.get(track_uuid=track_uuid)
+    except Tracks.DoesNotExist:
+        raise Http404("Track not found")
+    
+    file_path = os.path.join(settings.TRACKS_DIR, f'{track_uuid}.mp3')
+
+    if not os.path.exists(file_path):
+        raise Http404("Audio file missing")
+    
+    return HttpResponse(headers={
+        "X-Accel-Redirect": f"/tracks/{track_uuid}.mp3",
+        "Content-Type": "audio/mpeg",
+    })
 
 
 @csrf_exempt

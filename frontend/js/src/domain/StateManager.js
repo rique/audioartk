@@ -66,7 +66,7 @@ export class StateManager {
 
 export const ResourceManager = {
     _defaultAlbumArt: '/static/images/albumart.svg',
-    _baseMediaTrackURL: '/static/assets/tracks/',
+    _baseMediaTrackURL: '/api/track-file/',
     _baseAlbumArtURL: '/api/track-art/',
     _knownMissingArt: new Set(),
 
@@ -76,13 +76,10 @@ export const ResourceManager = {
 
     getMediaAudioURL(trackUUID) {
         if (!trackUUID) return null;
-        return this._baseMediaTrackURL + trackUUID + '.mp3';
+        return this._baseMediaTrackURL + trackUUID + '/';
     },
 
     getAlbumArtURL(track) {
-        if (track?.has_art === false) {
-            return this.getDefaultAlbumArt(); // Zero network latency
-        }
         console.log('ResourceManager.getAlbumArtURL called with track', {track}, track.getTrackUUID());
         return `${this._baseAlbumArtURL}${track.getTrackUUID()}/`;
     },
@@ -93,7 +90,11 @@ export const ResourceManager = {
 
     preloadAlbumArt(track) {
         const img = new Image();
-        img.src = this.getAlbumArtURL(track);
+        const albumArtURL = this.getAlbumArtURL(track);
+        
+        if (albumArtURL === this.getDefaultAlbumArt()) return;
+
+        img.src = albumArtURL;
         img.onerror = () => {
             console.warn(`Failed to preload album art for track ${track.getTrackUUID()}, using default art.`);
             img.src = this.getDefaultAlbumArt();

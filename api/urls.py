@@ -16,5 +16,6 @@ urlpatterns = [
     path("load-track-info", views.loadTrackInfo, name="loadTrackInfo"),
     path("load-playlists", views.loadPlaylists, name="loadPlaylists"),
     path('track-art/<str:track_uuid>/', views.trackArtProxy, name='track_art_proxy'),
+    path('track-file/<str:track_uuid>/', views.trackFileProxy, name='track_file_proxy'),
 ]
 

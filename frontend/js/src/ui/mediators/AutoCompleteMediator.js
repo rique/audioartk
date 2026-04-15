@@ -1,4 +1,5 @@
 import {MetadataIndex} from '../../domain/MetadataIndex.js';
+import {TrackListManager} from "../../domain/TrackList.js";
 
 export const AutocompleteMediator = {
     _lastLength: 0,
@@ -15,6 +16,9 @@ export const AutocompleteMediator = {
         this.trackGrid.onTrackAlbumEditing((track, inputEl, val) => 
             this.handleInlineCompletion('album', inputEl, val)
         , this);
+
+        TrackListManager.onTrackAddedToTrackList(MetadataIndex.addTrack.bind(MetadataIndex), this);
+        TrackListManager.onRemoveTrackFromTrackList(MetadataIndex.removedTrack.bind(MetadataIndex), this);
     },
 
     handleInlineCompletion(field, inputEl, value, evt) {
@@ -43,5 +47,7 @@ export const AutocompleteMediator = {
             // Selection starts where the user stopped typing, and ends at the end of the match
             inputEl.setSelectionRange(originalLength, match.length);
         }
-    }
+    },
+
+
 };

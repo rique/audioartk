@@ -1046,7 +1046,7 @@ TrackListBrowser.prototype = {
         this.scrollToCurrentTrack();
     },
     hide(evt) {
-        if (evt &&evt.target != evt.currentTarget)
+        if (evt && evt.target != evt.currentTarget)
             return;
         if (!this.isVisible)
             return

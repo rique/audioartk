@@ -1,5 +1,6 @@
 import { ResourceManager } from "../../domain/StateManager.js";
 import { Fader } from "../../core/Utils.js";
+import { Track } from "../../domain/models/Track.js";
 
 import {HTMLItems} from '../grid/RowTemplates.js';
 import {ListEvents} from '../../core/EventBus.js';
@@ -371,6 +372,7 @@ export class AudioPlayerDisplay {
         this.volumeFader = new Fader();
         this._volTimeout = null;
 
+        Track.onTagChange((tag, val, track) => this.manageTag(tag, val, track), this);
         this.setUpDisplay();
         this.setUpOverlays();
     }
@@ -395,11 +397,11 @@ export class AudioPlayerDisplay {
 
     setTrack(track) {
         if (this.track) {
-            this.track.onTagChangeUnsub(this);
+            // this.track.onTagChangeUnsub(this);
             this.track.onCurrentTimeUpdateUnsub(this);
         }
         this.track = track;
-        track.onTagChange((tag, val) => this.manageTag(tag, val), this);
+        // track.onTagChange((tag, val) => this.manageTag(tag, val), this);
         track.onCurrentTimeUpdate(() => this.updateTrackTime(), this);
         
         this.syncAllMetadata(track);
@@ -413,7 +415,8 @@ export class AudioPlayerDisplay {
         this.updateTrackTime();
     }
 
-    manageTag(tag, value) {
+    manageTag(tag, value, track) {
+        if (this.track !== track) return;
         const fields = {
             'artist': this.artistName,
             'title': this.nameTrackElem,

@@ -139,6 +139,9 @@ STATICFILES_DIRS = [
 # When you eventually run 'collectstatic' for production
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+TRACKS_DIR = str(BASE_DIR / 'frontend/assets/tracks')
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
