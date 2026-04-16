@@ -197,6 +197,7 @@ export class AudioPlayer {
         if (isLast) {
             if (this.repeatMode === 0) {
                 autoPlay = false;
+                TrackListManager.reset();
             } else if (this.repeatMode === 1) {
                 if (!TrackListManager.isShuffle()) {
                     TrackListManager.reset();

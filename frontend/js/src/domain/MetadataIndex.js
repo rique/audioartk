@@ -19,7 +19,6 @@ export const MetadataIndex = {
     },
 
     addTrack(track) {
-        console.log('MetadataIndex.addTrack', {track});
         if (track.getArtist?.()) this._data.artist.add(track.getArtist());
         if (track.getAlbum?.()) this._data.album.add(track.getAlbum());
     },

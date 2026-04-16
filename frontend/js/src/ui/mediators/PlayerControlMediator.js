@@ -84,8 +84,9 @@ export const PlayerControlMediator = {
 
         this.audioPlayer.onStop(this.playerProgressBar.resetProgressBar.bind(this.playerProgressBar));
         
-        this.playerControls.onRepeat((repeatMode) => {
+        this.audioPlayer.onRepeatSwitch((repeatMode) => {
             this._preloadNextTrackArt();
+            TrackListManager.switchRepeatMode(repeatMode);
         }, this);
     },
 
@@ -132,7 +133,6 @@ export const PlayerControlMediator = {
     },
 
     _displayPlaylistCreationUI(evt) { 
-        console.log('Displaying playlist creation UI', {evt});
         if (evt instanceof Event)
             evt.stopPropagation();
 

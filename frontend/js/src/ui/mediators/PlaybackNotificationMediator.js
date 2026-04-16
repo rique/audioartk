@@ -33,7 +33,7 @@ export const PlaybackNotificationMediator = {
         
         const currentTrack = this.audioPlayer.getCurrentTrack();
         const {track} = TrackListManager.getNextTrackInList();
-        console.log('_handleNearEnd', {currentTrack, track});
+        
         if (track && currentTrack) {
             PlayerNotifier.showNext(track, currentTrack.getTimeRemaining() * 1000);
             this._isNextTrackfired = true;

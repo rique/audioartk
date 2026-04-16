@@ -180,7 +180,6 @@ TrackList.prototype = {
         return { track: undefined, index: undefined };
     },
     setCurrent({track, index}) {
-        console.log('tracklist.setCurrent', {track, index});
         if (typeof index === 'number') {
             if (index >= 0 && index < this.length()) {
                 this.index = index;
@@ -201,7 +200,7 @@ TrackList.prototype = {
             console.error('Track not found in tracklist', track);
             return;
         }
-        console.log('tracklist.setCurrent', {entry});
+
         this.index = entry.index;
     },
     enableLoop() {
@@ -243,7 +242,7 @@ TrackList.prototype = {
             index = this.index + 1;
         else if (this.loop)
             index = 0;
-        console.log('readNextTrack', {index, thisIndex: this.index, maxIndex: this.maxIndex(), loop: this.loop});
+        // console.log('readNextTrack', {index, thisIndex: this.index, maxIndex: this.maxIndex(), loop: this.loop});
         track = this.items[index];
         return {track, index};
     },
@@ -398,7 +397,7 @@ const TrackListManager =  {
     addTrackToList(track) {
         if (!this.tracklist)
             this.tracklist = new TrackList();
-        // this.tracklist.enableLoop();
+
         this.tracklist.addItem(track);
         if (this.isShuffle())
             this.shuffledTracklist.addItem(track);
@@ -441,12 +440,13 @@ const TrackListManager =  {
             this.currentPlayState = this.playStates.CONTEXT_MAIN;
             this.queueIsPlaying = false;
             this.queueDepleted = false;
-            
+            this.lastTrack = tracklist.isLastTrack();
+
             if (!track) {
                 track = {track: undefined, index: undefined};
             }
-            this.lastTrack = tracklist.isLastTrack();
         }
+        
         console.log('nextTrack', {track, queueDepleted: this.queueDepleted});
         this.trackListEvents.trigger('onTrackChanged', track.track, track.index, this.queueIsPlaying, this.queueList.hasQueue());
         return track;
@@ -481,7 +481,6 @@ const TrackListManager =  {
         let currentTrack;
         if (this.isShuffle()) {
             const currentShuffle = this.shuffledTracklist.current();
-            console.log('tracklist.shuffle', {cur: currentShuffle});
             this.tracklist.setCurrent({track: currentShuffle.track, index: this.tracklist.indexOf(currentShuffle.track)});
             this.shuffledTracklist = null;
             this._isShuffle = false;
@@ -514,10 +513,11 @@ const TrackListManager =  {
     getNextTrackInList() {
         let track = this.queueList.getByIndex(0);
         if (!track.track) {
-            if (this.currentPlayState === this.playStates.CONTEXT_MAIN)
+            if (this.currentPlayState === this.playStates.CONTEXT_MAIN) {
                 track = this.getTrackList().readNextTrack();
-            else
+            } else {
                 track = this.getTrackList().readCurrentTrack();
+            }
         }
         return track;
     },
@@ -557,7 +557,6 @@ const TrackListManager =  {
         this.trackListLoop(repeatMode == 1);
     },
     setRepeatTrack(repeate) {
-        console.log('setRepeatTrack', {repeate});
         this.doRepeatTrack = repeate;
     },
     trackListLoop(loop) {

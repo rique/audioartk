@@ -371,16 +371,13 @@ export class HTMLDraggableItems extends HTMLIndexedItems {
         this._setupEvents();
     }
 
-    toggleHovered(debug = false) {
-        if (debug)
-            console.log('Toggling hovered state for', this.seekParent, this.render());
+    toggleHovered() {
         let target = this;
         this.seekParent = true;
         if (this.seekParent && typeof this.getParentItem === 'function') {
             target = this.getParentItem();
         }
-        if (debug)
-            console.log('Target for hover toggle:', target);
+        
         target.classToggle('hovered');
     }
 
@@ -931,7 +928,7 @@ FileBrowserRenderer.prototype = {
 export const FileBrowser = function(layout) {
     this.baseDir = '/home/enrique/Music/';
     this.api = new Api();
-    this.browseHistory = [this.baseDir];
+    this.browseHistory = [{dir: this.baseDir, index: 0}];
     this.historyIndex = 0;
     this.layout = layout;
     this.folderBrowserEvent = new ListEvents();
@@ -952,25 +949,28 @@ FileBrowser.prototype = {
     },
     folderSelector(evt) {
         let target = evt.target;
-        let folderName = target.innerText.trim();
+        let selectedIndex = target.dataset.index;
+        let folderName = target.dataset.name;
         console.log('foldername', folderName);
         
         if (folderName == '..') {
-            let baseDirArray = this.baseDir.split('/');
-            baseDirArray.splice((baseDirArray.length - 2), 1);
-            this.baseDir = baseDirArray.join('/');
+            let pathParts = this.baseDir.split('/').filter(p => p.length > 0);
+            this.scrollToTarget = pathParts[pathParts.length - 1] + '/';
+            let parts = this.baseDir.split('/').filter(Boolean);
+            parts.pop();
+            this.baseDir = '/' + parts.join('/') + '/';
         } else
             this.baseDir += folderName;
 
         clearElementInnerHTML(this.folderListBox);
         clearElementInnerHTML(this.fileListBox);
         this.historyIndex++;
-        this.browseHistory.push(this.baseDir);
+        this.browseHistory.push({dir: this.baseDir, index: selectedIndex});
         this.api.browseFiles(this.baseDir, this.fileBrowserCB.bind(this));
     },
     fileSelector(evt) {
         let target = evt.target;
-        let fileName = target.textContent.trim();
+        let fileName = target.dataset.name;
         console.log('fileName', fileName);
         this.api.addTrack(fileName, this.baseDir + fileName, (res) => {
             console.log('add Track', {res});
@@ -987,23 +987,51 @@ FileBrowser.prototype = {
         this._openFileBrowser();
         this.basePathBox.innerText = res['base_dir'];
         if (res['dir_list'].length > 0) {
+            let idx = 0;
             for (let dirName of res['dir_list']) {
                 let liElem = document.createElement('li');
                 liElem.classList.add('fld-itm');
+                liElem.dataset.index = idx;
+                liElem.dataset.type = 'folder';
+                liElem.dataset.name = dirName;
                 liElem.innerHTML = `<li class="fa-solid fa-folder"></li> ${dirName}`;
                 liElem.addEventListener('dblclick', this.folderSelector.bind(this));
                 this.folderListBox.appendChild(liElem);
+                idx++;
             }
         }
         
         if (res['file_list'].length > 0) {
+            let idx = 0;
             for (let fileName of res['file_list']) {
                 let liElem = document.createElement('li');
                 liElem.classList.add('fle-itm');
+                liElem.dataset.index = idx;
+                liElem.dataset.type = 'file';
+                liElem.dataset.name = fileName;
                 liElem.innerHTML = `<li class="fa-solid fa-file"></li> ${fileName}`;
                 liElem.addEventListener('dblclick', this.fileSelector.bind(this));
                 this.fileListBox.appendChild(liElem);
+                idx++;
             }
+        }
+
+        if (this.scrollToTarget) {
+            // Find the <li> that matches the folder we just came from
+            const items = this.folderListBox.querySelectorAll('.fld-itm');
+            for (let item of items) {
+                if (item.innerText.trim() === this.scrollToTarget) {
+                    // Use scrollIntoView for a smooth, native experience
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Optional: add a temporary highlight class to guide the eye
+                    item.classList.add('highlight-flash'); 
+                    setTimeout(() => item.classList.remove('highlight-flash'), 2000);
+                    
+                    break;
+                }
+            }
+            this.scrollToTarget = null; // Clear the target
         }
     },
     loadFileBrowser() {
