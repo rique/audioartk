@@ -1,11 +1,15 @@
-from mutagen.id3 import ID3, APIC, error
+from mutagen.id3 import ID3, APIC, error, TIT2, TPE1, TALB
 from mutagen.mp3 import MP3
-import mimetypes
-from core.utils.image_utils import prepared_image_context
+from base64 import b64encode
 
-class TrackArtManager:
+from core.utils.decorators import wrap_with_root_model
+from core.utils.image_utils import prepared_image_context
+from core.dtos import TrackMetadata, Picture
+
+class TrackManagerService:
     @staticmethod
-    def get_tags(file_path):
+    @wrap_with_root_model
+    def get_tags(file_path, include_picture=True):
         audio = ID3(file_path)
         mp3_file = MP3(file_path)
         keys = audio.keys()
@@ -22,19 +26,34 @@ class TrackArtManager:
         if 'TALB' in keys:
             album = audio.get('TALB').text[0]
         
-        apict = ''
-        pic_format = ''
-        if 'APIC:' in keys:
-            apict = b64encode(audio.get('APIC:').data).decode('ASCII')
-            pic_format = audio.get('APIC:').mime
-        else:
-            for k in keys:
-                if k.startswith('APIC:'):
-                    APIC = audio.get(k)
-                    if APIC.mime:
-                        apict = b64encode(APIC.data).decode('ASCII')
-                        pic_format = APIC.mime
-                        break
+        if title == '':
+            title = file_path.split('/')[-1]
+        
+        track_metadata = TrackMetadata(
+            duration=mp3_file.info.length,
+            title=title,
+            artist=artist,
+            album=album,
+        )
+        if include_picture:
+            track_metadata.picture = TrackManagerService.load_track_album_art(file_path)
+        
+        return track_metadata
+    
+    @staticmethod
+    def edit_tag(tag_name, tag_value, track_uuid):
+        audio = ID3(f'./frontend/assets/tracks/{track_uuid}.mp3')
+
+        try:
+            if tag_name == 'title':
+                audio.add(TIT2(encoding=3, text=tag_value))
+            elif tag_name == 'artist':
+                audio.add(TPE1(encoding=3, text=tag_value))
+            elif tag_name == 'album':
+                audio.add(TALB(encoding=3, text=tag_value))
+            audio.save()
+        except Exception as e:
+            raise Exception(e)
 
     @staticmethod
     def set_art(file_path, image_source):
@@ -63,6 +82,16 @@ class TrackArtManager:
             audio.save(file_path)
 
     @staticmethod
+    @wrap_with_root_model
+    def load_track_album_art(track_path):
+        apict, pic_format = TrackManagerService._get_album_art_data(track_path)
+        
+        return Picture(
+            data=apict, 
+            format=pic_format
+        ) if apict else None
+
+    @staticmethod
     def remove_art(file_path):
         """Removes all images from the track."""
         try:
@@ -72,3 +101,27 @@ class TrackArtManager:
             return True
         except error:
             return False
+        
+    @staticmethod
+    def _get_album_art_data(track_path):
+        audio = ID3(track_path)
+        keys = audio.keys()
+
+        apict = None
+        pic_format = None
+
+        if 'APIC:' in keys:
+            apict = audio.get('APIC:').data
+            pic_format = audio.get('APIC:').mime
+        else:
+            for k in keys:
+                if k.startswith('APIC:'):
+                    apic_frame = audio.get(k)
+                    if apic_frame.mime:
+                        apict = apic_frame.data
+                        pic_format = apic_frame.mime
+                        break
+        
+        return (apict, pic_format)
+    
+    

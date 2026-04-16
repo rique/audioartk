@@ -89,6 +89,7 @@ leftMenu.init();
 NotificationCenter.register('tracks.loaded', 'Tracks Loaded!!', 'info');
 
 api.loadBGImages((res) => {
+    console.log('background images loaded', res['img_list']);
     imgList.push(...res['img_list']);
     draw(audioPlayer, imgList);
 });

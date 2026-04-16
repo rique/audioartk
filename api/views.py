@@ -15,9 +15,10 @@ from .models import Tracks, Playlist
 
 from mutagen.id3 import ID3, TIT2, TPE1, TALB
 from mutagen.mp3 import MP3
-from base64 import b64encode
 
-# Create your views here.
+from core.services.track_service import TrackManagerService
+from core.services.fs_service import TrackFileSystemService
+from core.exceptions import InvalidBrowserPath, PathNotAccessible, TrackPathDoesNotExist
 
 
 @csrf_exempt
@@ -29,57 +30,21 @@ def addTrack(request):
     params = json.loads(body_unicode)
 
     track = Tracks()
-    track.track_name = params['track_name']
-    
-    
+
+    track.track_name = params['track_name']    
     track_original_path = params['track_original_path']
     
-    audio = ID3(track_original_path)
-    mp3_file = MP3(track_original_path)
-    keys = audio.keys()
-    
-    title = ''
-    if 'TIT2' in keys:
-        title = audio.get('TIT2').text[0]
-    
-    artist = ''
-    if 'TPE1' in keys:
-        artist = audio.get('TPE1').text[0]
-    
-    album = ''
-    if 'TALB' in keys:
-        album = audio.get('TALB').text[0]
-    
-    apict = ''
-    pic_format = ''
-    if 'APIC:' in keys:
-        apict = b64encode(audio.get('APIC:').data).decode('ASCII')
-        pic_format = audio.get('APIC:').mime
-    else:
-        for k in keys:
-            if k.startswith('APIC:'):
-                APIC = audio.get(k)
-                if APIC.mime:
-                    apict = b64encode(APIC.data).decode('ASCII')
-                    pic_format = APIC.mime
-                    break
+    track_metadata = TrackManagerService.get_tags(track_original_path)
 
     track_uuid = str(uuid4())
 
-    res = subprocess.run(f'ln -s "{track_original_path}" "{settings.BASE_DIR}/frontend/assets/tracks/{track_uuid}.mp3"', shell=True, capture_output=True)
-    print('stderr addTrack', res.stderr.decode(), res.stdout.decode())
+    TrackFileSystemService.store_track(track_original_path, track_uuid)
 
     track.track_original_path = track_original_path
     track.track_uuid = track_uuid
     track.save()
 
-    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': {
-        'title': title,
-        'artist': artist,
-        'album': album,
-        'picture': {'data': apict, 'format': pic_format},
-        'duration': mp3_file.info.length
-    }})
+    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata.model_dump()})
 
 
 @csrf_exempt
@@ -98,19 +63,9 @@ def editTrack(request):
         track = Tracks.objects.get(track_uuid=track_uuid)
     except Tracks.DoesNotExist:
         return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
-
-    # track_original_path = track_original_path.replace('~', '\~')
-    audio = ID3(f'./frontend/assets/tracks/{track_uuid}.mp3')
-    # mp3_file = MP3(track_original_path)
-
+   
     try:
-        if field_type == 'title':
-            audio.add(TIT2(encoding=3, text=field_value))
-        elif field_type == 'artist':
-            audio.add(TPE1(encoding=3, text=field_value))
-        elif field_type == 'album':
-            audio.add(TALB(encoding=3, text=field_value))
-        audio.save()
+        TrackManagerService.edit_tag(field_type, field_value, track_uuid)
     except Exception as e:
         return JsonResponse(data={'success': False, 'code': 'system_error'}, status=500, reason=f"AN unknow error occured {e}")
     
@@ -131,7 +86,7 @@ def deleteTrack(request):
         return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
 
     print('Proceeding to delete file ', track_uuid)
-    subprocess.run(f'rm -f "{settings.BASE_DIR}/frontend/assets/tracks/{track_uuid}.mp3"', shell=True)
+    TrackFileSystemService.delete_track(track_uuid)
     print('Removed link ', track_uuid)
     track.delete()
     print('Deleted file ', track_uuid)
@@ -150,33 +105,17 @@ def fileBrowser(request):
     params = json.loads(body_unicode)
     base_dir = params['base_dir'] or '~'
     
-    res = subprocess.run(f'cd "{base_dir}" && ls -d */', shell=True, capture_output=True)
-    res_str = res.stdout.decode().strip()
-    dir_list = [] if base_dir == '/' else ['..']
-    
-    if len(res_str) > 0:
-        dir_list += res_str.split('\n')
-    
-    # base_dir = shlex.quote(base_dir) #.replace(' ', '\ ').replace('(', '\(').replace(')', '\)').replace('&', '\&')
-    command1 = ['ls', '-p', base_dir]
-    command2 = [ 'grep', '-v', '/']
-    command3 = ['grep', '-i', 'mp3']
-    res1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
-    res2 = subprocess.Popen(command2, stdout=subprocess.PIPE, stdin=res1.stdout)
-    res1.stdout.close()
-    res3 = subprocess.Popen(command3, stdout=subprocess.PIPE, stdin=res2.stdout)
-    res2.stdout.close()
-    res = res3.communicate()[0]
-    
-    # res = subprocess.run(f'ls -p  "{base_dir}" | grep -v /| grep -i mp3', shell=True, capture_output=True)
-    # print('errors :', res3.stderr.decode())
-    res_str = res.decode().strip()
-    file_list = []
-
-    if len(res_str) > 0:
-        file_list = res_str.split('\n')
-    # print('file_list', file_list)# [ "08 Minha' All Mine.mp3" ]
-    return JsonResponse(data={'success': True, 'base_dir': base_dir, 'dir_list': dir_list, 'file_list': file_list})
+    try:
+        dir_listing = TrackFileSystemService.list_directory_contents(base_dir)
+    except InvalidBrowserPath:
+        return JsonResponse(data={'success': False, 'code': 'invalid_path'}, status=400, reason=f"The path {base_dir} is not valid.")
+    except PathNotAccessible:
+        return JsonResponse(data={'success': False, 'code': 'path_not_accessible'}, status=403, reason=f"The path {base_dir} is not accessible (permissions).")
+    except Exception as e:
+        return JsonResponse(data={'success': False, 'code': 'system_error'}, status=500, reason=f"An unknown error occurred: {e}")
+    dir_listing = dir_listing.model_dump() # Convert Pydantic model to dict
+    dir_listing['success'] = True
+    return JsonResponse(data=dir_listing)
 
 
 @csrf_exempt
@@ -193,27 +132,12 @@ def loadTrackAlbumart(request):
     except Tracks.DoesNotExist:
         return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
     
-    audio = ID3(f'./frontend/assets/tracks/{track_uuid}.mp3')
-    keys = audio.keys()
+    picture = TrackManagerService.load_track_album_art(TrackFileSystemService.get_track_path(track_uuid))
 
-    apict = ''
-    pic_format = ''
-
-    if 'APIC:' in keys:
-        apict = b64encode(audio.get('APIC:').data).decode('ASCII')
-        pic_format = audio.get('APIC:').mime
-    else:
-        for k in keys:
-            if k.startswith('APIC:'):
-                APIC = audio.get(k)
-                if APIC.mime:
-                    apict = b64encode(APIC.data).decode('ASCII')
-                    pic_format = APIC.mime
-                    break
-    
     return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': {
-        'picture': {'data': apict, 'format': pic_format},
+        'picture': picture.model_dump() if picture else None,
     } })
+
 
 @csrf_exempt
 def trackArtProxy(request, track_uuid):
@@ -223,26 +147,9 @@ def trackArtProxy(request, track_uuid):
     except Tracks.DoesNotExist:
         raise Http404("Track not found")
 
-    # 2. Path to the file
-    file_path = f'./frontend/assets/tracks/{track_uuid}.mp3'
-    if not os.path.exists(file_path):
-        raise Http404("Audio file missing")
+    picture = TrackManagerService.load_track_album_art(TrackFileSystemService.get_track_path(track_uuid))
 
-    # 3. Extract ID3 Tag
-    audio = ID3(file_path)
-    apic_data = None
-    mime_type = "image/jpeg" # Default
-
-    # Look for the APIC frame (same logic as your view)
-    for key in audio.keys():
-        if key.startswith('APIC:'):
-            apic = audio.get(key)
-            if apic.data:
-                apic_data = apic.data
-                mime_type = apic.mime or "image/jpeg"
-                break
-
-    if not apic_data:
+    if not picture:
         # 1. Correct path joining
         default_path = os.path.join(settings.STATICFILES_DIRS[0], 'images/albumart.svg')
         
@@ -256,8 +163,9 @@ def trackArtProxy(request, track_uuid):
                 return HttpResponse(f.read(), content_type=content_type)
         except FileNotFoundError:
             raise Http404("Default artwork file not found on disk")
-
-    return HttpResponse(apic_data, content_type=mime_type)
+        
+    picture = picture.root
+    return HttpResponse(picture.data, content_type=picture.format)
 
 
 def trackFileProxy(request, track_uuid):
@@ -290,27 +198,8 @@ def loadTrackInfo(request):
     except Tracks.DoesNotExist:
         return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
     
-    audio = ID3(f'./frontend/assets/tracks/{track_uuid}.mp3')
-    mp3_file = MP3(f'./frontend/assets/tracks/{track_uuid}.mp3')
-    keys = audio.keys()
-
-    title = ''
-    if 'TIT2' in keys:
-        title = audio.get('TIT2').text[0]
-    artist = ''
-    if 'TPE1' in keys:
-        artist = audio.get('TPE1').text[0]
-    album = ''
-    if 'TALB' in keys:
-        album = audio.get('TALB').text[0]
-    
-    
-    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': {
-        'duration': mp3_file.info.length,
-        'title': title,
-        'artist': artist,
-        'album': album,
-    }})
+    track_metadata = TrackManagerService.get_tags(TrackFileSystemService.get_track_path(track_uuid), include_picture=False)
+    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata.model_dump()})
 
 
 
@@ -325,29 +214,19 @@ def loadTrackList(request):
     duration = 0
     for trk in tracks:
         try:
-            mp3_file_path = f'./frontend/assets/tracks/{trk.track_uuid}.mp3'
-            audio = ID3(mp3_file_path)
-            mp3_file = MP3(mp3_file_path)
-            keys = audio.keys()
-            
-            title = ''
-            if 'TIT2' in keys:
-                title = audio.get('TIT2').text[0]
-            artist = ''
-            if 'TPE1' in keys:
-                artist = audio.get('TPE1').text[0]
-            album = ''
-            if 'TALB' in keys:
-                album = audio.get('TALB').text[0]
+            mp3_file_path = TrackFileSystemService.get_track_path(trk.track_uuid)
+            track_metadata = TrackManagerService.get_tags(mp3_file_path, include_picture=False)
 
-            duration += mp3_file.info.length
-            tracklist.append({'track': trk.dict, 'ID3': {
-                'title': title,
-                'artist': artist,
-                'album': album,
-                'picture': {'data': '', 'format': ''},
-                'duration': mp3_file.info.length
-            } })
+            if not track_metadata:
+                print(f"An error occured with file {mp3_file_path=}, skipping")
+                continue
+            
+            track_metadata = track_metadata.model_dump()
+
+            track_metadata['picture'] = {'data': '', 'format': ''}         
+            duration += track_metadata['duration']
+            
+            tracklist.append({'track': trk.dict, 'ID3': track_metadata})
         except Exception as e:
             print(f'Exception caugth for {mp3_file_path=}: {e}, continuing')
             continue
@@ -363,16 +242,14 @@ def loadTrackList(request):
 
 @csrf_exempt
 def loadBGImages(request):
-    img_dir = './frontend/imgc/'# './static/imgc/'
-    res = subprocess.run(f'find -L "{img_dir}" -type f | grep -i --include=*.{{jpg,jpeg,png,webp,gif}} "" | sort -R', shell=True, capture_output=True, check=False)
-    res_str = res.stdout.decode().strip()
-    print('stderr', res.stderr.decode().strip())
-    return JsonResponse(data={"success": True, 'img_list': [r.replace('./frontend', 'static') for r in res_str.split('\n')]})
+    img_dir = 'imgc/'# './static/imgc/'
+    img_list = TrackFileSystemService.get_background_images(img_dir).model_dump()
+    return JsonResponse(data={"success": True, 'img_list': img_list['img_list']})
 
 
 @csrf_exempt
-def scanForMyTracks(request):
-    base_dirs = '/mnt/ /home/enrique/'
+def scanForMyTracksOld(request):
+    base_dirs = '/mnt/c'
     shell_comand = "find " + base_dirs + " -type f -iname \"*.mp3\" -exec ls -l {} \;| awk '$5>1005128 {out = $5" "; for (i=9; i <= NF; i++) {out=out" "$i};  print  out}'" 
 
     res = subprocess.run(shell_comand, shell=True, capture_output=True)
@@ -391,6 +268,17 @@ def scanForMyTracks(request):
     return JsonResponse(data={
         'success': True,
         'trakslist': trakslist
+    })
+
+
+@csrf_exempt
+def scanForMyTracks(request):
+    # res_str = res.stdout.decode().strip()
+    scanned_tracks = TrackFileSystemService.scan_for_tracks().model_dump()
+    
+    return JsonResponse(data={
+        'success': True,
+        'trakslist': scanned_tracks['tracklist']
     })
 
 
