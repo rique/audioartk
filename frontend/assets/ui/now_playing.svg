@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <style>
+    .bar {
+      fill: #007bff; /* Your accent blue */
+      animation: pulse 1s infinite ease-in-out;
+      transform-origin: bottom;
+    }
+    .bar1 { animation-delay: 0.0s; }
+    .bar2 { animation-delay: 0.2s; }
+    .bar3 { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+  </style>
+  <rect class="bar bar1" x="2" y="2" width="4" height="20" />
+  <rect class="bar bar2" x="9" y="2" width="4" height="20" />
+  <rect class="bar bar3" x="16" y="2" width="4" height="20" />
+</svg>

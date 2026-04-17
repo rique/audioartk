@@ -365,6 +365,7 @@ class GridMaker {
             cell.innerContent(c.content);
             cell.setSearchable(c.searchable);
             if (c.textAlign) cell.textAlign(c.textAlign);
+            if (c.customClass) cell.classAdd(c.customClass);
             cell.setParentItem(row);
             row.addCell(cell);
         });
@@ -559,6 +560,7 @@ class TracklistGrid {
                 width: 5, 
                 unit: '%', 
                 type: 'int',
+                customClass: 'cell-index',
                 onClick: evt => evt.detail.HTMLItem.getParentItem().classToggleExclusive('selected', this.getParentCnt()) 
             },
             {
@@ -801,6 +803,7 @@ class QueuelistGrid {
             content: `Q${parseInt(index) + 1}`,
             width: 5,
             unit: '%',
+            customClass: 'cell-index',
             type: 'int',
         },{
             content: track.getTitle(),

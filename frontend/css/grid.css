@@ -9,6 +9,21 @@
     }
 }
 
+@keyframes pulse {
+    0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }
+}
+
+#now-playing-svg .bar {
+    fill: #e6e6e6; /* Your accent blue */
+    animation: pulse .6s infinite ease-in-out;
+    transform-origin: center;
+}
+
+#now-playing-svg .bar1 { animation-delay: 0.0s; }
+#now-playing-svg .bar2 { animation-delay: 0.26s; }
+#now-playing-svg .bar3 { animation-delay: 0.40s; }
+
 :root {
     --grid-border-color: #c2c2c2;
 
@@ -170,6 +185,13 @@ body {
 
 .cell.editable, .cell.sortable {
     cursor: pointer;
+}
+
+.cell.cell-index {
+    padding: 6px 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .cell input {

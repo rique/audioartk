@@ -298,6 +298,7 @@ export const PlayerControls = function(audioPlayer) {
         this.listEvents.trigger('onPlayPause', isPaused);
     }, this);
 }
+
 PlayerControls.prototype = {
     setAudioPlayer(audioPlayer) {
         this.audioPlayer = audioPlayer;

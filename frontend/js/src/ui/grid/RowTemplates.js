@@ -1,5 +1,5 @@
 import { ListEvents } from '../../core/EventBus.js';
-import { getLastParent, clearElementInnerHTML } from '../../core/Utils.js';
+import { getLastParent, clearElementInnerHTML, calculateBarLayout } from '../../core/Utils.js';
 import { TracklistNotifier, FileBrowserNotifier } from '../Notifier.js'
 import { TrackListManager } from '../../domain/TrackList.js'
 import { Track, ID3Tags } from '../../domain/models/Track.js';
@@ -93,12 +93,14 @@ export class HTMLItems {
             return this.render().id;
         }
         this.render().id = id;
+        return this;
     }
 
     width(w, unit) {
         if (typeof w === 'number') {
             w = w.toString() + '' + unit;
             this.css({ width: w });
+            return this;
         } else {
             return this.render().style.width;
         }
@@ -107,6 +109,7 @@ export class HTMLItems {
     height(height, unit) {
         if (typeof height === 'number') {
             this.render().style.height = `${height}${unit}`;
+            return this;
         } else {
             return this.render().style.height;
         }
@@ -115,6 +118,7 @@ export class HTMLItems {
     left(left, unit) {
         if (typeof left === 'number') {
             this.render().style.left = `${left}${unit}`;
+            return this;
         } else {
             return this.render().style.left;
         }
@@ -123,6 +127,7 @@ export class HTMLItems {
     top(top, unit) {
         if (typeof top === 'number') {
             this.render().style.top = `${top}${unit}`;
+            return this;
         } else {
             return this.render().style.top;
         }
@@ -195,9 +200,19 @@ export class HTMLItems {
         }, 0);
     }
 
+    attribute(name, value) {
+        if (typeof value !== 'undefined') {
+            this.render().setAttribute(name, value);
+            return this;
+        } else {
+            return this.render().getAttribute(name);
+        }
+    }
+
     innerContent(content) {
         if (typeof content !== 'undefined') {
             this.render(true).innerHTML = content;
+            return this;
         } else {
             return this.render(true).innerHTML;
         }
@@ -205,18 +220,22 @@ export class HTMLItems {
 
     append(...elements) {
         this.render().append(...elements.map(el => el.render()));
+        return this;
     }
 
     remove() {
         this.render().remove();
+        return this;
     }
 
     show() {
         this.css({ display: 'block' }, true);
+        return this;
     }
 
     hide() {
         this.css({ display: 'none' }, true);
+        return this;
     }
 
     hasClass(className) {
@@ -225,29 +244,38 @@ export class HTMLItems {
 
     classAdd(className) {
         this.render().classList.add(className);
+        return this;
     }
 
     classRemove(className) {
         this.render().classList.remove(className);
+        return this;
     }
 
     classReplace(className, replaceWith) {
         this.render().classList.replace(className, replaceWith);
+        return this;
     }
 
     classToggle(className) {
         this.render().classList.toggle(className);
+        return this;
     }
 
     classToggleExclusive(className, fromParent = document) {
         fromParent.querySelectorAll(`.${className}`).forEach(el => {
             if (el !== this.render()) el.classList.remove(className);
         });
-        this.classToggle(className);
+        return this.classToggle(className);
     }
 
     setClassName(className) {
         this.render().className = className;
+        return this;
+    }
+
+    getClassName() {
+        return this.render().className;
     }
 
     css(style, replace) {
@@ -491,6 +519,92 @@ export class DroppedAnimation {
         return new Animation(kfEffect, document.timeline);
     }
 }
+
+class SVGItem extends HTMLItems {
+    constructor(shape, svgNamespace = 'http://www.w3.org/2000/svg') {
+        super(shape);
+        this.element = document.createElementNS(svgNamespace, shape);
+        // this.attribute('xmlns', this.svgNamespace);
+    }
+}
+
+class ShapeSVGItem extends SVGItem {
+    constructor(shape) {
+        super(shape);
+    }
+
+    shapeWidth(value) {
+        return this.attribute('width', value);
+    }
+
+    shapeHeight(value) {
+        return this.attribute('height', value);
+    }
+
+    x(x) {
+        return this.attribute('x', x);
+    }
+
+    y(y) {
+        return this.attribute('y', y);
+    }
+}
+
+class MAINSVGItem extends ShapeSVGItem {
+    constructor() {
+        super('svg');
+    }
+}
+
+class RectSVGItem extends ShapeSVGItem {
+    constructor() {
+        super('rect');
+    }
+}
+
+class NowPlayingSVGComponent {
+    constructor() {
+        this.SVGItem = new MAINSVGItem();
+        this.initComponent();
+    }
+
+    initComponent() {
+        console.log('setting svg element');
+        this.SVGItem.id('now-playing-svg');
+        this.SVGItem.shapeWidth(18)
+                .shapeHeight(18)
+                .attribute('viewBox', '0 0 18 18'); //  min-x, min-y, width, heigh
+        
+        const rectConfig = {
+            totalWidth: 18, 
+            totalHeight: 18, 
+            nBars: 3, 
+            padding: 1, 
+            gap: 2, 
+            maxHeight: 15 
+        }
+
+        const rects = calculateBarLayout(rectConfig).map((layout, i) => {
+            return new RectSVGItem().x(layout.x)
+                .y(layout.y)
+                .shapeWidth(layout.width)
+                .shapeHeight(layout.height)
+                .classAdd('bar')
+                .classAdd(`bar${i + 1}`);
+        });
+        
+        this.SVGItem.append(...rects);
+    }
+
+    appendTo(htmlItem) {
+        htmlItem.append(this.SVGItem);
+    }
+
+    remove() {
+        this.SVGItem.remove();
+    }
+}
+
 
 /**
  * SECTION: INPUTS
@@ -784,6 +898,10 @@ export class Row extends HTMLDraggableItems {
         }
 
         return { isHead: !!this._isHead, cellList };
+    }
+
+    *[Symbol.iterator]() {
+        yield* this.cells;
     }
 }
 
@@ -1164,14 +1282,38 @@ TrackListBrowser.prototype = {
         this.clearAllCurrentlyPlaying();
         
         if (row) {
+            this.previousRow = row;
+            this.nowPlaying = new NowPlayingSVGComponent();
             row.classAdd("currently-playing");
+            for (const cell of row) {
+                if (cell.hasClass('cell-index')) {
+                    cell.innerContent('');
+                    this.nowPlaying.appendTo(cell); // <-- handling of now playing
+                    console.log('curent cell', {cell}, cell.getClassName());
+                    break;
+                }
+            }
             this.scrollToCurrentTrack();
         } else {
             console.warn("Mediator pointed to a grid, but row was missing at index:", {index, row}, this.grid);
         }
     },
-    clearAllCurrentlyPlaying() {
-        document.querySelectorAll('.currently-playing').forEach(el => el.classList.remove('currently-playing'));
+    clearAllCurrentlyPlaying(fromElem = document) {
+        if (this.nowPlaying) {
+            this.nowPlaying.remove();
+            this.nowPlaying = null;
+        }
+        // fromElem.querySelectorAll('.currently-playing').forEach(el => el.classList.remove('currently-playing'));
+        if (this.previousRow) {
+            this.previousRow.classRemove('currently-playing');
+            for (const cell of this.previousRow) {
+                if (cell.hasClass('cell-index')) {
+                    cell.innerContent(this.previousRow.getIndex());
+                    break;
+                }
+            }
+        }
+        
     },
     scrollToCurrentTrack() {
         const currentlyPlaying = document.querySelector('div.row.currently-playing');

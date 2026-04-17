@@ -180,6 +180,39 @@ export const shuffle = (list, index) => {
     return list;
 }
 
+/**
+ * Calculates geometric properties for N bars within an SVG.
+ * @param {Object} config - The layout configuration.
+ * @returns {Array} Array of objects {x, y, width, height}
+ */
+export const calculateBarLayout = ({
+    totalWidth, 
+    totalHeight, 
+    nBars, 
+    padding, 
+    gap, 
+    maxHeight
+}) => {
+    if (nBars <= 0) return [];
+
+    const availableWidth = totalWidth - (2 * padding);
+    
+    // Safety: Ensure gap isn't physically impossible
+    const maxPossibleGap = (availableWidth * 0.7) / Math.max(1, nBars - 1);
+    const safeGap = gap > maxPossibleGap ? maxPossibleGap : gap;
+
+    const barWidth = (availableWidth - ((nBars - 1) * safeGap)) / nBars;
+    const y = totalHeight - maxHeight; // Calculated once outside the loop
+    
+    // Use .map() to return the array directly (more functional/cleaner)
+    return Array.from({ length: nBars }, (_, i) => ({
+        x: parseFloat((padding + (i * (barWidth + safeGap))).toFixed(2)),
+        y,
+        width: parseFloat(barWidth.toFixed(2)),
+        height: maxHeight
+    }));
+};
+
 // --- UI EFFECTS (formerly effects.js) ---
 
 export class Fader {
