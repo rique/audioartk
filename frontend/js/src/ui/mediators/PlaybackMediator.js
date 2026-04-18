@@ -23,6 +23,22 @@ export const PlaybackMediator = {
                 this.audioPlayer.setCurrentTrackFromTrackList(true, undefined, {track, index});
             }
         });
+
+        this.queueGrid.onQueueRendered((row) => {
+            this.handleNowPlaying(this.audioPlayer.isPlayerPaused(), row);
+        });
+
+        this.audioPlayer.onPlayPause((isPaused) => {
+            const index = TrackListManager.getCurrentTrackIndex();
+            const row = this.browser.getGrid().getRowByIndex(index);
+            this.handleNowPlaying(isPaused, row);
+        });
+
+        this.audioPlayer.onStop(() => {
+            const index = TrackListManager.getCurrentTrackIndex();
+            const row = this.browser.getGrid().getRowByIndex(index);
+            this.handleNowPlaying(true, row);
+        });
     },
 
     async handleTrackChange(track, index, isQueue, hasQueue) {
@@ -38,6 +54,11 @@ export const PlaybackMediator = {
             this.browser.setGrid(this.mainGrid);
         }
         this.browser.setCurrentlyPlayingTrack(index);
+        this.handleNowPlaying(this.audioPlayer.isPlayerPaused());
+    },
+
+    handleNowPlaying(isPaused, row) {
+        this.browser.toggleNowPlaying(isPaused, row);
     },
 
     handleQueueEnd() {

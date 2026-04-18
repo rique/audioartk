@@ -22,9 +22,13 @@ const getOffsetBottom = (elem) => elem.getBoundingClientRect().bottom;
  */
 export class HTMLItems {
     constructor(elementName) {
-        this.element = document.createElement(elementName);
+        this.createElement(elementName);
         this.events = {};
         this.eventsHandler = {};
+    }
+
+    createElement(elementName) {
+        this.element = document.createElement(elementName);
     }
 
     render(getReal) {
@@ -282,7 +286,13 @@ export class HTMLItems {
         style = style || {};
         Object.assign(this.render().style, style);
     }
-
+    style(prop, value) {
+        if (typeof value !== 'undefined') {
+            this.render().style[prop] = value;
+            return this;
+        }
+        return this.render().style[prop];
+    }
     data(name, value) {
         const isName = typeof name !== 'undefined';
         const isValue = typeof value !== 'undefined';
@@ -521,10 +531,13 @@ export class DroppedAnimation {
 }
 
 class SVGItem extends HTMLItems {
-    constructor(shape, svgNamespace = 'http://www.w3.org/2000/svg') {
+    constructor(shape) {
         super(shape);
+    }
+
+    createElement(shape, svgNamespace = 'http://www.w3.org/2000/svg') {
+        console.log('calling create element svg item', shape, svgNamespace);
         this.element = document.createElementNS(svgNamespace, shape);
-        // this.attribute('xmlns', this.svgNamespace);
     }
 }
 
@@ -565,15 +578,24 @@ class RectSVGItem extends ShapeSVGItem {
 class NowPlayingSVGComponent {
     constructor() {
         this.SVGItem = new MAINSVGItem();
+        this.rects = [];
         this.initComponent();
     }
 
     initComponent() {
-        console.log('setting svg element');
-        this.SVGItem.id('now-playing-svg');
-        this.SVGItem.shapeWidth(18)
-                .shapeHeight(18)
-                .attribute('viewBox', '0 0 18 18'); //  min-x, min-y, width, heigh
+        this.SVGItem.id('now-playing-svg')
+            .shapeWidth(18)
+            .shapeHeight(18)
+            .attribute('viewBox', '0 0 18 18') //  min-x, min-y, width, heigh
+            .addEventListener('click', () => {
+                this.rects.forEach(rect => {
+                    const currentValue = rect.style('transform-origin');
+                    const transformOrigin = (currentValue === '' || currentValue.includes('center center')) ? 'bottom' : 'center';
+                    rect.style('transform-origin', transformOrigin);
+                    // Ensures the browser uses the bar's own bounding box
+                    rect.style('transform-box', 'fill-box');
+                });
+            });
         
         const rectConfig = {
             totalWidth: 18, 
@@ -584,8 +606,9 @@ class NowPlayingSVGComponent {
             maxHeight: 15 
         }
 
-        const rects = calculateBarLayout(rectConfig).map((layout, i) => {
-            return new RectSVGItem().x(layout.x)
+        this.rects = calculateBarLayout(rectConfig).map((layout, i) => {
+            return new RectSVGItem()
+                .x(layout.x)
                 .y(layout.y)
                 .shapeWidth(layout.width)
                 .shapeHeight(layout.height)
@@ -593,11 +616,19 @@ class NowPlayingSVGComponent {
                 .classAdd(`bar${i + 1}`);
         });
         
-        this.SVGItem.append(...rects);
+        this.SVGItem.append(...this.rects);
     }
 
     appendTo(htmlItem) {
         htmlItem.append(this.SVGItem);
+    }
+
+    hide() {
+        this.SVGItem.hide();
+    }
+
+    show() {
+        this.SVGItem.show();
     }
 
     remove() {
@@ -876,6 +907,10 @@ export class Row extends HTMLDraggableItems {
         if (!this.applied || this.cells.length == 0)
             this.appendCells();
         return super.render(getReal);
+    }
+
+    resetIndex() {
+
     }
 
     appendCells() {
@@ -1186,6 +1221,9 @@ TrackListBrowser.prototype = {
     setGrid(grid) {
         this.grid = grid;
     },
+    getGrid() {
+        return this.grid;
+    },
     show() {
         this.windowCnt.style.display = 'block';
         this.isVisible = true;
@@ -1283,16 +1321,12 @@ TrackListBrowser.prototype = {
         
         if (row) {
             this.previousRow = row;
-            this.nowPlaying = new NowPlayingSVGComponent();
-            row.classAdd("currently-playing");
-            for (const cell of row) {
-                if (cell.hasClass('cell-index')) {
-                    cell.innerContent('');
-                    this.nowPlaying.appendTo(cell); // <-- handling of now playing
-                    console.log('curent cell', {cell}, cell.getClassName());
-                    break;
-                }
+            if (!this.nowPlaying) {
+                this.nowPlaying = new NowPlayingSVGComponent();
+                this.nowPlaying.hide();
             }
+            row.classAdd("currently-playing");
+            this._appendNowPlayingToCell(row);
             this.scrollToCurrentTrack();
         } else {
             console.warn("Mediator pointed to a grid, but row was missing at index:", {index, row}, this.grid);
@@ -1300,18 +1334,12 @@ TrackListBrowser.prototype = {
     },
     clearAllCurrentlyPlaying(fromElem = document) {
         if (this.nowPlaying) {
-            this.nowPlaying.remove();
-            this.nowPlaying = null;
+            this.nowPlaying.hide();
         }
         // fromElem.querySelectorAll('.currently-playing').forEach(el => el.classList.remove('currently-playing'));
         if (this.previousRow) {
             this.previousRow.classRemove('currently-playing');
-            for (const cell of this.previousRow) {
-                if (cell.hasClass('cell-index')) {
-                    cell.innerContent(this.previousRow.getIndex());
-                    break;
-                }
-            }
+            this._restetNowPlayingCell(this.previousRow);
         }
         
     },
@@ -1328,6 +1356,38 @@ TrackListBrowser.prototype = {
             }, 0);
         }
     },
+    toggleNowPlaying(hide = true, row) {
+        if (!this.nowPlaying) return;
+        if (!row) row = this.previousRow;
+
+        if (hide) {
+            this._restetNowPlayingCell(row);
+        } else {
+            this._appendNowPlayingToCell(row);
+        }
+    },
+
+    _appendNowPlayingToCell(row) {
+        for (const cell of row) {
+            if (cell.hasClass('cell-index')) {
+                cell.innerContent('');
+                this.nowPlaying.appendTo(cell); // <-- handling of now playing
+                this.nowPlaying.show();
+                break;
+            }
+        }
+    },
+
+    _restetNowPlayingCell(row) {
+        for (const cell of row) {
+            if (cell.hasClass('cell-index')) {
+                this.nowPlaying.hide();
+                cell.innerContent(row.getIndex());
+                break;
+            }
+        }
+    },
+ 
     _notifyAddToQueue({track}) {
         this._tracklistBrowserNotifications.showAdded(track);
     },

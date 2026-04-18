@@ -80,9 +80,6 @@ class TrackInfoLoader extends BaseLoader {
     }
 };
 
-// Object.setPrototypeOf(AlbumArtLoader.prototype, BaseLoader.prototype);
-// Object.setPrototypeOf(TrackInfoLoader.prototype, BaseLoader.prototype);
-
 const trackInfoLoader = new TrackInfoLoader();
 const albumArtLoader = new AlbumArtLoader();
 

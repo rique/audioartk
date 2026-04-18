@@ -134,7 +134,6 @@ class BaseGrid {
     render() {
         clearElementInnerHTML(this.parentCnt);
         if (this.head) this.parentCnt.append(this.head.render());
-        console.log('Rendering grid with rows:', this.rows);
         this.rows.forEach(row => this.parentCnt.append(row.render()));
     }
 }
@@ -523,7 +522,6 @@ class TracklistGrid {
     _syncQueuePosition(forceRefresh = false) {
         if (!this.queuelistGrid) return;
         let anchorRow = null;
-
         if (!forceRefresh && this.queuelistGrid.isQueuePlaying && this.lastMainAnchor) {
             if (document.body.contains(this.lastMainAnchor.render())) {
                 anchorRow = this.lastMainAnchor;
@@ -659,6 +657,7 @@ class QueuelistGrid {
         this.gridMaker = new GridMaker(this.itemHtml.render(), true);
         this.gridMaker.setDraggable(true, true);
         TrackListManager.onAddedToQueue(this.updateQueue.bind(this), this);
+        this.events = new ListEvents();
     }
 
     setUpHTMLItem() {
@@ -688,7 +687,11 @@ class QueuelistGrid {
         if (this.isQueuePlaying) {
             // Highlighting logic for the queue's internal state
             const firstRow = this.gridMaker.getRowByIndex(0);
-            if (firstRow) firstRow.classAdd('currently-playing');
+            if (firstRow) { 
+                firstRow.classAdd('currently-playing');
+                this.events.trigger('onQueueRendered', firstRow);
+            }
+
         }
         
         this.gridMaker.render();
@@ -699,6 +702,7 @@ class QueuelistGrid {
             this.itemHtml.remove();
             return;
         }
+
         // Use document.body.contains to ensure we are checking the live page
         const isVisibleInDOM = anchorRow && document.body.contains(anchorRow.render());
         // Validate the anchor provided by the mediator
@@ -797,6 +801,9 @@ class QueuelistGrid {
     }
     removeRowFromGrid(rowIdx) {
         this.gridMaker.removeRowFromGrid(rowIdx);
+    }
+    onQueueRendered(cb, subscriber) {
+        this.events.onEventRegister({cb, subscriber}, 'onQueueRendered');
     }
     _getCellsFromTrack(track, index) {
         return [{
@@ -905,7 +912,6 @@ class Library {
     }
 
     async bootstrap(tracklist) {
-        console.log('bootstrap library', { tracklist });
         for (let i in tracklist) {
             let trackInfo = tracklist[i];
             let track = new Track(trackInfo['track']);

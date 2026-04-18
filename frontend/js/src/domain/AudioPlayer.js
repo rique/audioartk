@@ -92,11 +92,10 @@ export class AudioPlayer {
     stop() {
         this.pause();
         this.setCurrentTime(0);
-        this.audioPlayerEvents.trigger('onStop');
+        this.audioPlayerEvents.trigger('onStop', this.currentTrack);
     }
 
     next() {
-        this.currentTrack?.onTagChangeUnsub(this);
         this.audioPlayerEvents.trigger('onAudioEnded', this.currentTrack);
         this.setCurrentTrackFromTrackList(true, false);
     }
@@ -104,9 +103,7 @@ export class AudioPlayer {
     prev() {
         if (this.getCurrentTime() > 3.6) {
             this.setCurrentTime(0);
-            this.audioPlayerEvents.trigger('onStop');
         } else {
-            this.currentTrack?.onTagChangeUnsub(this);
             this.audioPlayerEvents.trigger('onAudioEnded', this.currentTrack);
             this.setCurrentTrackFromTrackList(true, true);
         }

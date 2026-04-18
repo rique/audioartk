@@ -40,7 +40,6 @@ export class StateManager {
             
             if (artData && artData !== this.defaultArt) {
                 this.cache.set(uuid, artData);
-                console.log(`[ResourceManager] Preloaded and cached art for: ${track.getTitle()}`);
             }
         } catch (error) {
             console.warn(`[ResourceManager] Failed to preload art for ${uuid}`, error);
@@ -80,7 +79,6 @@ export const ResourceManager = {
     },
 
     getAlbumArtURL(track) {
-        console.log('ResourceManager.getAlbumArtURL called with track', {track}, track.getTrackUUID());
         return `${this._baseAlbumArtURL}${track.getTrackUUID()}/`;
     },
 

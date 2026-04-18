@@ -398,11 +398,9 @@ export class AudioPlayerDisplay {
 
     setTrack(track) {
         if (this.track) {
-            // this.track.onTagChangeUnsub(this);
             this.track.onCurrentTimeUpdateUnsub(this);
         }
         this.track = track;
-        // track.onTagChange((tag, val) => this.manageTag(tag, val), this);
         track.onCurrentTimeUpdate(() => this.updateTrackTime(), this);
         
         this.syncAllMetadata(track);

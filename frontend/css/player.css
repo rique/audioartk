@@ -199,6 +199,10 @@ ul {
     overflow: auto;
 }
 
+.file-browser ul {
+    user-select: none;
+}
+
 .cnt-overlay .file-browser,
 .cnt-overlay #window-content.file-browser {
     font-size: 18px;

@@ -70,7 +70,7 @@ IndexList.prototype = {
         if (this.index < 0) {
             this.index = 0;
         }
-        console.log('current', {index: this.index})
+        
         const item = this.items[this.index];
         const index = this.items.indexOf(item);
         return {item, index};
@@ -242,7 +242,7 @@ TrackList.prototype = {
             index = this.index + 1;
         else if (this.loop)
             index = 0;
-        // console.log('readNextTrack', {index, thisIndex: this.index, maxIndex: this.maxIndex(), loop: this.loop});
+
         track = this.items[index];
         return {track, index};
     },
@@ -355,6 +355,9 @@ QeueuList.prototype = {
     },
     clearQueue() {
         this.trackList.setItems([]);
+    },
+    getIndex() {
+        return this.trackList.getIndex();
     },
     switchTrackIndex(oldIndex, newIndex) {
         this.trackList.switchTrackIndex(oldIndex, newIndex);

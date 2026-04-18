@@ -39,6 +39,11 @@ class Notification {
     }
 
     show(timeout = 5000) {
+        if (timeout < 0) {
+            console.warn("Invalid negative timeout value!", {timeout});
+            timeout = 10;
+        }
+
         this.isActive = true;
         this.tplUUID = uuidv4();
         const element = document.createElement('div');

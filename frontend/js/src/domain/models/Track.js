@@ -146,8 +146,8 @@ export class Track {
    static onTagChange(cb, subscriber) {
         Track.eventBus.onEventRegister({cb, subscriber}, 'onTagChange');
     }
-    onTagChangeUnsub(subscriber) {
-        this.events.unsubscribeEVent({eventKey: 'onTagChange', subscriber});
+    static onTagChangeUnsub(subscriber) {
+        Track.eventBus.unsubscribeEVent({eventKey: 'onTagChange', subscriber});
     }
     _formatTime(millisecTime) {
         let mins = '0', secs = '0';

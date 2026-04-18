@@ -14,6 +14,10 @@
     50% { transform: scaleY(1); }
 }
 
+#now-playing-svg:hover {
+    cursor: pointer;
+}
+
 #now-playing-svg .bar {
     fill: #e6e6e6; /* Your accent blue */
     animation: pulse .6s infinite ease-in-out;
