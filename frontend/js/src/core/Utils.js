@@ -3,7 +3,7 @@
  * Consolidated from utils.js and effects.js
  */
 
-// --- DATA & FORMATTING (formerly utils.js) ---
+// --- DATA & FORMATTING ---
 
 export const generateLoremText = (numParagraphs, numWords, words) => {
     let loremText = '';
@@ -167,6 +167,11 @@ export const getPercentageWidthFromMousePosition = (clientX, htmlItem, margin = 
 }
 
 export const shuffle = (list, index) => {
+    if (!list instanceof Array || list.length === 0) {
+        console.warn('Invalid list', {list});
+        return []
+    }
+
     let item;
     if (!isNaN(index))
         [item] = list.splice(index, 1);
@@ -195,16 +200,32 @@ export const calculateBarLayout = ({
 }) => {
     if (nBars <= 0) return [];
 
+    if (isNaN(totalWidth) || totalWidth <= 0 || isNaN(totalHeight) || totalHeight <= 0) {
+        console.warn('Invalid width and/or height!', {totalWidth, totalHeight});
+        return [];
+    }
+    
+    if (isNaN(padding) || padding < 0) {
+        console.warn('Invalid padding values, setting it to 0', {padding});
+        padding = 0;
+    }
+
     const availableWidth = totalWidth - (2 * padding);
     
+    if (availableWidth <= 0) {
+        console.warn('The width is invalid!', {availableWidth});
+        return [];
+    }
+
     // Safety: Ensure gap isn't physically impossible
     const maxPossibleGap = (availableWidth * 0.7) / Math.max(1, nBars - 1);
     const safeGap = gap > maxPossibleGap ? maxPossibleGap : gap;
 
     const barWidth = (availableWidth - ((nBars - 1) * safeGap)) / nBars;
-    const y = totalHeight - maxHeight; // Calculated once outside the loop
+    let y = totalHeight;
+
+    if (!isNaN(maxHeight) && maxHeight > 0) y = y - maxHeight;
     
-    // Use .map() to return the array directly (more functional/cleaner)
     return Array.from({ length: nBars }, (_, i) => ({
         x: parseFloat((padding + (i * (barWidth + safeGap))).toFixed(2)),
         y,
@@ -213,7 +234,7 @@ export const calculateBarLayout = ({
     }));
 };
 
-// --- UI EFFECTS (formerly effects.js) ---
+// --- UI EFFECTS ---
 
 export class Fader {
     constructor() {

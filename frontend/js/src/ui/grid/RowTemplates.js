@@ -180,6 +180,8 @@ export class HTMLItems {
     setLeftTop(left, top) {
         this.render().style.left = `${left}px`;
         this.render().style.top = `${top}px`;
+
+        return this;
     }
 
     scrollTop(parentElem) {
@@ -202,6 +204,8 @@ export class HTMLItems {
                 top: scrollToValue,
             });
         }, 0);
+
+        return this;
     }
 
     attribute(name, value) {
@@ -246,13 +250,13 @@ export class HTMLItems {
         return this.render().classList.contains(className);
     }
 
-    classAdd(className) {
-        this.render().classList.add(className);
+    classAdd(...classes) {
+        this.render().classList.add(...classes);
         return this;
     }
 
-    classRemove(className) {
-        this.render().classList.remove(className);
+    classRemove(...classes) {
+        this.render().classList.remove(...classes);
         return this;
     }
 
@@ -285,6 +289,8 @@ export class HTMLItems {
     css(style, replace) {
         style = style || {};
         Object.assign(this.render().style, style);
+
+        return this;
     }
     style(prop, value) {
         if (typeof value !== 'undefined') {
@@ -298,6 +304,7 @@ export class HTMLItems {
         const isValue = typeof value !== 'undefined';
         if (isName && isValue) {
             this.render().dataset[name] = value;
+            return this;
         } else if (isName) {
             return this.render().dataset[name];
         } else {
@@ -307,6 +314,7 @@ export class HTMLItems {
 
     setSelectionRange(start, end) {
         this.render().setSelectionRange(start, end);
+        return this;
     }
 
     insertItemAfter(htmlItem) {
@@ -314,6 +322,8 @@ export class HTMLItems {
         const myNode = this.render();
         targetNode.insertAdjacentElement('afterend', myNode);
         this._isStaged = false;
+
+        return this;
     }
 
     addEventListener(evtName, cb) {
@@ -326,10 +336,14 @@ export class HTMLItems {
             cb
         });
         this.render().addEventListener(evtName, cb, false);
+
+        return this;
     }
 
     removeEventListener(evtName, cb) {
         this.render().removeEventListener(evtName, cb);
+
+        return this;
     }
 
     clearAllEvents() {
@@ -536,7 +550,6 @@ class SVGItem extends HTMLItems {
     }
 
     createElement(shape, svgNamespace = 'http://www.w3.org/2000/svg') {
-        console.log('calling create element svg item', shape, svgNamespace);
         this.element = document.createElementNS(svgNamespace, shape);
     }
 }
@@ -598,12 +611,12 @@ class NowPlayingSVGComponent {
             });
         
         const rectConfig = {
-            totalWidth: 18, 
-            totalHeight: 18, 
-            nBars: 3, 
-            padding: 1, 
-            gap: 2, 
-            maxHeight: 15 
+            totalWidth: 18,
+            totalHeight: 18,
+            nBars: 3,
+            padding: 1,
+            gap: 2,
+            maxHeight: 15
         }
 
         this.rects = calculateBarLayout(rectConfig).map((layout, i) => {
@@ -612,10 +625,12 @@ class NowPlayingSVGComponent {
                 .y(layout.y)
                 .shapeWidth(layout.width)
                 .shapeHeight(layout.height)
-                .classAdd('bar')
-                .classAdd(`bar${i + 1}`);
+                .classAdd('bar', `bar${i + 1}`);
         });
         
+        if (this.rects.length === 0)
+            throw new Error('No bars could be defined!', {rectConfig});
+
         this.SVGItem.append(...this.rects);
     }
 

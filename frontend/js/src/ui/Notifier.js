@@ -21,9 +21,7 @@ class TrackBoxTemplate {
     }
 }
 
-/**
- * The core Notification class that can be updated and re-rendered.
- */
+
 class Notification {
     constructor(title, level) {
         this.title = title;
@@ -81,7 +79,7 @@ class Notification {
         animation.onfinish = () => {
             this.fader.fadeOut(element, 400, 1, 0, () => {
                 this.isActive = false;
-                element.remove()
+                element.remove();
             });
         };
     }
