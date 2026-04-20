@@ -19,6 +19,7 @@ from mutagen.mp3 import MP3
 from core.services.track_service import TrackManagerService
 from core.services.fs_service import TrackFileSystemService
 from core.exceptions import InvalidBrowserPath, PathNotAccessible, TrackPathDoesNotExist
+from core.utils.http import XAccelResponse
 
 
 @csrf_exempt
@@ -174,15 +175,11 @@ def trackFileProxy(request, track_uuid):
     except Tracks.DoesNotExist:
         raise Http404("Track not found")
     
-    file_path = os.path.join(settings.TRACKS_DIR, f'{track_uuid}.mp3')
-
+    file_path = TrackFileSystemService.get_track_path(track_uuid)
     if not os.path.exists(file_path):
         raise Http404("Audio file missing")
     
-    return HttpResponse(headers={
-        "X-Accel-Redirect": f"/tracks/{track_uuid}.mp3",
-        "Content-Type": "audio/mpeg",
-    })
+    return XAccelResponse(internal_path=f"/tracks/{track_uuid}.mp3", content_type="audio/mpeg")
 
 
 @csrf_exempt
