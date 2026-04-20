@@ -69,7 +69,6 @@
     user-select: none;
     overflow: auto;
     margin: auto;
-    font-size: 3.6rem;
     display: flex;
     flex-direction: column;
 }
@@ -83,7 +82,7 @@
     user-select: none;
     height: auto;
     display: flex;
-    margin: auto;
+    margin: 0 auto;
     /*transform: translate3d(-3px,707px,0);*/
 }
 
