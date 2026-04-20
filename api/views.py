@@ -1,34 +1,26 @@
 import subprocess
 import json
-import shlex, mimetypes
+import mimetypes
 import os
 from uuid import uuid4
-from base64 import b64encode
 
-from django.shortcuts import render
-from django.template import loader
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
 from .models import Tracks, Playlist
 
-from mutagen.id3 import ID3, TIT2, TPE1, TALB
-from mutagen.mp3 import MP3
-
 from core.services.track_service import TrackManagerService
 from core.services.fs_service import TrackFileSystemService
 from core.exceptions import InvalidBrowserPath, PathNotAccessible, TrackPathDoesNotExist
 from core.utils.http import XAccelResponse
+from core.utils.decorators import json_api
 
 
 @csrf_exempt
+@json_api(method='POST')
 def addTrack(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-    
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
 
     track = Tracks()
 
@@ -49,12 +41,9 @@ def addTrack(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def editTrack(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
 
     track_uuid = params['track_uuid']
     field_type = params['field_type']
@@ -74,12 +63,9 @@ def editTrack(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def deleteTrack(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
     track_uuid = params['track_uuid']
     try:
         track = Tracks.objects.get(track_uuid=track_uuid)
@@ -96,14 +82,10 @@ def deleteTrack(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def fileBrowser(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-
     print('BASEDIR', settings.BASE_DIR)
-
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
     base_dir = params['base_dir'] or '~'
     
     try:
@@ -120,12 +102,9 @@ def fileBrowser(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def loadTrackAlbumart(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-    
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
     track_uuid = params['track_uuid']
 
     try:
@@ -141,6 +120,7 @@ def loadTrackAlbumart(request):
 
 
 @csrf_exempt
+@json_api(method='GET')
 def trackArtProxy(request, track_uuid):
     # 1. Verification
     try:
@@ -168,7 +148,7 @@ def trackArtProxy(request, track_uuid):
     picture = picture.root
     return HttpResponse(picture.data, content_type=picture.format)
 
-
+@json_api(method='GET')
 def trackFileProxy(request, track_uuid):
     try:
         track = Tracks.objects.get(track_uuid=track_uuid)
