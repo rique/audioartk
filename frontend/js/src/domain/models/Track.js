@@ -243,12 +243,10 @@ TrackSearch.prototype = {
         this.searchInputElem.value = '';
     },
     _setExclusivity() {
-        console.log('Setting exclusivity');
         keyCotrols.setExclusivityCallerKeyUpV2(this);
         keyCotrols.setExclusivityCallerKeyDownV2(this);
     },
     _unsetExclusivity() {
-        console.log('Unsetting exclusivity');
         keyCotrols.unsetExclusivityCallerKeyUpV2(this);
         keyCotrols.unsetExclusivityCallerKeyDownV2(this);
     },

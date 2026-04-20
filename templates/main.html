@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% block meta %}
+        {% endblock %}
         <title>JS Audio Player</title>
         {% block user_style %}
         {% endblock %}
-        {%block scripts%}
-        {%endblock%}
+        {% block scripts %}
+        {% endblock %}
     </head>
     <body>
         {% block content %}

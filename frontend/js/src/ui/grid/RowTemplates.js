@@ -1001,6 +1001,7 @@ Layout.prototype = {
 
 export const LeftMenu = function() {
     this.menuComponents = {};
+    this._isDone = false;
 };
 LeftMenu.prototype = {
     init() {
@@ -1018,15 +1019,17 @@ LeftMenu.prototype = {
         this.mainMenuElem.classList.toggle('is-open');
     },
     open() {
-        let maxRight = 0 - 1;
+        let maxRight = 0 - 30;
         let start = - (this.leftMenuElement.offsetWidth);
         let step = 30;
+        this._isDone = false;
         this._slide.bind(this)(start, maxRight, step, this.mainMenuElem, 'right');
     },
     close() {
-        let maxRight = - (this.leftMenuElement.offsetWidth) + 1;
+        let maxRight = - (this.leftMenuElement.offsetWidth) - 30;
         let start = 0;
         let step = -30;
+        this._isDone = false;
         this._slide.bind(this)(start, maxRight, step, this.mainMenuElem, 'left');
     },
     addMenuComponent(component, section) {
@@ -1036,14 +1039,25 @@ LeftMenu.prototype = {
     },
     _slide(start, maxRight, step, mainMenuElem, direction) {
         direction = direction || 'right';
-        if ((start <= maxRight && direction == 'right') || (start >= maxRight && direction == 'left')) {
-            if ((start > maxRight && direction == 'right') || (start < maxRight && direction == 'left'))
-                start = maxRight + 1;
-            else
-                start += step;
-            mainMenuElem.style.right = `${start}px`;
-            requestAnimationFrame(this._slide.bind(this, start, maxRight, step, mainMenuElem, direction))
+        if (start <= maxRight && direction == 'right') {
+            start += step;
+            if (start > maxRight) {
+                start = maxRight;
+                this._isDone = true;
+            }
+        } else if (start >= maxRight && direction == 'left') {
+            start += step;
+            if (start < maxRight) {
+                start = maxRight;
+                this._isDone = true;
+            }
         }
+
+        mainMenuElem.style.right = `${start}px`;
+        
+        if (this._isDone) return;
+
+        requestAnimationFrame(this._slide.bind(this, start, maxRight, step, mainMenuElem, direction));
     },
 };
 

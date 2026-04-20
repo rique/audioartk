@@ -18,13 +18,13 @@ const setUp = (audioPlayer, imgList) => {
     const canvas = document.createElement("canvas");
     
     canvas.width = window.innerWidth - 36;
-    canvas.height = window.innerHeight - 204;
+    canvas.height = window.innerHeight - 182;
     canvas.style.display = 'block';
     canvas.style.margin = 'auto';
     
     window.addEventListener('resize', () => {
         canvas.width = window.innerWidth - 36;
-        canvas.height = window.innerHeight - 204;
+        canvas.height = window.innerHeight - 182;
     });
     
     document.body.appendChild(canvas);

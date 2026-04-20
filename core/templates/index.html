@@ -1,5 +1,8 @@
 {% extends "main.html" %}
 {% load static %}
+{% block meta %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+{% endblock %}
 {% block user_style %}
 
 <link rel="icon" type="image/png" href="{% static 'assets/favicons/favicon.png' %}" sizes="32x32">
@@ -29,7 +32,6 @@
     </div>
     <div id="player-controls">
     </div>
-    <!--<canvas id="vu-meters"></canvas>-->
     <div id="main-left-menu">
       <div id="open-menu" style="vertical-align: top;" class="inline-block">
         <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -53,9 +55,6 @@
         </div>
       </div>
     </div>
-    <!--<div id="progress">
-      <div id="prog-bar"></div>
-    </div>-->
   </div>
 </div>
 <div style="display: none;" id="volume-display">

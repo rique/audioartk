@@ -11,7 +11,7 @@ const PlayerButtonBaseItem = function() {
 };
 PlayerButtonBaseItem.prototype = {
     setUpItem() {
-        this.htmlItem.setClassName('inline-block action-cnt');
+        this.htmlItem.setClassName('action-cnt');
     },
     onSwitchState(cb, subscriber) {
         this.listEvents.onEventRegister({cb, subscriber}, 'onSwitchState');

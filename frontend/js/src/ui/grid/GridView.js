@@ -273,16 +273,26 @@ class SortableGrid extends SearchableGrid {
     }
 }
 
+class SortableGridFlex extends SortableGrid {
+    constructor(...args) {
+        super(...args);
+    }
+
+    open() {
+        this.parentCnt.style.display = 'flex';
+    }
+}
+
 /**
  * SECTION: GridMaker & Vues Spécifiques (Tracklist, Queue)
  */
 
 class GridMaker {
-    constructor(parentCnt, sortable, searchable) {
+    constructor(parentCnt, sortable, searchable, flex = true) {
         this.rows = [];
         this.sortable = sortable;
         this.searchable = searchable;
-        this.grid = sortable ? new SortableGrid(parentCnt) : new BaseGrid(parentCnt);
+        this.grid = sortable ? flex ? new SortableGridFlex(parentCnt) : new SortableGrid(parentCnt) : new BaseGrid(parentCnt);
         
         if (sortable) {
             this.grid.onSortedGrid(this._onSortedGrid.bind(this));

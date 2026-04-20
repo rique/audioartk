@@ -51,15 +51,15 @@
     padding: 0;
 }
 
-html {
+/*html {
     height: 100%;
     font-size: 2vw;
-}
+}*/
 
-body {
+/*body {
     height: 100%;
     font-family: Arial, Helvetica, sans-serif;
-}
+}*/
 
 #table-content {
     width: 100%;
@@ -69,13 +69,16 @@ body {
     user-select: none;
     overflow: auto;
     margin: auto;
+    font-size: 3.6rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .row {
     width: 99%;
     border-bottom: 1px solid var(--grid-border-color);
     background: #f7f8f8;
-    font-size: 0.3em;
+    font-size: 1.4rem;
     color: #252525;
     user-select: none;
     height: auto;
@@ -199,14 +202,14 @@ body {
 }
 
 .cell input {
-    width: 97%;
+    width: 99%;
     display: block;
     padding: 9px 4px 9px 4px;
     margin: 1px auto 0 auto;
     border: none;
     outline: 2px solid var(--outline-input-color);
     font-family: Arial, Helvetica, sans-serif;
-    height: 47.5%;
+    height: 95%;
 }
 
 .draggable {
