@@ -13,8 +13,8 @@ export const PlaybackMediator = {
         TrackListManager.onQueueFinished(() => this.handleQueueEnd());
         TrackListManager.onTrackListLoaded(() => this._initializeMainGrid());
         
-        TrackListManager.onTrackChanged((...args) => this.handleTrackChange(...args));
-        TrackListManager.onGridSyncRequired((...args) => this.handleTrackChange(...args));
+        TrackListManager.onTrackChanged((track, index, isQueue, hasQueue) => this.handleTrackChange(track, index, isQueue, hasQueue));
+        TrackListManager.onGridSyncRequired((track, index, isQueue, hasQueue) => this.handleTrackChange(track, index, isQueue, hasQueue));
         
         TrackListManager.onShuffleTracklist((track, index) => {
             this.mainGrid.redrawGrid();
