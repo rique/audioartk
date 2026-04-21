@@ -531,7 +531,9 @@ class TracklistGrid {
 
     _syncQueuePosition(forceRefresh = false) {
         if (!this.queuelistGrid) return;
+
         let anchorRow = null;
+
         if (!forceRefresh && this.queuelistGrid.isQueuePlaying && this.lastMainAnchor) {
             if (document.body.contains(this.lastMainAnchor.render())) {
                 anchorRow = this.lastMainAnchor;
@@ -620,9 +622,7 @@ class TracklistGrid {
                     evt.stopImmediatePropagation();
                     const htmlItem = evt.detail.HTMLItem;
                     this.draggedEndIndx = htmlItem.getParentItem().getIndex();
-                    TrackListManager.switchTrackIndex(this.draggedStartIndx - 1, this.draggedEndIndx - 1);
-                    this._syncQueuePosition();
-                    this.events.trigger('onDraggedTrackDropped', htmlItem);
+                    this.events.trigger('onDraggedTrackDropped', htmlItem, this.queuelistGrid.isQueuePlaying, this.draggedStartIndx - 1, this.draggedEndIndx - 1);
                     htmlItem.innerContent('drag');
                 },
                 width: 4, unit: '%'
@@ -712,7 +712,6 @@ class QueuelistGrid {
             this.itemHtml.remove();
             return;
         }
-
         // Use document.body.contains to ensure we are checking the live page
         const isVisibleInDOM = anchorRow && document.body.contains(anchorRow.render());
         // Validate the anchor provided by the mediator
@@ -888,7 +887,7 @@ class QueuelistGrid {
                 evt.stopImmediatePropagation();
                 const htmlItem = evt.detail.HTMLItem;
                 this.draggedEndIndx = htmlItem.getParentItem().getIndex();
-                TrackListManager.switchTrackIndex(this.draggedStartIndx - 1, this.draggedEndIndx - 1, true);
+                TrackListManager.switchTrackIndex(this.draggedStartIndx - 1, this.draggedEndIndx - 1, this.isQueuePlaying, true);
                 //this.render();
                 htmlItem.innerContent('drag');
             },

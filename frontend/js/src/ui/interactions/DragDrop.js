@@ -1,12 +1,4 @@
-/**  Drag and drop manager for drag and drop functionality.
- * This module provides a comprehensive implementation of drag and drop functionality for the music player application, allowing users to easily rearrange tracks within the tracklist and queue by dragging and dropping them. The DragIt class encapsulates the logic for handling drag events, while the DragmeMover class manages the movement of the dragged element. The DragitManager class oversees the overall drag and drop process, including activation, deactivation, and event handling.
- * The design allows for flexibility in defining draggable elements and their behavior during drag operations, making it adaptable to various contexts within the application. The module also ensures smooth user interactions by utilizing requestAnimationFrame for efficient updates during dragging.
- * Overall, this module enhances the user experience by providing an intuitive and responsive drag and drop interface, contributing to a polished and user-friendly music player application.
- * The implementation promotes code reusability and maintainability by encapsulating drag and drop logic within dedicated classes, allowing for easy updates and extensions in the future as new features are introduced.
- * In summary, this module serves as a crucial component of the music player application, providing a robust and flexible system for managing drag and drop interactions across different contexts, ultimately enhancing the overall user experience.
- * This module provides a comprehensive implementation of the API interactions required for the music player application, ensuring smooth communication between the frontend and backend while enhancing the overall user experience through efficient data management and retrieval. The Api class encapsulates methods for making HTTP requests to various API endpoints, allowing for operations such as browsing files, adding tracks, and editing track information.
- * Each method within the Api class is designed to send an appropriate HTTP request to the corresponding API endpoint and process the response to provide feedback to the caller through callbacks or promises. The module is structured to be easily integrated with other components of the application, allowing for seamless communication between the frontend and backend.
- * /*/
+
 const getButton = (key) => {
     const buttons = {
         0: 'uninitialized',
@@ -203,7 +195,6 @@ DragitManager.prototype = {
             return;
 
         const drag = this._findHoveredDrag(this.currentDrag);
-        console.log('Dragging over element:', drag, 'Current drag:', this.currentDrag.getDragme());
         if (drag && drag != this.hoveredDrag) {
             if (this.hoveredDrag) {
                 if (this.seekParent)

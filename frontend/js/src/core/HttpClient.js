@@ -9,6 +9,31 @@
  */
 import {readCookie} from './Utils.js';
 
+class APIClient {
+    constructor() {
+        this.url = 'https://audioartk.me/api';
+        this.csrftoken = readCookie('csrftoken');
+        console.log('this.csrftoken', this.csrftoken);
+    }
+
+    async post(url) {
+        
+    }
+
+    _getXhrPost(url) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        return xhr;
+    }
+
+    _getXhrGet(url) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        return xhr;
+    }
+
+}
+
 const Api = function() {
     this.url = 'https://audioartk.me/api';
     this.csrftoken = readCookie('csrftoken');

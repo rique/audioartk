@@ -19,7 +19,7 @@
 }
 
 #now-playing-svg .bar {
-    fill: #e6e6e6; /* Your accent blue */
+    fill: #e6e6e6;
     animation: pulse .6s infinite ease-in-out;
     transform-origin: center;
 }
@@ -51,16 +51,6 @@
     padding: 0;
 }
 
-/*html {
-    height: 100%;
-    font-size: 2vw;
-}*/
-
-/*body {
-    height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
-}*/
-
 #table-content {
     width: 100%;
     height: 84.55%;
@@ -83,7 +73,6 @@
     height: auto;
     display: flex;
     margin: 0 auto;
-    /*transform: translate3d(-3px,707px,0);*/
 }
 
 .row.head {
@@ -99,11 +88,10 @@
 }
 
 .row:has(.empty), .row.hovered {
-    animation: 70ms 1 forwards stretchdown;
+    animation: 68ms 1 forwards stretchdown;
 }
 .hovered {
     background: rgb(255, 192, 192)!important;
-    /*color: white!important;*/
 }
 .row:first-child {
     border-top: 1px solid var(--grid-border-color);
@@ -115,22 +103,12 @@
 
 .row.lonely:hover {
     background: var(--row-even-hover-bg-color);
-    /*color: var(--font-color-dropped);*/
 }
-
-/*.row:nth-child(odd):hover {
-    background: var(--row-odd-hover-bg-color);
-}*/
 
 .row.lonely .track-actions:hover {
     border: 1px solid #252525;
     background: var(--row-odd-bg-color);
 }
-
-/*.row.lonely:nth-child(odd) .track-actions:hover {
-    border: 1px solid #252525;
-    background: var(--row-even-bg-color);
-}*/
 
 .empty {
     height: 0px;
@@ -142,7 +120,7 @@
 
 .row.dragged {
     border: 1px dashed var(--grid-border-color);
-    font-size: 0.25em;
+    font-size: 1rem;
     filter: drop-shadow(0 0 8px rgba(85, 85, 85, 0.5));
     /*filter: opacity(74%);*/
     z-index: 650;

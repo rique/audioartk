@@ -529,11 +529,11 @@ export class DroppedAnimation {
         }
 
         const keyFrames = [
-            { background: elementBGColor, fontSize: '0.25em' },
-            { background: '#e5fce8', fontSize: '0.25em' },
-            { background: '#e5fce8', fontSize: '0.25em' },
-            { background: elementBGColor, fontSize: '0.27em' },
-            { fontSize: '0.3em' }
+            { background: elementBGColor, fontSize: '0.8rem' },
+            { background: '#e5fce8', fontSize: '0.9rem' },
+            { background: '#e5fce8', fontSize: '1rem' },
+            { background: elementBGColor, fontSize: '1.3rem' },
+            { fontSize: '1.4rem' }
         ];
 
         const kfEffect = new KeyframeEffect(element, keyFrames, {

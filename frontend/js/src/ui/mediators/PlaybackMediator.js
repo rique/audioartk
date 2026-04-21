@@ -28,6 +28,11 @@ export const PlaybackMediator = {
             this.handleNowPlaying(this.audioPlayer.isPlayerPaused(), row);
         });
 
+        this.mainGrid.onDraggedTrackDropped((htmlItem, isQueuePlaying, draggedStartIndx, draggedEndIndx) => {
+            TrackListManager.switchTrackIndex(draggedStartIndx, draggedEndIndx, isQueuePlaying);
+            this.mainGrid._syncQueuePosition();
+        });
+
         this.audioPlayer.onPlayPause((isPaused) => {
             const index = TrackListManager.getCurrentTrackIndex();
             const row = this.browser.getGrid().getRowByIndex(index);

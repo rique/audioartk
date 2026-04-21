@@ -256,19 +256,19 @@ TrackList.prototype = {
     setTrackIndex(newIdx) {
         this.index = newIdx;
     },
-    switchTrackIndex(oldIndex, newIndex) {
+    switchTrackIndex(oldIndex, newIndex, isQueuePlaying) {
         if (oldIndex === newIndex) return;
-
+        let playingTrack;
         // 1. Get a reference to the track that is CURRENTLY playing
-        const playingTrack = this.items[this.index];
+        if (!isQueuePlaying)
+            playingTrack = this.items[this.index];
 
         // 2. Perform the move in the Array.
         const [movedTrack] = this.items.splice(oldIndex, 1);
         this.items.splice(newIndex, 0, movedTrack);
-
         // 3. Update of the pointer this.index at the new position
         // of the currently playing track. 
-        if (playingTrack) {
+        if (!isQueuePlaying && playingTrack) {
             this.index = this.items.indexOf(playingTrack);
         }
 
@@ -568,7 +568,7 @@ const TrackListManager =  {
         else
             this.tracklist.disableLoop();
     },
-    switchTrackIndex(oldIdx, newIdx, isQueue) {
+    switchTrackIndex(oldIdx, newIdx, queueIsPlaying, isQueue) {
         let tracklist;
         if (isQueue ) {
             if (this.queueIsPlaying) {
@@ -580,7 +580,7 @@ const TrackListManager =  {
             tracklist = this.getTrackList();
         }
 
-        tracklist.switchTrackIndex(oldIdx, newIdx);
+        tracklist.switchTrackIndex(oldIdx, newIdx, queueIsPlaying);
         this.trackListEvents.trigger('onTrackIndexSwitch', oldIdx, newIdx);
     },
     isShuffle() {
