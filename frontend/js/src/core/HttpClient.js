@@ -12,6 +12,7 @@ import {readCookie} from './Utils.js';
 const Api = function() {
     this.url = 'https://audioartk.me/api';
     this.csrftoken = readCookie('csrftoken');
+    console.log('this.csrftoken', this.csrftoken);
 };
 Api.prototype = {
     getXhrPost(url) {

@@ -16,7 +16,8 @@ class Tracks(models.Model):
             'track_name': self.track_name,
             'track_uuid': self.track_uuid,
             'track_original_path': self.track_original_path,
-            'track_date_added': self.track_date_added,
+            'track_date_added': self.track_date_added.strftime('%Y/%m/%d %H:%M:%S'),
+            'trackinfo': self.trackinfo.dict if hasattr(self, 'trackinfo') else {}
         }
 
 
@@ -31,23 +32,30 @@ class Playlist(models.Model):
     playlist_uuid = models.CharField(max_length=36, default=uuid4)
     playlist_created_date = models.DateTimeField(auto_now_add=True)
 
+    @property
     def dict(self):
         return {
             'playlist_name': self.playlist_name,
             'playlist_type': self.playlist_type,
             'playlist_uuid': self.playlist_uuid,
             'playlist_created_date': self.playlist_created_date.strftime('%Y/%m/%d %H:%M:%S'),
-            'tracks': [tr.__dict__ for tr in self.tracks.all()]
+            'tracks': [tr.dict for tr in self.tracks.all()]
         }
 
 
-
 class TrackInfo(models.Model):
-    track = models.OneToOneField(Tracks, on_delete=models.CASCADE)
+    track = models.OneToOneField(Tracks, on_delete=models.CASCADE, related_name='trackinfo', primary_key=True)
     track_title = models.CharField(max_length=256)
     track_artist = models.CharField(max_length=256)
     track_album = models.CharField(max_length=256)
     track_duration = models.FloatField()
-    track_minutes = models.IntegerField()
-    track_seconds = models.IntegerField()
+
+    @property
+    def dict(self):
+        return {
+            'title': self.track_title,
+            'artist': self.track_artist,
+            'album': self.track_album,
+            'duration': self.track_duration
+        }
     

@@ -203,7 +203,7 @@ const RepeatButtonItem = function() {
 };
 RepeatButtonItem.prototype = {
     setUpItem() {
-        this.htmlItem.id('play-button');
+        this.htmlItem.id('repeat-button');
         this.setInnerContent();
         PlayerButtonBaseItem.prototype.setUpItem.call(this);
     },

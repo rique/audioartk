@@ -5,55 +5,42 @@ from base64 import b64encode
 from core.utils.decorators import wrap_with_root_model
 from core.utils.image_utils import prepared_image_context
 from core.dtos import TrackMetadata, Picture
+from core.services.fs_service import TrackFileSystemService
 
 class TrackManagerService:
     @staticmethod
     @wrap_with_root_model
     def get_tags(file_path, include_picture=True):
-        audio = ID3(file_path)
+        # 1. Physical Read
         mp3_file = MP3(file_path)
-        keys = audio.keys()
+        audio = ID3(file_path)
         
-        title = ''
-        if 'TIT2' in keys:
-            title = audio.get('TIT2').text[0]
+        # 2. Extract (Pure Logic)
+        metadata = TrackManagerService._extract_from_id3(audio, mp3_file.info)
         
-        artist = ''
-        if 'TPE1' in keys:
-            artist = audio.get('TPE1').text[0]
-        
-        album = ''
-        if 'TALB' in keys:
-            album = audio.get('TALB').text[0]
-        
-        if title == '':
-            title = file_path.split('/')[-1]
-        
-        track_metadata = TrackMetadata(
-            duration=mp3_file.info.length,
-            title=title,
-            artist=artist,
-            album=album,
-        )
         if include_picture:
-            track_metadata.picture = TrackManagerService.load_track_album_art(file_path)
-        
-        return track_metadata
+            picture = TrackManagerService.load_track_album_art(file_path)
+            if picture:
+                metadata.picture = picture.root
+        return metadata
     
     @staticmethod
-    def edit_tag(tag_name, tag_value, track_uuid):
-        audio = ID3(f'./frontend/assets/tracks/{track_uuid}.mp3')
+    def edit_tag(tag_name, tag_value, track_uuid, return_metadata=False):
+        file_path = TrackFileSystemService.get_track_path(track_uuid)
+        
+        # SINGLE READ START
+        mp3_file = MP3(file_path) # We need this for the duration
+        audio = ID3(file_path)
 
-        try:
-            if tag_name == 'title':
-                audio.add(TIT2(encoding=3, text=tag_value))
-            elif tag_name == 'artist':
-                audio.add(TPE1(encoding=3, text=tag_value))
-            elif tag_name == 'album':
-                audio.add(TALB(encoding=3, text=tag_value))
-            audio.save()
-        except Exception as e:
-            raise Exception(e)
+        # Update logic
+        FRAME_MAP = {'title': TIT2, 'artist': TPE1, 'album': TALB}
+        if tag_name in FRAME_MAP:
+            audio.add(FRAME_MAP[tag_name](encoding=3, text=tag_value))
+            audio.save() # Disk Write
+        
+        if return_metadata:
+            # NO SECOND READ: We pass the 'audio' object we already have in memory
+            return TrackManagerService._extract_from_id3(audio, mp3_file.info)
 
     @staticmethod
     def set_art(file_path, image_source):
@@ -123,5 +110,43 @@ class TrackManagerService:
                         break
         
         return (apict, pic_format)
-    
+
+    @staticmethod
+    def _extract_from_id3(audio: ID3, mp3_info=None):
+        """
+        Private helper that turns an ID3 object into a TrackMetadata object.
+        Does NOT touch the disk.
+        """
+        title, artist, album = TrackManagerService._get_id3_metadata(audio)
+        
+        return TrackMetadata(
+            duration=mp3_info.length if mp3_info else 0,
+            title=title,
+            artist=artist,
+            album=album,
+        )
+
+    @staticmethod
+    def _get_id3_metadata(audio: ID3):
+        keys = audio.keys()
+        
+        title = ''
+        if 'TIT2' in keys:
+            title = audio.get('TIT2').text[0]
+        
+        artist = ''
+        if 'TPE1' in keys:
+            artist = audio.get('TPE1').text[0]
+        
+        album = ''
+        if 'TALB' in keys:
+            album = audio.get('TALB').text[0]
+
+        """
+        if title == '':
+            title = file_path.split('/')[-1]
+        """
+
+        return title, artist, album
+        
     

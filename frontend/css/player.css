@@ -752,17 +752,18 @@ table.queue-table .small-cell {
 }
 
 .playlist-form {
-    width: 22%;
+    width: 25%;
     padding: 22px;
     border: 1px solid;
     border-radius: 6px;
     margin: 10% auto 0 auto;
+    height: 11%;
 }
 
 .playlist-form input {
     width: 84%;
     padding: 6px;
-    margin-right: 16px;
+    margin: 16px 14px 0 0;
 }
 
 .playlist-form button {

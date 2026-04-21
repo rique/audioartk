@@ -11,11 +11,12 @@ urlpatterns = [
     path("delete-track", views.deleteTrack, name="deleteTrack"),
     path("create-playlist", views.createPlaylist, name="createPlaylist"),
     path("edit-track", views.editTrack, name="editTrack"),
-    path("add-track-to-playlist", views.addTrackToPLaylist, name="addTrackToPLaylist"),
+    path("add-track-to-playlist", views.addTracksToPlaylist, name="addTrackToPLaylist"),
     path("load-track-albumart", views.loadTrackAlbumart, name="loadTrackAlbumart"),
     path("load-track-info", views.loadTrackInfo, name="loadTrackInfo"),
     path("load-playlists", views.loadPlaylists, name="loadPlaylists"),
     path('track-art/<str:track_uuid>/', views.trackArtProxy, name='track_art_proxy'),
     path('track-file/<str:track_uuid>/', views.trackFileProxy, name='track_file_proxy'),
+    path('sync-tracks-metadata', views.sync_all_tracks_with_db, name="sync_all_tracks_with_db")
 ]
 

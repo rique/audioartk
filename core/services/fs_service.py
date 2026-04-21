@@ -34,10 +34,14 @@ class TrackFileSystemService:
     def get_track_path(track_uuid):
         return f"{settings.TRACKS_DIR}/{track_uuid}.mp3"
 
+    @staticmethod
+    def list_track_links():
+        listing = TrackFileSystemService.list_directory_contents(settings.TRACKS_DIR, include_folders=False)
+        return listing.model_dump()['file_list']
 
     @staticmethod
     @wrap_with_root_model
-    def list_directory_contents(base_dir='~'):
+    def list_directory_contents(base_dir='~', include_folders=True):
         # 1. Resolve path (handles ~ and relative paths safely)
         base_dir = os.path.expanduser(base_dir)
 
@@ -59,7 +63,7 @@ class TrackFileSystemService:
         try:
             with os.scandir(path_obj) as entries:
                 for entry in entries:
-                    if entry.is_dir():
+                    if entry.is_dir() and include_folders:
                         directories.append(entry.name + '/')
                     elif entry.is_file() and entry.name.lower().endswith('.mp3'):
                         files.append(entry.name)

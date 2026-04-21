@@ -1,20 +1,23 @@
 import subprocess
-import json
 import mimetypes
 import os
 from uuid import uuid4
+from traceback import print_exc
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 
-from .models import Tracks, Playlist
+from .models import Tracks, Playlist, TrackInfo
 
 from core.services.track_service import TrackManagerService
 from core.services.fs_service import TrackFileSystemService
 from core.exceptions import InvalidBrowserPath, PathNotAccessible, TrackPathDoesNotExist
 from core.utils.http import XAccelResponse
 from core.utils.decorators import json_api
+from core.utils.tracks_utils import extract_track_uuid_from_path
 
 
 @csrf_exempt
@@ -33,33 +36,63 @@ def addTrack(request):
 
     TrackFileSystemService.store_track(track_original_path, track_uuid)
 
+    track_metadata = track_metadata.model_dump()
+
     track.track_original_path = track_original_path
     track.track_uuid = track_uuid
     track.save()
 
-    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata.model_dump()})
+    track_info = TrackInfo(
+        track=track,
+        track_title=track_metadata['title'],
+        track_artist=track_metadata['artist'],
+        track_album=track_metadata['album'],
+        track_duration=track_metadata['duration']
+    )
+
+    track_info.save()
+    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata})
 
 
 @csrf_exempt
 @json_api(method='POST')
+@transaction.atomic
 def editTrack(request):
+    # 1. Use .get() with defaults to avoid KeyErrors
     params = request.params
+    track_uuid = params.get('track_uuid')
+    field_type = params.get('field_type')
+    field_value = params.get('field_value')
 
-    track_uuid = params['track_uuid']
-    field_type = params['field_type']
-    field_value = params['field_value']
+    # 2. Validation Whitelist
+    ALLOWED_FIELDS = {
+        'title': 'track_title',
+        'artist': 'track_artist',
+        'album': 'track_album'
+    }
+
+    if field_type not in ALLOWED_FIELDS:
+        return JsonResponse({'success': False, 'code': 'invalid_field'}, status=400, reason=f"Invalid field {field_type}")
+
+    track = get_object_or_404(Tracks, track_uuid=track_uuid)
 
     try:
-        track = Tracks.objects.get(track_uuid=track_uuid)
-    except Tracks.DoesNotExist:
-        return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
-   
-    try:
-        TrackManagerService.edit_tag(field_type, field_value, track_uuid)
+        metadata = TrackManagerService.edit_tag(field_type, field_value, track_uuid, return_metadata=True)
+
+        TrackInfo.objects.update_or_create(
+            track=track,
+            defaults={
+                'track_title': metadata.title,
+                'track_artist': metadata.artist,
+                'track_album': metadata.album,
+                'track_duration': metadata.duration
+            }
+        )
     except Exception as e:
-        return JsonResponse(data={'success': False, 'code': 'system_error'}, status=500, reason=f"AN unknow error occured {e}")
-    
-    return JsonResponse(data={'success': True})
+        print(f"Sync error for {track_uuid}: {e}")
+        return JsonResponse({'success': False, 'code': 'system_error'}, status=500, reason=f"An error occure while syncing the track")
+
+    return JsonResponse({'success': True})
 
 
 @csrf_exempt
@@ -70,7 +103,7 @@ def deleteTrack(request):
     try:
         track = Tracks.objects.get(track_uuid=track_uuid)
     except Tracks.DoesNotExist:
-        return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
+        return JsonResponse(data={'success': False, 'code': 'does_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
 
     print('Proceeding to delete file ', track_uuid)
     TrackFileSystemService.delete_track(track_uuid)
@@ -110,7 +143,7 @@ def loadTrackAlbumart(request):
     try:
         track = Tracks.objects.get(track_uuid=track_uuid)
     except Tracks.DoesNotExist:
-        return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
+        return JsonResponse(data={'success': False, 'code': 'does_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
     
     picture = TrackManagerService.load_track_album_art(TrackFileSystemService.get_track_path(track_uuid))
 
@@ -163,27 +196,24 @@ def trackFileProxy(request, track_uuid):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def loadTrackInfo(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-    
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
     track_uuid = params['track_uuid']
     try:
         track = Tracks.objects.get(track_uuid=track_uuid)
     except Tracks.DoesNotExist:
-        return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
+        return JsonResponse(data={'success': False, 'code': 'does_not_exist'}, status=404, reason=f"Object or ressource with uuid {track_uuid} not found")
     
-    track_metadata = TrackManagerService.get_tags(TrackFileSystemService.get_track_path(track_uuid), include_picture=False)
-    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata.model_dump()})
+    
+    track_metadata =  track.trackinfo.dict if hasattr(track, 'trackinfo') else {}
+    return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata})
 
 
 
 @csrf_exempt
+@json_api(method='POST')
 def loadTrackList(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
     
     tracks = Tracks.objects.filter().all()
     tracklist = []
@@ -191,21 +221,18 @@ def loadTrackList(request):
     duration = 0
     for trk in tracks:
         try:
-            mp3_file_path = TrackFileSystemService.get_track_path(trk.track_uuid)
-            track_metadata = TrackManagerService.get_tags(mp3_file_path, include_picture=False)
+            track_metadata = trk.trackinfo.dict if hasattr(trk, 'trackinfo') else {}
 
             if not track_metadata:
-                print(f"An error occured with file {mp3_file_path=}, skipping")
+                print(f"An error occured with file {trk=}, skipping")
                 continue
-            
-            track_metadata = track_metadata.model_dump()
 
             track_metadata['picture'] = {'data': '', 'format': ''}         
             duration += track_metadata['duration']
             
             tracklist.append({'track': trk.dict, 'ID3': track_metadata})
         except Exception as e:
-            print(f'Exception caugth for {mp3_file_path=}: {e}, continuing')
+            print(f'Exception caugth for {trk=}: {e}, continuing')
             continue
 
     print('duration', duration)
@@ -218,6 +245,7 @@ def loadTrackList(request):
 
 
 @csrf_exempt
+@json_api(method='GET')
 def loadBGImages(request):
     img_dir = 'imgc/'# './static/imgc/'
     img_list = TrackFileSystemService.get_background_images(img_dir).model_dump()
@@ -260,28 +288,23 @@ def scanForMyTracks(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
+@transaction.atomic
 def createPlaylist(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+    params = request.params
 
     tracklist = params['tracklist']
-    playlist_name = params['playlist_name']
+    playlist_name = params.get('playlist_name', 'Untitled Playlist')
 
-    playlist = Playlist()
-    playlist.playlist_name = playlist_name
+    playlist = Playlist.objects.create(
+        playlist_name=playlist_name
+    )
 
-    if len(tracklist) > 0:
-        for tr in tracklist:
-            try:
-                track = Tracks.objects.get(track_uuid=tr['track_uuid'])
-            except Tracks.DoesNotExist:
-                continue
-            playlist.tracks.add(track)
+    uuids = {tr['track_uuid'] for tr in tracklist}
+    valid_tracks = Tracks.objects.filter(track_uuid__in=uuids)
 
-    playlist.save()
+    if valid_tracks.exists():
+        playlist.tracks.add(*valid_tracks)
 
     return JsonResponse(data={
         'success': True,
@@ -290,12 +313,10 @@ def createPlaylist(request):
 
 
 @csrf_exempt
-def addTrackToPLaylist(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
-
-    body_unicode = request.body.decode('utf-8')
-    params = json.loads(body_unicode)
+@json_api(method='POST')
+@transaction.atomic
+def addTracksToPlaylist(request):
+    params = request.params
 
     tracklist = params['tracklist']
     playlist_uuid = params['playlist_uuid']
@@ -303,17 +324,12 @@ def addTrackToPLaylist(request):
     try:
         playlist = Playlist.objects.get(playlist_uuid=playlist_uuid)
     except Playlist.DoesNotExist:
-        return JsonResponse(data={'success': False, 'code': 'dose_not_exist'}, status=404, reason=f"Object or ressource with uuid {playlist_uuid} not found")
+        return JsonResponse(data={'success': False, 'code': 'does_not_exist'}, status=404, reason=f"Object or ressource with uuid {playlist_uuid} not found")
 
-    if len(tracklist) > 0:
-        for tr in tracklist:
-            try:
-                track = Tracks.objects.get(track_uuid=tr['track_uuid'])
-            except Tracks.DoesNotExist:
-                continue
-            playlist.tracks.add(track)
+    uuids = {tr['track_uuid'] for tr in tracklist}
+    valid_tracks = Tracks.objects.filter(track_uuid__in=uuids)
 
-    playlist.save()
+    playlist.tracks.add(*valid_tracks)
 
     return JsonResponse(data={
         'success': True,
@@ -322,11 +338,10 @@ def addTrackToPLaylist(request):
 
 
 @csrf_exempt
+@json_api(method='POST')
 def loadPlaylists(request):
-    if request.method != 'POST':
-        return JsonResponse(data={'success': False, 'code': 'wrong_method'}, status=405, reason="Method Not Allowed")
     
-    playlists = [pl.dict() for pl in Playlist.objects.filter().all()]
+    playlists = [pl.dict for pl in Playlist.objects.filter().all()]
 
     return JsonResponse(data={
         'success': True,
@@ -334,3 +349,48 @@ def loadPlaylists(request):
     }) 
 
 
+@csrf_exempt
+@json_api(method='GET')
+def sync_all_tracks_with_db(request):
+    track_list = TrackFileSystemService.list_track_links()
+
+    if not track_list:
+        return JsonResponse(data={'success': False, 'code': 'no_tracks_found'}, status=404)
+
+    error_messages = []
+
+    with transaction.atomic():
+        synced_count = 0
+        for track_file in track_list:
+            try:
+                track_uuid = extract_track_uuid_from_path(track_file)
+                if not track_uuid:
+                    continue
+
+                track = Tracks.objects.get(track_uuid=track_uuid)
+                metadata = TrackManagerService.get_tags(TrackFileSystemService.get_track_path(track_uuid))
+                track_metadata = metadata.model_dump()
+                
+                obj, created = TrackInfo.objects.update_or_create(
+                    track=track,
+                    defaults={
+                        'track_title': track_metadata['title'],
+                        'track_artist': track_metadata['artist'],
+                        'track_album': track_metadata['album'],
+                        'track_duration': track_metadata['duration']
+                    }
+                )
+                synced_count += 1
+
+            except Tracks.DoesNotExist:
+                print_exc()
+                print(f"Skipping: Track {track_uuid} not found in database.")
+                error_messages.append(f"Skipping: Track {track_uuid} not found in database.")
+                continue
+            except Exception as e:
+                print_exc()
+                print(f"Error processing {track_file}: {e}")
+                error_messages.append(f"Error processing {track_file}: {e}")
+                continue
+
+    return JsonResponse({'success': True, 'synced_count': synced_count, 'error_messages': error_messages})
