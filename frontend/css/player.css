@@ -38,6 +38,11 @@ ul {
     list-style-type: none;
 }
 
+#content {
+    display: flex;
+    flex-direction: row;
+}
+
 #player {
     padding: 0 8px 0 8px;
     width: 98.92%;
@@ -200,8 +205,8 @@ a.player-action .fa-solid {
 .cnt-overlay .track-browser,
 .cnt-overlay #window-content {
     position: relative;
-    width: 72%;
-    height: 72%;
+    width: 76%;
+    height: 76%;
     background: #2d2d2d;
     border-radius: 10px;
     padding: 16px;
@@ -536,13 +541,14 @@ li.fa-solid.fa-file {
 
 .action-menu-cnt ul {
     width: 100%;
+    text-align: center;
 }
 
 .action-menu-cnt ul li {
     cursor: pointer;
     padding: 8px 10px;
     border-bottom: 1px solid #f0f0f0;
-    width: 87%;
+    width: 100%;
 }
 
 .action-menu-cnt ul li:last-child {

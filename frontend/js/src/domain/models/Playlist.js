@@ -1,9 +1,9 @@
-import Api from "../../core/HttpClient.js";
+import {API} from "../../core/HttpClient.js";
 import { HTMLItems, EditInput } from "../../ui/grid/RowTemplates.js"; 
 import { TrackListManager, TrackList } from "../TrackList.js";
 import { ListEvents } from "../../core/EventBus.js";
 
-const api = new Api();
+const api = new API();
 
 /**
  * Represents a specific collection of tracks
@@ -74,9 +74,7 @@ export class PlaylistCreator {
         if (!name?.trim()) return;
 
         try {
-            //const res = await api.post('create-playlist/', { name, tracks: [] });
-            api.createPlaylist(name, [], this._onSuccessCreated.bind(this));
-            
+            api.createPlaylist(name, []).then(this._onSuccessCreated.bind(this)).catch(error => console.log(error));
         } catch (err) {
             alert('Error creating playlist');
         }

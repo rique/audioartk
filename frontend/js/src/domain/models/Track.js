@@ -1,16 +1,9 @@
-/** Tracks Module
- * Defines the Track class and related functionality for managing track metadata, album art, and interactions with the audio player and tracklist browser.
- * The Track class encapsulates properties such as title, artist, album, duration, and current playback time, as well as methods for updating and retrieving this information.
- * Integrates with the ID3Tags class to manage track metadata and the AlbumArtLoader for fetching album art asynchronously.
- * Provides a TrackEditor object for handling inline editing of track metadata within the tracklist grid.
- * The module is designed to be extensible and integrates with other components of the application, such as notifications and the audio player display.
- */
-import { ListEvents, keyCotrols } from "../../core/EventBus.js"; // Adjust based on your final naming
-import Api from "../../core/HttpClient.js";
+import { ListEvents, keyCotrols } from "../../core/EventBus.js";
+import {API} from "../../core/HttpClient.js";
 import { TrackListManager } from "../../domain/TrackList.js";
 import { AlbumArtLoader } from "../../domain/AudioEngine.js";
 
-const api = new Api();
+const api = new API();
 
 /**
  * Handles metadata for a specific track
@@ -176,7 +169,7 @@ export const TrackEditor = {
             return;
         }
 
-        api.editTrack(fieldType, value, trackUUid, (res) => {
+        api.editTrack(fieldType, value, trackUUid).then((res) => {
             if (res.success) {
                 cell.innerContent(value);
                 const {track} = TrackListManager.getTrackByUUID(trackUUid);
@@ -184,7 +177,7 @@ export const TrackEditor = {
             } else {
                 cell.innerContent(oldValue);
             }
-        });
+        }).catch(error => console.error(error));
     },
     _setExclusivity() {
         keyCotrols.setExclusivityCallerKeyUpV2(this);

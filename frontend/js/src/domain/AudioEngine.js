@@ -1,15 +1,5 @@
-/* * Track Loader Module
- * Provides caching and loading mechanisms for track-related data such as album art and track info.
- * Implements a simple LRU (Least Recently Used) cache to optimize performance and reduce redundant API calls.
- * The AlbumArtLoader and TrackInfoLoader classes extend a common BaseLoader class that handles caching logic, while each loader implements its own asynchronous loading method to fetch the required data from the API.
- * The module is designed to be easily integrated with other components of the application, such as the audio player display and notifications, allowing for seamless retrieval and display of track-related information.
- * Overall, this module enhances the user experience by providing efficient and responsive loading of track data, ensuring that album art and track info are readily available when needed without causing unnecessary delays or performance issues.
- * The design allows for easy maintenance and scalability, as new types of track-related data can be added by simply extending the BaseLoader class and implementing the appropriate loading logic.
- * In summary, this module serves as a crucial component of the music player application, providing a robust and efficient system for managing track-related data while optimizing performance through caching strategies.
- */
-
-import Api from '../core/HttpClient.js';
-const api = new Api();
+import {API} from '../core/HttpClient.js';
+const api = new API();
 
 class BaseLoader {
     constructor(maxCacheSize) {
@@ -54,11 +44,15 @@ class AlbumArtLoader extends BaseLoader {
     }
 
     async loadAsync(track_uuid) {
-        const res = await api.loadTrackAlbumArtAsync(track_uuid);
-        if (res.success) {
-            return {object: {id3: res.ID3}, loaded: true};
+        try {
+            const res = await api.loadTrackAlbumArt(track_uuid);
+            if (res.success) {
+                return {object: {id3: res.ID3}, loaded: true};
+            }
+            return {object: false, loaded: false};
+        } catch(e) {
+            console.error(e);
         }
-        return {object: false, loaded: false};
     }
 
     getDefaultAlbumArt() {
@@ -72,11 +66,15 @@ class TrackInfoLoader extends BaseLoader {
     }
 
     async loadAsync(track_uuid) {
-        const res = await api.loadTrackInfoAsync(track_uuid);
-        if (res.success) {
-            return {object: {id3: res.ID3}, loaded: true};
+        try {
+            const res = await api.loadTrackInfo(track_uuid);
+            if (res.success) {
+                return {object: {id3: res.ID3}, loaded: true};
+            }
+            return {object: false, loaded: false};
+        } catch(e) {
+            console.error(e);
         }
-        return {object: false, loaded: false};
     }
 };
 

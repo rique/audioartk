@@ -599,7 +599,12 @@ class TracklistGrid {
                 width: 25, unit: '%', type: 'str', searchable: true,
                 data: { trackId: track.trackUUid, fieldType: 'album' }
             },
-            { content: track.getTrackDuration(true), width: 8, unit: '%' },
+            { 
+                content: track.getTrackDuration(true), 
+                width: 8, 
+                unit: '%',
+                textAlign: 'center' 
+            },
             {
                 content: `<span data-track-id="${track.trackUUid}" class="track-actions"><li class="fa-solid fa-ellipsis"></li></span>`,
                 width: 4, unit: '%',
@@ -863,7 +868,8 @@ class QueuelistGrid {
         }, {
             content: track.getTrackDuration(true),
             width: 8,
-            unit: '%'
+            unit: '%',
+            textAlign: 'center'
         }, {
             content: `<span data-track-id="${track.trackUUid}" class="track-actions"><li class="fa-solid fa-ellipsis"></li></span>`,
             width: 4,

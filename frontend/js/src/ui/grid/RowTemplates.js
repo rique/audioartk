@@ -3,7 +3,7 @@ import { getLastParent, clearElementInnerHTML, calculateBarLayout } from '../../
 import { TracklistNotifier, FileBrowserNotifier } from '../Notifier.js'
 import { TrackListManager } from '../../domain/TrackList.js'
 import { Track, ID3Tags } from '../../domain/models/Track.js';
-import Api from '../../core/HttpClient.js';
+import {API} from '../../core/HttpClient.js';
 
 /** * SECTION 1: DOM HELPERS 
  */
@@ -532,7 +532,7 @@ export class DroppedAnimation {
             { background: elementBGColor, fontSize: '0.8rem' },
             { background: '#e5fce8', fontSize: '0.9rem' },
             { background: '#e5fce8', fontSize: '1rem' },
-            { background: elementBGColor, fontSize: '1.3rem' },
+            { background: elementBGColor, fontSize: '1.25rem' },
             { fontSize: '1.4rem' }
         ];
 
@@ -596,7 +596,8 @@ class NowPlayingSVGComponent {
     }
 
     initComponent() {
-        this.SVGItem.id('now-playing-svg')
+        this.SVGItem
+            .id('now-playing-svg')
             .shapeWidth(18)
             .shapeHeight(18)
             .attribute('viewBox', '0 0 18 18') //  min-x, min-y, width, heigh
@@ -1109,7 +1110,7 @@ FileBrowserRenderer.prototype = {
 
 export const FileBrowser = function(layout) {
     this.baseDir = '/home/enrique/Music/';
-    this.api = new Api();
+    this.api = new API();
     this.browseHistory = [{dir: this.baseDir, index: 0}];
     this.historyIndex = 0;
     this.layout = layout;
@@ -1148,13 +1149,13 @@ FileBrowser.prototype = {
         clearElementInnerHTML(this.fileListBox);
         this.historyIndex++;
         this.browseHistory.push({dir: this.baseDir, index: selectedIndex});
-        this.api.browseFiles(this.baseDir, this.fileBrowserCB.bind(this));
+        this.api.browseFiles(this.baseDir).then(this.fileBrowserCB.bind(this)).catch(error => console.error(error));
     },
     fileSelector(evt) {
         let target = evt.target;
         let fileName = target.dataset.name;
         console.log('fileName', fileName);
-        this.api.addTrack(fileName, this.baseDir + fileName, (res) => {
+        this.api.addTrack(fileName, this.baseDir + fileName).then((res) => {
             console.log('add Track', {res});
             let track = new Track(res['track']),
                 id3Tags = new ID3Tags(res['ID3']);
@@ -1163,6 +1164,8 @@ FileBrowser.prototype = {
             TrackListManager.addTrackToList(track);
             this._fileBrowserNotifications.setAddedTrack(track, 6000);
             this.folderBrowserEvent.trigger('onSongAdded', {track});
+        }).catch((error) => {
+            console.error(error);
         });
     },
     fileBrowserCB(res) {
@@ -1218,7 +1221,9 @@ FileBrowser.prototype = {
     },
     loadFileBrowser() {
         layoutHTML.renderLayout(this.layout.layoutName);
-        this.api.browseFiles(this.baseDir, this.fileBrowserCB.bind(this))
+        this.api.browseFiles(this.baseDir).then(this.fileBrowserCB.bind(this)).catch((error) => {
+            console.error(error);
+        });
     },
     onSongAdded(cb, subscriber) {
         this.folderBrowserEvent.onEventRegister({'cb': (track, idx) => {
@@ -1329,14 +1334,16 @@ TrackListBrowser.prototype = {
         divElem.style.display = 'none';
     },
     deleteTrackAction(liDelete, divElem, trackUUid) {
-        const api = new Api();
-        api.deleteTrack(trackUUid, (res) => {
+        const api = new API();
+        api.deleteTrack(trackUUid).then((res) => {
             if (res.success) {
                 const {index, track} = TrackListManager.removeTrackFromTracklistByUUID(trackUUid);
                 console.log('removed', {index, track});
-            } else
+            } else {
                 alert('Error deleting file!');
-        });
+                console.error('Error deleting file!', res);
+            }
+        }).catch(error => console.error(error));
     },
     addToFavoriteAction(liFavorite, divElem, trackUUid) {
         console.log('not implemented :|', trackUUid);
@@ -1361,11 +1368,11 @@ TrackListBrowser.prototype = {
             console.warn("Mediator pointed to a grid, but row was missing at index:", {index, row}, this.grid);
         }
     },
-    clearAllCurrentlyPlaying(fromElem = document) {
+    clearAllCurrentlyPlaying() {
         if (this.nowPlaying) {
             this.nowPlaying.hide();
         }
-        // fromElem.querySelectorAll('.currently-playing').forEach(el => el.classList.remove('currently-playing'));
+        
         if (this.previousRow) {
             this.previousRow.classRemove('currently-playing');
             this._restetNowPlayingCell(this.previousRow);
@@ -1400,7 +1407,7 @@ TrackListBrowser.prototype = {
         for (const cell of row) {
             if (cell.hasClass('cell-index')) {
                 cell.innerContent('');
-                this.nowPlaying.appendTo(cell); // <-- handling of now playing
+                this.nowPlaying.appendTo(cell);
                 this.nowPlaying.show();
                 break;
             }

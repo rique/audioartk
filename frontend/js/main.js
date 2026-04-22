@@ -1,15 +1,3 @@
-/**
- * Main entry point for the application. This file is responsible for initializing the application and loading the necessary resources.
- * It sets up the audio player, track list, notifications, and other components of the application.
- * The main responsibilities include:
- * - Loading the track list and album art from the server.
- * - Initializing the audio player and its display.
- * - Setting up event listeners for user interactions and keyboard controls.
- * - Managing the state of the application and coordinating between different components.
- * The code is organized to ensure a clear separation of concerns and maintainability, allowing for easy updates and feature additions in the future.
- * It also integrates with the Notifications Center to provide feedback to the user about various actions and states of the application.
- * Overall, this file serves as the central hub for orchestrating the different parts of the music player application.
- */
 import {NotificationCenter, PlayerNotifier} from './src/ui/Notifier.js';
 import {PlaybackMediator} from './src/ui/mediators/PlaybackMediator.js';
 import {PlayerControlMediator} from './src/ui/mediators/PlayerControlMediator.js'
@@ -27,9 +15,9 @@ import {keyCotrols} from './src/core/EventBus.js';
 import {LeftMenu, FileBrowser, Layout, layoutHTML, FileBrowserRenderer, TrackListBrowser} from './src/ui/grid/RowTemplates.js';
 import {AudioPlayerProgressBar} from './src/ui/player/ProgressBar.js';
 import {PlaylistCreator} from './src/domain/models/Playlist.js';
-import Api from './src/core/HttpClient.js';
+import {API} from './src/core/HttpClient.js';
 
-const imgList = [];
+
 const audioPlayerProgressBar = new AudioPlayerProgressBar();
 const audioPlayer = new AudioPlayer(audioPlayerProgressBar);
 const audioPlayerDisplay = new AudioPlayerDisplay(audioPlayer);
@@ -38,7 +26,7 @@ audioPlayerProgressBar.setAudioPlayer(audioPlayer);
 const playerControls = new PlayerControls(audioPlayer);
 const playerButtons = new PlayerButtons(document.getElementById('player-controls'), playerControls);
 playerButtons.setUp();
-const api = new Api();
+const api = new API();
 
 AudioPlayerControlsMediator.init(keyCotrols);
 AudioPlayerControlsMediator.setPlayerControls(playerControls);
@@ -88,12 +76,11 @@ leftMenu.init();
 
 NotificationCenter.register('tracks.loaded', 'Tracks Loaded!!', 'info');
 
-api.loadBGImages((res) => {
-    imgList.push(...res['img_list']);
-    draw(audioPlayer, imgList);
-});
+api.loadBGImages().then((res) => {
+    draw(audioPlayer, res['img_list']);
+}).catch(error => console.error(error));
 
-api.loadTrackList((res) => {
+api.loadTrackList().then((res) => {
     audioPlayer.init();
     library.bootstrap(res['tracklist']).then(() => {
         TrackListManager.setPlaylist(library.getPlaylist());
@@ -104,12 +91,10 @@ api.loadTrackList((res) => {
         }
         
         NotificationCenter.updateAndShow('tracks.loaded', `<p>${TrackListManager.getTracksNumber()} tracks have been loaded!!<p>`, 6200);
-        // NotificationCenter.displayNotification('tracks.loaded', 6000);
         MetadataMediator.init();
     }); 
-});
+}).catch(error => console.error(error));
 
-api.loadPlaylists((res) => {
+api.loadPlaylists().then((res) => {
     console.log('load playlists',{res});
-});
-
+}).catch(error => console.error(error));

@@ -10,23 +10,14 @@
 }
 
 @keyframes pulse {
+    /*0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }*/
     0%, 100% { transform: scaleY(0.3); }
-    50% { transform: scaleY(1); }
+    20% { transform: scaleY(1); }      /* Quick "hit" */
+    40% { transform: scaleY(0.5); }    /* Short drop */
+    50% { transform: scaleY(0.8); }    /* Small syncopated bounce */
+    80% { transform: scaleY(0.2); }    /* Long fade */
 }
-
-#now-playing-svg:hover {
-    cursor: pointer;
-}
-
-#now-playing-svg .bar {
-    fill: #e6e6e6;
-    animation: pulse .6s infinite ease-in-out;
-    transform-origin: center;
-}
-
-#now-playing-svg .bar1 { animation-delay: 0.0s; }
-#now-playing-svg .bar2 { animation-delay: 0.26s; }
-#now-playing-svg .bar3 { animation-delay: 0.40s; }
 
 :root {
     --grid-border-color: #c2c2c2;
@@ -50,6 +41,21 @@
     margin: 0;
     padding: 0;
 }
+
+#now-playing-svg:hover {
+    cursor: pointer;
+}
+
+#now-playing-svg .bar {
+    fill: #e6e6e6;
+    transform: scaleY(0.3);
+    animation: pulse .6s infinite linear;
+    transform-origin: center;
+}
+
+#now-playing-svg .bar1 { animation-delay: calc(3s / 100); }
+#now-playing-svg .bar2 { animation-delay: calc(47s / 100); }
+#now-playing-svg .bar3 { animation-delay: calc(17s / 100); }
 
 #table-content {
     width: 100%;

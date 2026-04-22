@@ -20,7 +20,7 @@
 <script type="module" defer src="/static/js/main.js"></script>
 {% endblock %}
 {% block content %}
-<div id="content">
+<main id="content">
   <div id="player">
     <div id="info-box">
       <div id="foto-box">
@@ -41,6 +41,7 @@
             <button class="open-file-browser">Browse Files</button>
             <button class="open-tracklist-browser">View tracks</button>
             <button class="open-playlist-create">Create new playlist</button>
+            <button class="open-last-fm">Last FM</button>
           </div>
           <div id="volume-control">
             VOL : <span class="vol-up">
@@ -56,7 +57,7 @@
       </div>
     </div>
   </div>
-</div>
+</main>
 <div style="display: none;" id="volume-display">
   <span class="vol-val">100</span>
 </div>
