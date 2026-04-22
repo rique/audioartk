@@ -15,6 +15,10 @@ export const PlaybackNotificationMediator = {
         // 1. Listen for the 30-second threshold (from AudioPlayer/PlayerManager)
         this.audioPlayer.onTrackNearEnd(this._handleNearEnd.bind(this), this);
         this.audioPlayer.onPlayerSongChange(this._hideNextTrackNotification.bind(this), this);
+        this.audioPlayer.onPlayPause((isPaused, track) => {
+            if (isPaused) return PlayerNotifier.pause();
+            return PlayerNotifier.play();
+        });
         this.playerControls.onPrevTrack(this._hideNextTrackNotification.bind(this), this);
         
         this.playerProgressBar.progressBar.onSeek((percent, mouseDown) => {

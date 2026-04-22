@@ -66,23 +66,33 @@ class Notification {
 
         // Progress Animation
         const progressBar = element.querySelector('.notif-sub-prog-bar');
-        const animation = new Animation(
+        this.animation = new Animation(
             new KeyframeEffect(progressBar, [{ width: '100%' }, { width: '0%' }], { duration: timeout }),
             document.timeline
         );
 
-        element.addEventListener('click', () => animation.finish());
+        element.addEventListener('click', () => this.animation.finish());
 
         this.fader.fadeIn(element, 250);
-        animation.play();
+        this.animation.play();
         
-        animation.onfinish = () => {
+        this.animation.onfinish = () => {
             this.fader.fadeOut(element, 400, 1, 0, () => {
                 this.isActive = false;
+                this.animation = null;
                 element.remove();
             });
         };
     }
+
+    pause() {
+        this.animation?.pause();
+    }
+
+    play() {
+        this.animation?.play();
+    }
+
     hide(cb) {
         // We find the element in the DOM using the UUID we generated in show()
         // If we didn't store the element reference in 'this', we use the data attribute.
@@ -110,25 +120,42 @@ export const NotificationCenter = {
     _registry: {},
 
     register(key, title, level) {
-        if (this._registry[key]) return;
+        if (this._registry[key]) {
+            console.error(`Notifier: Key "${key}" already set.`);
+            return;
+        }
         this._registry[key] = new Notification(title, level);
     },
 
     updateAndShow(key, message, timeout) {
-        const notif = this._registry[key];
-        if (!notif) return console.error(`Notifier: Key "${key}" not found.`);
+        const notif = this._getNotification(key);
         
-        notif.update(message);
-        notif.show(timeout);
+        notif?.update(message);
+        notif?.show(timeout);
+    },
+    pause(key) {
+        const notif = this._getNotification(key);
+        notif?.pause();
+    },
+    play(key) {
+        const notif = this._getNotification(key);
+        notif?.play();
     },
     hide(key, cb) {
-        const notif = this._registry[key];
-        if (!notif) return console.error(`Notifier: Key "${key}" not found.`);
-
-        notif.hide(cb);
+        const notif = this._getNotification(key);
+        notif?.hide(cb);
     },
     isNotificationActive(key) {
         return this._registry[key]?.isNotificationActive();
+    },
+    _getNotification(key) {
+        const notif = this._registry[key];
+        if (!notif) {
+            console.error(`Notifier: Key "${key}" not found.`);
+            return;
+        }
+
+        return notif;
     }
 };
 
@@ -164,6 +191,12 @@ export const PlayerNotifier = {
     },
     hide(cb) {
         NotificationCenter.hide(this.key, cb);
+    },
+    pause() {
+        NotificationCenter.pause(this.key);
+    },
+    play() {
+        NotificationCenter.play(this.key);
     },
     isActive() {
         return NotificationCenter.isNotificationActive(this.key);
