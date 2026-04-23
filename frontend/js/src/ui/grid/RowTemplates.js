@@ -18,6 +18,16 @@ const getOffsetLeft = (elem) => {
 const getOffsetTop = (elem) => elem.getBoundingClientRect().top;
 const getOffsetBottom = (elem) => elem.getBoundingClientRect().bottom;
 
+export class RawHTMLItem {
+    constructor(htmlString) {
+        this.html = htmlString;
+    }
+
+    render() {
+        return this.html;
+    }
+}
+
 /** * SECTION 2: BASE CLASSES 
  */
 export class HTMLItems {
@@ -975,100 +985,46 @@ export class SortableRow extends Row {
     }
 }
 
-export const Layout = function(parentElem, layoutName) {
+export class Layout { 
+    constructor(parentElem, layoutName) {
         this.parentElem = parentElem;
         this.layoutName = layoutName;
-};
-Layout.prototype = {
+    }
+
     setParntElem(parentElem) {
         this.parentElem = parentElem;
-    },
+    }
+
     getParentElem() {
         return this.parentElem;
-    },
+    }
+
     setLayoutName(layoutName) {
         this.layoutName = layoutName;
-    },
+    }
+
     getLayoutName() {
         return this.layoutName;
-    },
+    }
+
     registerRenderCallback(cb) {
         this.renderCallback = cb; 
-    },
+    }
+
     render() {
         this.renderCallback(this.parentElem);
     }
 };
 
-export const LeftMenu = function() {
-    this.menuComponents = {};
-    this._isDone = false;
-};
-LeftMenu.prototype = {
-    init() {
-        this.mainMenuElem = document.getElementById('main-left-menu');
-        this.openMenuElem = document.getElementById('open-menu');
-        this.leftMenuElement = document.getElementById('left-menu');
-        this.openMenuElem.addEventListener('click', this.openClose.bind(this));
-    },
-    openClose() {
-        if (this.mainMenuElem.classList.contains('is-open')) {
-            this.close();
-        } else {
-            this.open();
-        }
-        this.mainMenuElem.classList.toggle('is-open');
-    },
-    open() {
-        let maxRight = 0 - 30;
-        let start = - (this.leftMenuElement.offsetWidth);
-        let step = 30;
-        this._isDone = false;
-        this._slide.bind(this)(start, maxRight, step, this.mainMenuElem, 'right');
-    },
-    close() {
-        let maxRight = - (this.leftMenuElement.offsetWidth) - 30;
-        let start = 0;
-        let step = -30;
-        this._isDone = false;
-        this._slide.bind(this)(start, maxRight, step, this.mainMenuElem, 'left');
-    },
-    addMenuComponent(component, section) {
-        if (!this.menuComponents.hasOwnProperty(section))
-            this.menuComponents[section] = [];
-        this.menuComponents[section].push(component);
-    },
-    _slide(start, maxRight, step, mainMenuElem, direction) {
-        direction = direction || 'right';
-        if (start <= maxRight && direction == 'right') {
-            start += step;
-            if (start > maxRight) {
-                start = maxRight;
-                this._isDone = true;
-            }
-        } else if (start >= maxRight && direction == 'left') {
-            start += step;
-            if (start < maxRight) {
-                start = maxRight;
-                this._isDone = true;
-            }
-        }
+class LayoutHTML {
+    constructor() {
+        this.layouts = {};
+    }
 
-        mainMenuElem.style.right = `${start}px`;
-        
-        if (this._isDone) return;
-
-        requestAnimationFrame(this._slide.bind(this, start, maxRight, step, mainMenuElem, direction));
-    },
-};
-
-const LayoutHTML = function() {
-    this.layouts = {};
-};
-LayoutHTML.prototype = {
     addHTMLLayout(layout) {
         this.layouts[layout.layoutName] = layout;
-    },
+    }
+
     renderLayout(layoutName) {
         this.layouts[layoutName].render();
     }
@@ -1076,21 +1032,24 @@ LayoutHTML.prototype = {
 
 export const layoutHTML = new LayoutHTML();
 
-export const FileBrowserRenderer = function(fileBrowser, layout) {
-    this.fileBrowser = fileBrowser;
-    this.layout = layout;
-    this.layout.registerRenderCallback(this._render.bind(this));
-    this._createElements();
-};
-FileBrowserRenderer.prototype = {
+export class FileBrowserRenderer { 
+    constructor(fileBrowser, layout) {
+        this.fileBrowser = fileBrowser;
+        this.layout = layout;
+        this.layout.registerRenderCallback(this._render.bind(this));
+        this._createElements();
+    }
+
     _createElements() {
         this.divBasePath = document.createElement('div');
         this.ulFolderList = document.createElement('ul');
         this.ulFileList = document.createElement('ul');
-    },
+    }
+    
     _displayFileBroserLayout() {
         layoutHTML.renderLayout(this.layout.layoutName);
-    },
+    }
+
     _render(parentElem) {
         clearElementInnerHTML(parentElem);
         parentElem.className = 'file-browser';
@@ -1108,28 +1067,31 @@ FileBrowserRenderer.prototype = {
 };
 
 
-export const FileBrowser = function(layout) {
-    this.baseDir = '/home/enrique/Music/';
-    this.api = new API();
-    this.browseHistory = [{dir: this.baseDir, index: 0}];
-    this.historyIndex = 0;
-    this.layout = layout;
-    this.folderBrowserEvent = new ListEvents();
-    this._fileBrowserNotifications = FileBrowserNotifier;
-};
-FileBrowser.prototype = {
+export class FileBrowser { 
+    constructor(layout) {
+        this.baseDir = '/home/enrique/Music/';
+        this.api = new API();
+        this.browseHistory = [{dir: this.baseDir, index: 0}];
+        this.historyIndex = 0;
+        this.layout = layout;
+        this.folderBrowserEvent = new ListEvents();
+        this._fileBrowserNotifications = FileBrowserNotifier;
+    }
+
     close(evt) {
         if (evt && evt.target != evt.currentTarget)
             return;
         if (this.isOpen)
             this._closeFileBrowser();
-    },
+    }
+
     setElementBoxes(fileExplorerBox, basePathBox, folderListBox, fileListBox) {
         this.fileExplorerBox = fileExplorerBox;
         this.basePathBox = basePathBox;
         this.folderListBox = folderListBox;
         this.fileListBox = fileListBox;
-    },
+    }
+
     folderSelector(evt) {
         let target = evt.target;
         let selectedIndex = target.dataset.index;
@@ -1150,7 +1112,8 @@ FileBrowser.prototype = {
         this.historyIndex++;
         this.browseHistory.push({dir: this.baseDir, index: selectedIndex});
         this.api.browseFiles(this.baseDir).then(this.fileBrowserCB.bind(this)).catch(error => console.error(error));
-    },
+    }
+
     fileSelector(evt) {
         let target = evt.target;
         let fileName = target.dataset.name;
@@ -1167,7 +1130,8 @@ FileBrowser.prototype = {
         }).catch((error) => {
             console.error(error);
         });
-    },
+    }
+
     fileBrowserCB(res) {
         this._openFileBrowser();
         this.basePathBox.innerText = res['base_dir'];
@@ -1218,51 +1182,59 @@ FileBrowser.prototype = {
             }
             this.scrollToTarget = null; // Clear the target
         }
-    },
+    }
+
     loadFileBrowser() {
         layoutHTML.renderLayout(this.layout.layoutName);
         this.api.browseFiles(this.baseDir).then(this.fileBrowserCB.bind(this)).catch((error) => {
             console.error(error);
         });
-    },
+    }
+
     onSongAdded(cb, subscriber) {
         this.folderBrowserEvent.onEventRegister({'cb': (track, idx) => {
             cb(track, idx);
         }, subscriber}, 'onSongAdded');
-    },
+    }
+
     _closeFileBrowser() {
         this.isOpen = false;
         clearElementInnerHTML(this.folderListBox);
         clearElementInnerHTML(this.fileListBox);
         this.fileExplorerBox.style.display = 'none';
-    },
+    }
+
     _openFileBrowser() {
         this.isOpen = true;
         this.fileExplorerBox.style.display = 'block';
-    },
-};
+    }
+}
 
-export const TrackListBrowser = function(audioPlayer, audioPlayerDisplay) {
-    this._tracklistBrowserNotifications = TracklistNotifier;
-    this.audioPlayer = audioPlayer;
-    this.audioPlayerDisplay = audioPlayerDisplay;
-    this.windowCnt = document.getElementById('window-content');
-    this.isVisible = false;
-    TrackListManager.onAddedToQueue(this._notifyAddToQueue.bind(this), this);
-    TrackListManager.onRemoveTrackFromTrackList(this._notifyARemovedTrack.bind(this), this);
-};
-TrackListBrowser.prototype = {
+export class TrackListBrowser { 
+    constructor(audioPlayer, audioPlayerDisplay) {
+        this._tracklistBrowserNotifications = TracklistNotifier;
+        this.audioPlayer = audioPlayer;
+        this.audioPlayerDisplay = audioPlayerDisplay;
+        this.windowCnt = document.getElementById('window-content');
+        this.isVisible = false;
+        TrackListManager.onAddedToQueue(this._notifyAddToQueue.bind(this), this);
+        TrackListManager.onRemoveTrackFromTrackList(this._notifyARemovedTrack.bind(this), this);
+    }
+    
     setGrid(grid) {
         this.grid = grid;
-    },
+    }
+
     getGrid() {
         return this.grid;
-    },
+    }
+
     show() {
         this.windowCnt.style.display = 'block';
         this.isVisible = true;
         this.scrollToCurrentTrack();
-    },
+    }
+
     hide(evt) {
         if (evt && evt.target != evt.currentTarget)
             return;
@@ -1270,13 +1242,15 @@ TrackListBrowser.prototype = {
             return
         this.windowCnt.style.display = 'none';
         this.isVisible = false;
-    },
+    }
+
     playSongFromTracklist(evt) {
         const cell = evt.detail.HTMLItem;
         TrackListManager.setTrackIndex(cell.getParentItem().getIndex() - 1, true);
         const {track} = TrackListManager.getCurrentTrack();
         this.audioPlayerDisplay.setTrack(track);
-    },
+    }
+
     showActionMenu(evt) {
         const target = evt.target;
         this.hideAllActionMenus();
@@ -1322,17 +1296,21 @@ TrackListBrowser.prototype = {
         });
 
         target.parentNode.appendChild(divElem);
-    },
+    }
+
     hideActionMenu(divElem) {
         divElem.style.display = 'none';
-    },
+    }
+
     hideAllActionMenus() {
         document.querySelectorAll('.action-menu-cnt').forEach(el => el.style.display = 'none');
-    },
+    }
+
     addToQueueAction(divElem, trackUUid) {
         TrackListManager.addToQueue(TrackListManager.getTrackByUUID(trackUUid));
         divElem.style.display = 'none';
-    },
+    }
+
     deleteTrackAction(liDelete, divElem, trackUUid) {
         const api = new API();
         api.deleteTrack(trackUUid).then((res) => {
@@ -1344,10 +1322,12 @@ TrackListBrowser.prototype = {
                 console.error('Error deleting file!', res);
             }
         }).catch(error => console.error(error));
-    },
+    }
+
     addToFavoriteAction(liFavorite, divElem, trackUUid) {
         console.log('not implemented :|', trackUUid);
-    },
+    }
+
     setCurrentlyPlayingTrack(index) {
         if (!this.grid)
             return console.warn("TrackListBrowser: No grid set for the browser, cannot highlight currently playing track.");
@@ -1367,7 +1347,8 @@ TrackListBrowser.prototype = {
         } else {
             console.warn("Mediator pointed to a grid, but row was missing at index:", {index, row}, this.grid);
         }
-    },
+    }
+
     clearAllCurrentlyPlaying() {
         if (this.nowPlaying) {
             this.nowPlaying.hide();
@@ -1377,8 +1358,8 @@ TrackListBrowser.prototype = {
             this.previousRow.classRemove('currently-playing');
             this._restetNowPlayingCell(this.previousRow);
         }
-        
-    },
+    }
+
     scrollToCurrentTrack() {
         const currentlyPlaying = document.querySelector('div.row.currently-playing');
         if (currentlyPlaying) {
@@ -1391,7 +1372,8 @@ TrackListBrowser.prototype = {
                 });
             }, 0);
         }
-    },
+    }
+
     toggleNowPlaying(hide = true, row) {
         if (!this.nowPlaying) return;
         if (!row) row = this.previousRow;
@@ -1401,7 +1383,7 @@ TrackListBrowser.prototype = {
         } else {
             this._appendNowPlayingToCell(row);
         }
-    },
+    }
 
     _appendNowPlayingToCell(row) {
         for (const cell of row) {
@@ -1412,7 +1394,7 @@ TrackListBrowser.prototype = {
                 break;
             }
         }
-    },
+    }
 
     _restetNowPlayingCell(row) {
         for (const cell of row) {
@@ -1422,12 +1404,13 @@ TrackListBrowser.prototype = {
                 break;
             }
         }
-    },
+    }
  
     _notifyAddToQueue({track}) {
         this._tracklistBrowserNotifications.showAdded(track);
-    },
+    }
+
     _notifyARemovedTrack({track}) {
         this._tracklistBrowserNotifications.showRemoved(track);
-    },
+    }
 }

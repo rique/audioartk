@@ -5,7 +5,6 @@ from uuid import uuid4
 from traceback import print_exc
 
 from django.http import HttpResponse, JsonResponse, Http404
-from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -20,7 +19,7 @@ from core.utils.decorators import json_api
 from core.utils.tracks_utils import extract_track_uuid_from_path
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def addTrack(request):
     params = request.params
@@ -54,7 +53,7 @@ def addTrack(request):
     return JsonResponse(data={'success': True, 'track': track.dict, 'ID3': track_metadata})
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 @transaction.atomic
 def editTrack(request):
@@ -95,7 +94,7 @@ def editTrack(request):
     return JsonResponse({'success': True})
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def deleteTrack(request):
     params = request.params
@@ -114,7 +113,7 @@ def deleteTrack(request):
     return JsonResponse(data={'success': True, })
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def fileBrowser(request):
     print('BASEDIR', settings.BASE_DIR)
@@ -134,7 +133,7 @@ def fileBrowser(request):
     return JsonResponse(data=dir_listing)
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def loadTrackAlbumart(request):
     params = request.params
@@ -152,7 +151,7 @@ def loadTrackAlbumart(request):
     } })
 
 
-@csrf_exempt
+
 @json_api(method='GET')
 def trackArtProxy(request, track_uuid):
     # 1. Verification
@@ -195,7 +194,7 @@ def trackFileProxy(request, track_uuid):
     return XAccelResponse(internal_path=f"/tracks/{track_uuid}.mp3", content_type="audio/mpeg")
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def loadTrackInfo(request):
     params = request.params
@@ -211,7 +210,7 @@ def loadTrackInfo(request):
 
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def loadTrackList(request):
     
@@ -244,7 +243,7 @@ def loadTrackList(request):
     })
 
 
-@csrf_exempt
+
 @json_api(method='GET')
 def loadBGImages(request):
     img_dir = 'imgc/'# './static/imgc/'
@@ -252,7 +251,7 @@ def loadBGImages(request):
     return JsonResponse(data={"success": True, 'img_list': img_list['img_list']})
 
 
-@csrf_exempt
+
 def scanForMyTracksOld(request):
     base_dirs = '/mnt/c'
     shell_comand = "find " + base_dirs + " -type f -iname \"*.mp3\" -exec ls -l {} \;| awk '$5>1005128 {out = $5" "; for (i=9; i <= NF; i++) {out=out" "$i};  print  out}'" 
@@ -276,7 +275,7 @@ def scanForMyTracksOld(request):
     })
 
 
-@csrf_exempt
+
 def scanForMyTracks(request):
     # res_str = res.stdout.decode().strip()
     scanned_tracks = TrackFileSystemService.scan_for_tracks().model_dump()
@@ -287,7 +286,7 @@ def scanForMyTracks(request):
     })
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 @transaction.atomic
 def createPlaylist(request):
@@ -312,7 +311,7 @@ def createPlaylist(request):
     })
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 @transaction.atomic
 def addTracksToPlaylist(request):
@@ -337,7 +336,7 @@ def addTracksToPlaylist(request):
     })
 
 
-@csrf_exempt
+
 @json_api(method='POST')
 def loadPlaylists(request):
     
@@ -349,7 +348,7 @@ def loadPlaylists(request):
     }) 
 
 
-@csrf_exempt
+
 @json_api(method='GET')
 def sync_all_tracks_with_db(request):
     track_list = TrackFileSystemService.list_track_links()

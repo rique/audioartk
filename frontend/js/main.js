@@ -12,10 +12,48 @@ import draw from './src/ui/visuals/Visualizer.js';
 import {AudioPlayerDisplay, PlayerControls, PlayerButtons} from './src/ui/player/PlayerUI.js';
 import {AudioPlayer} from './src/domain/AudioPlayer.js'
 import {keyCotrols} from './src/core/EventBus.js';
-import {LeftMenu, FileBrowser, Layout, layoutHTML, FileBrowserRenderer, TrackListBrowser} from './src/ui/grid/RowTemplates.js';
+import {FileBrowser, Layout, layoutHTML, FileBrowserRenderer, TrackListBrowser} from './src/ui/grid/RowTemplates.js';
 import {AudioPlayerProgressBar} from './src/ui/player/ProgressBar.js';
 import {PlaylistCreator} from './src/domain/models/Playlist.js';
 import {API} from './src/core/HttpClient.js';
+import {
+    SideBarItem, SideBarSectionItem, RawVolumeControlSection, 
+    ActionButtonsItem, PlaylistItem
+} from './src/ui/components/SideBarItems.js';
+
+const api = new API();
+
+try {
+    const sideBar = new SideBarItem();
+    const actionSection = new SideBarSectionItem('action-buttons');
+
+    actionSection.addSectionItems(
+        new ActionButtonsItem('Browse Files').classAdd("open-file-browser"), 
+        new ActionButtonsItem('View tracks').classAdd("open-tracklist-browser"), 
+        new ActionButtonsItem('Create new playlist').classAdd("open-playlist-create"),
+        new ActionButtonsItem('Last FM').classAdd("open-last-fm")
+    );
+
+    const playlistSection = new SideBarSectionItem('playlist-list');
+    
+    const res = await api.loadPlaylists();
+    const playlists = res['playlists'];
+    if (playlists.length > 0) {
+        playlists.forEach((pl) => {
+            playlistSection.addSectionItems(new PlaylistItem(pl.playlist_name, pl.playlist_uuid));
+        });
+
+        actionSection.appendItems();
+        playlistSection.appendItems();
+        sideBar.addComponent(actionSection);
+        sideBar.addComponent(playlistSection);
+        sideBar.addComponent(new RawVolumeControlSection());
+        sideBar.init(document.getElementById('player'));
+    }
+
+} catch(e) {
+    console.error(e);
+}
 
 
 const audioPlayerProgressBar = new AudioPlayerProgressBar();
@@ -26,7 +64,7 @@ audioPlayerProgressBar.setAudioPlayer(audioPlayer);
 const playerControls = new PlayerControls(audioPlayer);
 const playerButtons = new PlayerButtons(document.getElementById('player-controls'), playerControls);
 playerButtons.setUp();
-const api = new API();
+
 
 AudioPlayerControlsMediator.init(keyCotrols);
 AudioPlayerControlsMediator.setPlayerControls(playerControls);
@@ -53,6 +91,14 @@ PlaybackMediator.init(
     audioPlayer
 );
 
+PlaybackNotificationMediator.init(
+    audioPlayer,
+    playerControls,
+    audioPlayerProgressBar
+);
+
+AutocompleteMediator.init(tracklistGrid);
+
 PlayerControlMediator.init(
     audioPlayer, 
     audioPlayerDisplay, 
@@ -63,16 +109,8 @@ PlayerControlMediator.init(
     {tracklistGrid, playlistCreation, fileBrowser, trackListBrowser}
 );
 
-PlaybackNotificationMediator.init(
-    audioPlayer,
-    playerControls,
-    audioPlayerProgressBar
-);
-
-AutocompleteMediator.init(tracklistGrid);
-
-const leftMenu = new LeftMenu();
-leftMenu.init();
+/*const sideBar = new SideBar();
+sideBar.init();*/
 
 NotificationCenter.register('tracks.loaded', 'Tracks Loaded!!', 'info');
 
@@ -95,6 +133,4 @@ api.loadTrackList().then((res) => {
     }); 
 }).catch(error => console.error(error));
 
-api.loadPlaylists().then((res) => {
-    console.log('load playlists',{res});
-}).catch(error => console.error(error));
+

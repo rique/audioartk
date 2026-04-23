@@ -37,6 +37,14 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+CSRF_COOKIE_NAME = "csrftoken"
+
+# 2. MUST BE FALSE so your JavaScript can read it
+CSRF_COOKIE_HTTPONLY = False 
+
+# 3. Ensure this is set if you are using HTTPS (which you are on audioartk.me)
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 # Application definition
 
 INSTALLED_APPS = [

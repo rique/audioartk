@@ -75,7 +75,7 @@ ul {
     max-width: 10rem;
 }
 
-#cotrols {
+#controls {
     width: 100%;
     height: 100%;
 }
@@ -479,12 +479,15 @@ li.fa-solid.fa-file {
     width: 100%;
     padding: 0 0 20px 0;
     height: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
 }
 
 #volume-control {
     width: 100%;
     font-size: 18px;
-    padding: 0 0 20px 0;
+    padding: 20px 0 0;
 }
 
 #volume-control span {
@@ -511,11 +514,13 @@ li.fa-solid.fa-file {
     border-radius: 4px;
     background: #107bb4;
     color: #fff;
-    font-size: 16px;
+    font-size: 1.6rem;
     font-family: Arial, Helvetica, sans-serif;
     cursor: pointer;
     display: block;
-    margin: 0 0 24px 0;
+    height: 38px;
+    flex-shrink: 0;
+    width: 90%;
 }
 
 #file-browser-action button:hover {
@@ -568,12 +573,17 @@ li.fa-solid.fa-file {
 #main-left-menu {
     height: 100%;
     background: transparent;
-    width: 16%;
+    width: 20%;
     position: absolute;
     /*right: -358px;*/
-    right: -14.2%;
+    right: -337px;
     top: 0;
     z-index: 50;
+    transition: right 0.2s ease-in-out;
+}
+
+#main-left-menu.is-open {
+    right: -30px;
 }
 
 #open-menu {
@@ -792,4 +802,43 @@ table.queue-table .small-cell {
   animation: flash-glow 1s ease-out;
   border-left: 3px solid #007bff;
   border-radius: 4px;
+}
+
+.no-wrap-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#action-buttons, #playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+ #playlist-list {
+    max-height: 550px;
+    overflow-y: auto;
+ }
+
+#playlist-list::before {
+    /*content: "Playlists";
+    text-transform: uppercase;
+    padding: 4px;
+    cursor: pointer;*/
+}
+
+#playlist-list button {
+    height: 48px;
+}
+
+.playlist-itm {
+    height: 40px;
+    padding: 7px;
+    border-bottom: 1px solid #d6d6d6;
+    cursor: pointer;
+    background: #107bb4;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 1.6rem;
 }
