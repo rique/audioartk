@@ -1,13 +1,13 @@
 import BaseEngine from "./BaseEngine.js";
 
 export class BarChartEngine extends BaseEngine {
-    setup(audioPlayer, fftSize = 256) {
+    async setup(audioPlayer, fftSize = 256) {
         this.audioCtx = new AudioContext();
         this.audioSourceNode = this.audioCtx.createMediaElementSource(audioPlayer.audioElem);
 
         //Create analyser node
         this.analyserNode = this.audioCtx.createAnalyser();
-        this.analyserNode.fftSize = fftSize;
+        this.analyserNode.fftSize = fftSize ?? 256;
         this.bufferLength = this.analyserNode.frequencyBinCount;
         this.dataArray = new Float32Array(this.bufferLength);
         // this.analyserNode.fftSize = fftSize;
@@ -19,16 +19,22 @@ export class BarChartEngine extends BaseEngine {
 
         this._buildContext();
     }
+
+    update() {
+        if (!this.analyserNode) return;
+        // This method pulls fresh data from the hardware
+        this.analyserNode.getFloatFrequencyData(this.dataArray);
+    }
 }
 
 export class WaveformEngine extends BaseEngine {
-    setup(audioPlayer, fftSize = 2048) {
+    async setup(audioPlayer, fftSize = 2048) {
         this.audioCtx = new AudioContext();
         this.audioSourceNode = this.audioCtx.createMediaElementSource(audioPlayer.audioElem);
 
         //Create analyser node
         this.analyserNode = this.audioCtx.createAnalyser();
-        this.analyserNode.fftSize = fftSize;
+        this.analyserNode.fftSize = fftSize ?? 2048;
         this.bufferLength = this.analyserNode.frequencyBinCount;
         this.dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
 
@@ -37,5 +43,10 @@ export class WaveformEngine extends BaseEngine {
         this.analyserNode.connect(this.audioCtx.destination);
 
         this._buildContext();
+    }
+
+    update() {
+        if (!this.analyserNode) return;
+        this.analyserNode.getByteTimeDomainData(this.dataArray);
     }
 }

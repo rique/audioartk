@@ -1,4 +1,5 @@
 import BaseVisualizer from "./BaseVisualizer.js"
+import {getFormatedDate} from '../../../../core/Utils.js';
 
 export class BaseChartColorVisualizer extends BaseVisualizer {
     _pulseLigthness(barHeight) {
@@ -26,5 +27,41 @@ export class BaseChartColorVisualizer extends BaseVisualizer {
         }
     
         ctx.fillStyle = `hsla(${hue}, ${saturation}, ${light}, ${alpha})`;
+    }
+
+    process(renderContext) {
+        const {time, dataArray, ctx, canvas, bufferLength} = renderContext;
+        const barWidth = (canvas.attribute('width') / bufferLength); // * 2.2;
+        let posX = 0, posY = 0, maxBarHeight = (255 + 140) * 2;
+        const dateText = getFormatedDate();
+        
+        for (let i = 0; i < bufferLength; i++) {
+            const audioValue = dataArray[i];
+            const barHeight = (audioValue + 140) * 2;
+            renderContext['barHeight'] = barHeight;
+            posY = canvas.attribute('height') - barHeight * 2;
+
+            this.initialize(renderContext);
+            ctx.fillRect(
+                posX,
+                posY,
+                barWidth,
+                barHeight * 2,
+            );
+            ctx.font = "15px sans-serif";
+            ctx.textAlign = 'center';
+            ctx.fillStyle = `#f1f1f1`;
+            ctx.fillText(Math.round(barHeight).toString(), posX + 10, posY - 5, barWidth);
+            posX += barWidth + 1;
+        }
+
+        this._displayOverlay(dateText, ctx);
+    }
+
+    _displayOverlay(dateText, ctx) {
+        ctx.font = "25px sans-serif";
+        ctx.textAlign = 'left';
+        ctx.fillStyle = `#f1f1f1`;
+        ctx.fillText(dateText, 10, 36);
     }
 }

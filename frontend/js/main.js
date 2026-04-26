@@ -8,7 +8,6 @@ import {AudioPlayerControlsMediator} from './src/ui/mediators/AudioPlayerControl
 import {TrackListManager} from './src/domain/TrackList.js';
 import {MetadataIndex} from './src/domain/MetadataIndex.js';
 import {TracklistGrid, library} from './src/ui/grid/GridView.js';
-import draw from './src/ui/visuals/Visualizer.js';
 import {AudioPlayerDisplay, PlayerControls, PlayerButtons} from './src/ui/player/PlayerUI.js';
 import {AudioPlayer} from './src/domain/AudioPlayer.js'
 import {keyCotrols} from './src/core/EventBus.js';
@@ -121,7 +120,7 @@ NotificationCenter.register('tracks.loaded', 'Tracks Loaded!!', 'info');
 }).catch(error => console.error(error));*/
 
 VisualizerManager.addProcessor(bgImgProcessor);
-VisualizerManager.addProcessor(graphProcessor, audioPlayer, 256);
+VisualizerManager.addProcessor(graphProcessor, audioPlayer);
 VisualizerManager.executeProcessors();
 
 api.loadTrackList().then((res) => {

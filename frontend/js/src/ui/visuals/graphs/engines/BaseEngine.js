@@ -3,12 +3,17 @@ export default class BaseEngine {
         this.context = {};
     }
     setup(audioPlayer, fftSize) {}
+    
     getContext() {
         return this.context;
     }
+
     mergeContext(context) {
         this.context = {...this.context, ...context};
     }
+
+    update() {}
+
     _buildContext() {
         for (const [key, val] of Object.entries(this)) {
 			if (key === 'context') continue;

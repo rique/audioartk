@@ -30,12 +30,11 @@ class RedToPurpel extends BaseChartColorVisualizer {
     initialize({barHeight, saturation = '100%', light = '75%', alpha = .6, pulse = false, ctx}) {
         const maxRange = 190; 
         const intensity = Math.min(barHeight / maxRange, 1);
-        console.log('barHeight', {barHeight});
         // 2. The "Warm to Cold" Formula
         // Low intensity (0) = 280 (Purple/Cold)
         // High intensity (1) = 0 (Red/Hot)
         const hue = 280 - (intensity * 280);
-        
+        // console.log('intensity', intensity);
         if (pulse) {
             const pulsed = pulseLigthness(barHeight);
             light = `${pulsed}%`;

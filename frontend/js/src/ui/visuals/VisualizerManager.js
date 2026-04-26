@@ -1,6 +1,5 @@
-import {getFormatedDate} from '../../core/Utils.js';
 import { CanvasItem } from './canvas/CanvasItem.js';
-import VisualizerFactory from './graphs/Registry.js';
+import {VisualizerFactory, EngineFactory} from './graphs/Registry.js';
 import { API } from '../../core/HttpClient.js';
 import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngines.js';
 
@@ -102,96 +101,52 @@ export class BGImagesProcessor extends BaseProcessor {
 
 
 export class GraphProcessor extends BaseProcessor {
-    constructor(chartType = 'barchart', chartName = 'red-to-purple') {
+    // 'waveform', 'neon-pulse-wave'
+    // 'barchart', 'red-to-purple'
+    /*
+    VisualizerFactory.register('waveform', 'waveform-visualizer', WaveformVisualizer);
+    VisualizerFactory.register('waveform', 'neon-pulse-wave', NeonPulseWave);
+    VisualizerFactory.register('waveform', 'mirror-oscilloscope-wave', MirrorOscilloscope);
+    VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave);
+    VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
+    */
+    constructor(category = 'waveform', chartName = 'heatmap-mirror-oscilloscope-wave') {
         super();
-        this.graph = VisualizerFactory.create(chartType, chartName, this.canvasCtx);
+        this.category = category;
+        this.graph = VisualizerFactory.create(category, chartName, this.canvasCtx);
+        this.engine = EngineFactory.create(category);
     }
 
-    setup() {
-        this.audioCtx = new AudioContext();
-        this.audioSourceNode = this.audioCtx.createMediaElementSource(audioPlayer.audioElem);
-
-        //Create analyser node
-        this.analyserNode = this.audioCtx.createAnalyser();
-        this.analyserNode.fftSize = fftSize;
-        this.bufferLength = this.analyserNode.frequencyBinCount;
-        this.dataArray = new Float32Array(this.bufferLength);
-        // this.analyserNode.fftSize = fftSize;
-        // this.dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-
-        //Set up audio node network
-        this.audioSourceNode.connect(this.analyserNode);
-        this.analyserNode.connect(this.audioCtx.destination);
+    async setup(audioPlayer, fftSize) {
+        await this.engine.setup(audioPlayer, fftSize);
     }
 
     process() {
-        this.analyserNode.getFloatFrequencyData(this.dataArray);
-        const barWidth = (this.canvas.attribute('width') / this.bufferLength); // * 2.2;
-        let posX = 0, posY = 0, maxBarHeight = (255 + 140) * 2;
-        const dateText = getFormatedDate();
-        const time = Date.now() * 0.002;
 
-        for (let i = 0; i < this.bufferLength; i++) {
-            const audioValue = this.dataArray[i];
-            const barHeight = (audioValue + 140) * 2;
-            posY = this.canvas.attribute('height') - barHeight * 2;
-            const barContext = {
-                hue: 180, i, time, barHeight, saturation: '100%', light: '75%', alpha: .6, pulse: false, ctx: this.canvasCtx
-            };
+        // 3. Update data from hardware
+        this.engine.update();
+        
+        // 4. Get the context (buffers, bufferLength, etc.)
+        const audioContext = this.engine.getContext();
 
-            const waveContext = {
-                dataArray: this.dataArray, bufferLength: this.bufferLength, canvasWidth: this.canvas.attribute('width'), canvasHeight: this.canvas.attribute('height'), ctx: this.canvasCtx
-            }
+        const renderContext = {
+            ...audioContext,
+            canvasWidth: this.canvas.attribute('width'),
+            canvasHeight: this.canvas.attribute('height'),
+            ctx: this.canvasCtx,
+            canvas: this.canvas,
+            time: Date.now() * 0.002
+        };
 
-            this.graph.initialize(barContext);
-            this.canvasCtx.fillRect(
-                posX,
-                posY,
-                barWidth,
-                barHeight * 2,
-            );
-            this.canvasCtx.font = "25px sans-serif";
-            this.canvasCtx.textAlign = 'left';
-            this.canvasCtx.fillStyle = `#f1f1f1`;
-            this.canvasCtx.fillText(dateText, 10, 36);
-            this.canvasCtx.font = "15px sans-serif";
-            this.canvasCtx.textAlign = 'center';
-            this.canvasCtx.fillStyle = `#f1f1f1`;
-            this.canvasCtx.fillText(Math.round(barHeight).toString(), posX + 10, posY - 5, barWidth);
-            posX += barWidth + 1;
-        }
+        // 5. Hand the data to the visualizer
+        // If it's a waveform, it uses its internal 'draw' logic
+        // If it's a barchart, it uses the loop logic from the base class
+        this.graph.process(renderContext);
     }
 
     setChart(chartType, chartName) {
         if (!chartType || !chartName) return;
         this.graph = VisualizerFactory.create(chartType, chartName, this.canvasCtx);
-    }
-}
-
-
-export class GraphProcessor extends BaseProcessor {
-    setup(audioPlayer, fftSize = 2048) { // FFT size usually higher for smooth waveforms
-        // ... (standard AudioContext setup) ...
-        this.analyserNode.fftSize = fftSize;
-        this.dataArray = new Uint8Array(this.analyserNode.frequencyBinCount);
-    }
-
-    process() {
-        // CRITICAL: Use Time Domain for waveforms
-        this.analyserNode.getByteTimeDomainData(this.dataArray);
-
-        // If the visualizer has a custom 'draw' method, use it
-        if (typeof this.graph.draw === 'function') {
-            this.graph.draw({
-                dataArray: this.dataArray,
-                bufferLength: this.bufferLength,
-                canvasWidth: this.canvas.attribute('width'),
-                canvasHeight: this.canvas.attribute('height'),
-                ctx: this.canvasCtx
-            });
-        } else {
-            // ... fallback to your existing bar chart loop ...
-        }
     }
 }
 
@@ -215,7 +170,8 @@ const VisualizerManager = {
         try {
             await Promise.all(tasks);
         } catch(e) {
-            console.error(e);
+            console.trace(e);
+            return console.error(e);
         }
         
         this.isRunning = true;
