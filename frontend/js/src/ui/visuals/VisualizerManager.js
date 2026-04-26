@@ -101,15 +101,6 @@ export class BGImagesProcessor extends BaseProcessor {
 
 
 export class GraphProcessor extends BaseProcessor {
-    // 'waveform', 'neon-pulse-wave'
-    // 'barchart', 'red-to-purple'
-    /*
-    VisualizerFactory.register('waveform', 'waveform-visualizer', WaveformVisualizer);
-    VisualizerFactory.register('waveform', 'neon-pulse-wave', NeonPulseWave);
-    VisualizerFactory.register('waveform', 'mirror-oscilloscope-wave', MirrorOscilloscope);
-    VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave);
-    VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
-    */
     constructor(category = 'waveform', chartName = 'heatmap-mirror-oscilloscope-wave') {
         super();
         this.category = category;
