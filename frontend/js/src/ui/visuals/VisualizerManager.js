@@ -113,11 +113,8 @@ export class GraphProcessor extends BaseProcessor {
     }
 
     process() {
-
-        // 3. Update data from hardware
         this.engine.update();
         
-        // 4. Get the context (buffers, bufferLength, etc.)
         const audioContext = this.engine.getContext();
 
         const renderContext = {
@@ -129,9 +126,6 @@ export class GraphProcessor extends BaseProcessor {
             time: Date.now() * 0.002
         };
 
-        // 5. Hand the data to the visualizer
-        // If it's a waveform, it uses its internal 'draw' logic
-        // If it's a barchart, it uses the loop logic from the base class
         this.graph.process(renderContext);
     }
 
