@@ -20,6 +20,8 @@ import {
     SideBarItem, SideBarSectionItem, RawVolumeControlSection, 
     ActionButtonsItem, PlaylistItem
 } from './src/ui/components/SideBarItems.js';
+import {VisualizerManager, bgImgProcessor, graphProcessor} from "./src/ui/visuals/Main.js"
+import { BGImagesProcessor } from './src/ui/visuals/VisualizerManager.js';
 
 const api = new API();
 
@@ -114,9 +116,13 @@ sideBar.init();*/
 
 NotificationCenter.register('tracks.loaded', 'Tracks Loaded!!', 'info');
 
-api.loadBGImages().then((res) => {
+/*api.loadBGImages().then((res) => {
     draw(audioPlayer, res['img_list']);
-}).catch(error => console.error(error));
+}).catch(error => console.error(error));*/
+
+VisualizerManager.addProcessor(bgImgProcessor);
+VisualizerManager.addProcessor(graphProcessor, audioPlayer, 256);
+VisualizerManager.executeProcessors();
 
 api.loadTrackList().then((res) => {
     audioPlayer.init();

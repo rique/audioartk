@@ -30,7 +30,6 @@ def addTrack(request):
     track_original_path = params['track_original_path']
     
     track_metadata = TrackManagerService.get_tags(track_original_path)
-
     track_uuid = str(uuid4())
 
     TrackFileSystemService.store_track(track_original_path, track_uuid)
@@ -213,7 +212,6 @@ def loadTrackInfo(request):
 
 @json_api(method='POST')
 def loadTrackList(request):
-    
     tracks = Tracks.objects.filter().all()
     tracklist = []
     nb_tracks = len(tracks)

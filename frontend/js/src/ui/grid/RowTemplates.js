@@ -463,18 +463,22 @@ export class HTMLDraggableItems extends HTMLIndexedItems {
         this.addEventListener('dropped', cb);
     }
 
-    init(seekParent) {
+    init(seekParent, anchorElement) {
         if (!this.element)
             return false;
 
         if (seekParent)
             this.setSeekParent();
 
+        if (anchorElement) {
+            
+        }
+
         this.css({
             position: 'absolute',
             left: `${this.offsetLeft()}px`,
             top: `${this.offsetTop()}px`,
-            zIndex: 100,
+            zIndex: 999,
         });
 
         this.render().classList.replace('dropped', 'dragged');
@@ -485,6 +489,7 @@ export class HTMLDraggableItems extends HTMLIndexedItems {
     reset() {
         this.css({
             position: 'static',
+            zIndex: 0
         });
 
         const droppedAnimation = new DroppedAnimation(this.render());

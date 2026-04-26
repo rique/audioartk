@@ -41,6 +41,7 @@ ul {
 #content {
     display: flex;
     flex-direction: row;
+    position: relative;
 }
 
 #player {
@@ -195,7 +196,7 @@ a.player-action .fa-solid {
     height: 100%;
     position: fixed;
     background: rgba(100, 100, 100, .4);
-    z-index: 100;
+    z-index: 50;
     top: 0;
     left: 0;
     display: none;
@@ -212,6 +213,10 @@ a.player-action .fa-solid {
     padding: 16px;
     display: none;
     margin: 10% auto 0 auto;
+}
+
+.cnt-overlay #window-content {
+    z-index: auto;
 }
 
 .cnt-overlay .file-browser, 
@@ -571,7 +576,7 @@ li.fa-solid.fa-file {
   }
 
 #main-left-menu {
-    height: 100%;
+    height: 107.82rem;
     background: transparent;
     width: 20%;
     position: absolute;

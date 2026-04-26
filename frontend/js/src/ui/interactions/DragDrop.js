@@ -13,10 +13,17 @@ const getButton = (key) => {
     return 'unknown';
 };
 
-const getCursor = (evt) => {
+const getCursor = (evt, anchorElement) => {
+    let X = evt.clientX, 
+        Y = evt.clientY;
+    if (anchorElement) {
+        const anchorElementRect = anchorElement.getBoundingClientRect();
+        X -= anchorElementRect.left;
+        Y -= anchorElementRect.top;
+    }
     return {
-        X: evt.clientX,
-        Y: evt.clientY,
+        X,
+        Y,
         buttons: getButton(evt.buttons)
     }
 }
@@ -25,8 +32,8 @@ const DragmeMover = function(dragme) {
     this.dragme = dragme;
 }
 DragmeMover.prototype = {
-    init(seekParent) {
-        return this.dragme.init(seekParent);
+    init(seekParent, anchorElement) {
+        return this.dragme.init(seekParent, anchorElement);
     },
     moveTo(x, y) {
         if (this.prevX && this.prevY) {
@@ -85,20 +92,20 @@ DragIt.prototype = {
     unsetDragmeSeekParent() {
         this.dragMover.getDragme().unsetSeekParent();
     },
-    dragit(cursor, seekParent) {
+    dragit(cursor, seekParent, anchorElement) {
         if (cursor.buttons != 'leftClick')
             return;
                         
         if (!this._isInit)
-            this._init(seekParent);
+            this._init(seekParent, anchorElement);
         this.pressed = true;
 
         this.getDragme().dispatchEvent('dragged');
         this.dragMover.moveTo(cursor.X, cursor.Y);
     },
-    dragmove(cursor, seekParent) {
+    dragmove(cursor, seekParent, anchorElement) {
         if (this.pressed)
-            this.dragit(cursor, seekParent);
+            this.dragit(cursor, seekParent, anchorElement);
     },
     dragstop(cursor) {
         if (!this.pressed)
@@ -121,21 +128,22 @@ DragIt.prototype = {
     toggleHovered(hovered) {
         this.getDragme().toggleHovered(hovered)
     },
-    _init(seekParent) {
-        this._isInit = this.dragMover.init(seekParent);
+    _init(seekParent, anchorElement) {
+        this._isInit = this.dragMover.init(seekParent, anchorElement);
     },
     _finish() {
         this.pressed = false;
         this._isInit = false;
         this.dragMover.done();
-        if (this.onFinish && typeof this.onFinish === 'function')
+        if (typeof this.onFinish === 'function')
             this.onFinish(this);
     }
 }
 
-const DragitManager = function(drags) {
+const DragitManager = function(drags, anchorElement) {
     this.drags = drags || [];
     this.seekParent = false;
+    this.anchorElement = anchorElement;
 }
 DragitManager.prototype = {
     activate(elementsArray, seekParent) {
@@ -182,11 +190,15 @@ DragitManager.prototype = {
             return;
         }
 
-        const cursor = getCursor(evt);
+        const cursor = getCursor(evt, this.anchorElement);
         const drag = this._findCursorHoveredDrag(cursor);
 
         if (drag) {
-            drag.dragit(cursor, this.seekParent);
+            if (this.anchorElement) {
+                // console.log('got drag', drag.getDragme().render());
+                // this.anchorElement.append(drag.getDragme().render());
+            }
+            drag.dragit(cursor, this.seekParent, this.anchorElement);
             this.currentDrag = drag;
         }
     },

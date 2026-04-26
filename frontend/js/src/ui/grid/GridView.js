@@ -412,7 +412,7 @@ class GridMaker {
     }
 
     _setDraggableGrid() {
-        this.dragitManager = new DragitManager();
+        this.dragitManager = new DragitManager([], document.querySelector('.cnt-overlay'));
         if (!this.byCell) this.dragitManager.activate(this.getDraggableRows());
         else this.dragitManager.activate(this.getDraggableCells(), true);
     }

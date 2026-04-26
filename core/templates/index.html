@@ -33,6 +33,25 @@
     <div id="player-controls">
     </div>
   </div>
+  <div style="display: none;" class="cnt-overlay">
+    <div style="display: none;" id="window-folder" class="file-browser">
+    </div>
+    <div style="display: none;" id="window-content">
+      <div class="tracklist-head">
+        <div class="tracklist-title inline-block">Track list</div><div class="tracklist-search inline-block">
+          <div class="img-cnt inline-block"><img src="/static/mag-glass2-white.svg"></div><div class="input-cnt inline-block" style="visibility: hidden;"><input class="search-input"></div>
+        </div>
+      </div>
+      <div class="tracklist-content-div">
+        <div id="table-content"></div>
+        <div class="tracklist-info-cnt">
+          <span class="tracklist-info-nb">
+            <span class="nb-tracks">0</span> Total Tracks</span><span class="tracklist-info-duration">
+              <span class="duration-tracks">00:00:00</span>Total Duration</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 <div style="display: none;" id="volume-display">
   <span class="vol-val">100</span>
@@ -41,25 +60,7 @@
   <i id="mute-on" style="display: none;" class="fa-solid fa-volume-xmark"></i>
   <i id="mute-off" style="display: none;" class="fa-solid fa-volume-high"></i>
 </div>
-<div style="display: none;" class="cnt-overlay">
-  <div style="display: none;" id="window-folder" class="file-browser">
-  </div>
-  <div style="display: none;" id="window-content">
-    <div class="tracklist-head">
-      <div class="tracklist-title inline-block">Track list</div><div class="tracklist-search inline-block">
-        <div class="img-cnt inline-block"><img src="/static/mag-glass2-white.svg"></div><div class="input-cnt inline-block" style="visibility: hidden;"><input class="search-input"></div>
-      </div>
-    </div>
-    <div class="tracklist-content-div">
-      <div id="table-content"></div>
-      <div class="tracklist-info-cnt">
-        <span class="tracklist-info-nb">
-          <span class="nb-tracks">0</span> Total Tracks</span><span class="tracklist-info-duration">
-            <span class="duration-tracks">00:00:00</span>Total Duration</span>
-      </div>
-    </div>
-  </div>
-</div>
+
 <div id="notifications-cnt">
 </div>
 {% endblock %}
