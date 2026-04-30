@@ -4,7 +4,6 @@ import {HTMLItems} from '../../grid/RowTemplates.js';
 export class CanvasItem extends HTMLItems {
     constructor({width, height, padWidth = 0, padHeight = 0, autoResize = false}) {
         super('canvas');
-        console.log('Welcome to new Canvas, enjoy it!');
         this.attribute('width', width - padWidth)
                 .attribute('height', height - padHeight)
                 .width(width - padWidth)

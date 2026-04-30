@@ -2,45 +2,25 @@ import BaseVisualizer from "./BaseVisualizer.js";
 import {getFormatedDate} from '../../../../core/Utils.js';
 
 export class BaseWaveColorVisualizer extends BaseVisualizer {
-    process(renderContext) {
-        const dateText = getFormatedDate();
-        const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
-        const sliceWidth = canvasWidth / bufferLength;
-        let x = 0;
+    initialize({ time }) {
+        this.baseHue = (time * 126) % 360;
+        // We don't return {r,g,b} here anymore because the Renderer 
+        // will ask getColorAt for them inside the loop.
+    }
 
-        // 1. START OPTIMIZATION: Prepare a single path
-        ctx.beginPath();
+    // 2. SAMPLING: Calculate the color for a specific point "i"
+    getColorAt(i, renderContext) {
+        // We take the base (time) and add a shift based on position (i)
+        // Adjust '0.2' to make the rainbow colors closer together or further apart
+        const pointHue = (this.baseHue + (i * 0.2)) % 360;
         
-        // 2. GRADIENT OPTIMIZATION: Create a gradient for the whole width
-        const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0);
-
-        for (let i = 0; i < bufferLength; i++) {
-            const audioValue = dataArray[i];
-            const v = audioValue / 128.0;
-            const y = (v * canvasHeight) / 2;
-
-            renderContext.audioValue = audioValue;
-            renderContext.i = i;
-
-            // 3. Get color components from the subclass
-            const { r, g, b } = this.initialize(renderContext);
-
-            // 4. Add a color stop for this specific point (i / bufferLength is 0.0 to 1.0)
-            // Note: Adding 2048 stops can be heavy; usually 10-20 stops is enough.
-            if (i % 16 === 0 || i === bufferLength - 1) { 
-                gradient.addColorStop(i / (bufferLength - 1), `rgba(${r}, ${g}, ${b}, .6)`);
-            }
-
-            // 5. Connect the coordinates
-            this.draw(x, y, i, r, g, b, ctx);
-
-            x += sliceWidth;
-        }
-
-        // 6. SINGLE STROKE: Apply the gradient and draw once
-        ctx.strokeStyle = gradient;
-        ctx.stroke();
-
+        return this._hslToRgb(pointHue, 100, 70);
+    }
+    process(renderContext) {
+        this.initialize(renderContext);
+        const dateText = getFormatedDate();
+        const {ctx} = renderContext;
+        this.renderer.render(renderContext);
         this._displayOverlay(dateText, ctx);
     }
     _displayOverlay(dateText, ctx) {
@@ -49,4 +29,8 @@ export class BaseWaveColorVisualizer extends BaseVisualizer {
         ctx.fillStyle = `#f1f1f1`;
         ctx.fillText(dateText, 10, 36);
     }
+}
+
+export class BaseMirrorWaveColorVisualizer extends BaseWaveColorVisualizer {
+    static isMirror = true;
 }

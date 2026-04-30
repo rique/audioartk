@@ -22,40 +22,17 @@ export class BaseChartColorVisualizer extends BaseVisualizer {
         const hue = coef - (intensity * coef);
     
         if (pulse) {
-            const pulsed = pulseLigthness(barHeight);
-            light = `${pulsed}%`;
+            const pulsed = this._pulseLigthness(barHeight);
+            light = pulsed;
         }
     
-        ctx.fillStyle = `hsla(${hue}, ${saturation}, ${light}, ${alpha})`;
+        return {h: hue, s: saturation, l: light, a: alpha};
     }
 
     process(renderContext) {
-        const {time, dataArray, ctx, canvas, bufferLength} = renderContext;
-        const barWidth = (canvas.attribute('width') / bufferLength); // * 2.2;
-        let posX = 0, posY = 0, maxBarHeight = (255 + 140) * 2;
-        const dateText = getFormatedDate();
-        
-        for (let i = 0; i < bufferLength; i++) {
-            const audioValue = dataArray[i];
-            const barHeight = (audioValue + 140) * 2;
-            renderContext['barHeight'] = barHeight;
-            posY = canvas.attribute('height') - barHeight * 2;
-
-            this.initialize(renderContext);
-            ctx.fillRect(
-                posX,
-                posY,
-                barWidth,
-                barHeight * 2,
-            );
-            ctx.font = "15px sans-serif";
-            ctx.textAlign = 'center';
-            ctx.fillStyle = `#f1f1f1`;
-            ctx.fillText(Math.round(barHeight).toString(), posX + 10, posY - 5, barWidth);
-            posX += barWidth + 1;
-        }
-
-        this._displayOverlay(dateText, ctx);
+        const {ctx} = renderContext;
+        this.renderer.render(renderContext);
+        this._displayOverlay(getFormatedDate(), ctx);
     }
 
     _displayOverlay(dateText, ctx) {
@@ -63,5 +40,9 @@ export class BaseChartColorVisualizer extends BaseVisualizer {
         ctx.textAlign = 'left';
         ctx.fillStyle = `#f1f1f1`;
         ctx.fillText(dateText, 10, 36);
+    }
+
+    _defaultCalculationBarHeight(i, dataArray) {
+        return (dataArray[i] + 140) * 2;
     }
 }

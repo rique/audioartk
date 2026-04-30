@@ -2,6 +2,7 @@ import { CanvasItem } from './canvas/CanvasItem.js';
 import {VisualizerFactory, EngineFactory} from './graphs/Registry.js';
 import { API } from '../../core/HttpClient.js';
 import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngines.js';
+import RendererFactory from './Gradient/Renderers/RendererFactory.js';
 
 const api = new API();
 
@@ -21,6 +22,7 @@ export class BGImagesProcessor extends BaseProcessor {
         super();
 
         this.curImg = 'img1.jpg';
+        // this.curImg =  'binikini.jpg';
         this.alphaCoef = 0; 
         this.doFadeIn = true; 
         this.imgIdx = 0;
@@ -99,12 +101,31 @@ export class BGImagesProcessor extends BaseProcessor {
     }
 }
 
+/*
+WaveForm:
+VisualizerFactory.register('waveform', 'waveform-visualizer', WaveformVisualizer);
+VisualizerFactory.register('waveform', 'neon-pulse-wave', NeonPulseWave);
+VisualizerFactory.register('waveform', 'mirror-oscilloscope-wave', MirrorOscilloscope);
+VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave);
+VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
+VisualizerFactory.register('waveform', 'cycling-mirror-oscilloscope-wave', CyclingMirrorOscilloscope);
+VisualizerFactory.register('waveform', 'rainbow-mirror-oscilloscope-wave', RainbowMirrorWave);
+VisualizerFactory.register('waveform', 'heatmap-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
 
+Bars:
+VisualizerFactory.register('barchart', 'classic-red', ClassicRed);
+VisualizerFactory.register('barchart', 'mono-color', MonoColor);
+VisualizerFactory.register('barchart', 'red-to-purple', RedToPurpel);
+VisualizerFactory.register('barchart', 'red-and-purple', RedAndPurpel);
+VisualizerFactory.register('barchart', 'red-to-orange', RedToOrange);
+VisualizerFactory.register('barchart', 'ripple-waves', RippleWaves);
+VisualizerFactory.register('barchart', 'trigbased-rgb-plasma', TrigBasedRGBPlasma);
+*/
 export class GraphProcessor extends BaseProcessor {
-    constructor(category = 'waveform', chartName = 'heatmap-mirror-oscilloscope-wave') {
+    constructor(category = 'waveform', chartName = 'cycling-mirror-oscilloscope-wave', renderer = 'radial') {
         super();
         this.category = category;
-        this.graph = VisualizerFactory.create(category, chartName, this.canvasCtx);
+        this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
         this.engine = EngineFactory.create(category);
     }
 
@@ -174,15 +195,18 @@ const VisualizerManager = {
     _startMainLoop() {
         const loop = () => {
             try {
+                // SET AND RESET CANVAS CONTEXT TO DEFAULTS
                 this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
+                this.canvasCtx.font = "11px sans-serif";
+                this.canvasCtx.textAlign = 'center';
+                this.canvasCtx.lineWidth = 2;
+                this.canvasCtx.lineCap = 'round';
                 this._processors.forEach(({processor}) => processor.process());
             } catch(e) {
-                console.error(e);
-            } finally {
-                requestAnimationFrame(loop);
-            }
+                return console.error(e);
+            } 
+            requestAnimationFrame(loop);
         }
-
         requestAnimationFrame(loop);
     },
 
@@ -199,7 +223,6 @@ const VisualizerManager = {
         }).appendTo(document.body);
 
         this.canvasCtx = this.canvas.context('2d');
-        this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
     },
 }
 

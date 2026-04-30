@@ -66,7 +66,7 @@ ul {
 
 #player-controls {
     display: flex;
-    gap: 8.4rem; /* doesn't show a gap 84px */
+    gap: 6.2rem; /* doesn't show a gap 84px */
 }
 
 #foto-box, #album-art {
@@ -152,10 +152,10 @@ ul {
     display: none;
     position: absolute;
     /*background: #181717;*/
-    top: 16.5px;
-    left: 12px;
+    top: 8.5px;
+    left: 9px;
     text-align: center;
-    font-size: 17px;
+    font-size: 1.5rem;
     color: #bf1616;
     font-weight: bold;
     height: 16px;
@@ -638,11 +638,11 @@ li.fa-solid.fa-file {
 .notification-box {
     margin: 6px auto 0 auto;
     width: 95%;
-    height: 140px;
+    height: 150px;
     padding: 10px;
     border: 1px solid #313131;
     border-radius: 8px;
-    background: rgb(54, 54, 54);
+    background: rgb(40, 40, 40);
     color: #f4f4f4;
     font-family: Arial, Helvetica, sans-serif;
     filter: drop-shadow(0 0 2px #6a6a6a4a);
@@ -719,7 +719,7 @@ li.fa-solid.fa-file {
 }
 
 .notif-logo {
-    width: 16%;
+    width: 18%;
 }
 
 .notif-logo img {
@@ -730,6 +730,7 @@ li.fa-solid.fa-file {
     padding: 0 6px 0 0;
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 

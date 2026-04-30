@@ -18,7 +18,7 @@ import {API} from './src/core/HttpClient.js';
 import {
     SideBarItem, SideBarSectionItem, RawVolumeControlSection, 
     ActionButtonsItem, PlaylistItem
-} from './src/ui/components/SideBarItems.js';
+} from './src/ui/components/SideBarItem.js';
 import {VisualizerManager, bgImgProcessor, graphProcessor} from "./src/ui/visuals/Main.js"
 import { BGImagesProcessor } from './src/ui/visuals/VisualizerManager.js';
 

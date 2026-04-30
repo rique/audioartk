@@ -6,6 +6,6 @@ import './waveform/WaveformVisualizer.js';
 import './engines/VisualizerEngines.js';
 
 const manifest = VisualizerFactory.getManifest();
-console.log('le manifest, le manifest, stop la violence!', {manifest});
+console.log({manifest});
 
 export {VisualizerFactory, EngineFactory};

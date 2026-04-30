@@ -241,48 +241,20 @@ def loadTrackList(request):
     })
 
 
-
 @json_api(method='GET')
 def loadBGImages(request):
-    img_dir = 'imgc/'# './static/imgc/'
+    img_dir = 'imgc/'
     img_list = TrackFileSystemService.get_background_images(img_dir).model_dump()
     return JsonResponse(data={"success": True, 'img_list': img_list['img_list']})
 
 
-
-def scanForMyTracksOld(request):
-    base_dirs = '/mnt/c'
-    shell_comand = "find " + base_dirs + " -type f -iname \"*.mp3\" -exec ls -l {} \;| awk '$5>1005128 {out = $5" "; for (i=9; i <= NF; i++) {out=out" "$i};  print  out}'" 
-
-    res = subprocess.run(shell_comand, shell=True, capture_output=True)
-    print('stderr', res.stderr.decode())
-    
-    res_str = res.stdout.decode().strip()
-
-    trakslist = []
-
-    if len(res_str) > 0:
-        for track in res_str.split('\n'):
-            #  track 8073963/mnt/sabrent/Music/4lieneticYoursftMadiLarson.mp3 ['8073963', 'mnt', 'sabrent', 'Music', '4lieneticYoursftMadiLarson.mp3']
-            t = track.split('/')
-            trakslist += [(int(t[0]), '/'.join(t[1:]))]
-    
-    return JsonResponse(data={
-        'success': True,
-        'trakslist': trakslist
-    })
-
-
-
 def scanForMyTracks(request):
-    # res_str = res.stdout.decode().strip()
     scanned_tracks = TrackFileSystemService.scan_for_tracks().model_dump()
     
     return JsonResponse(data={
         'success': True,
-        'trakslist': scanned_tracks['tracklist']
+        'traklist': scanned_tracks['tracklist']
     })
-
 
 
 @json_api(method='POST')
@@ -307,7 +279,6 @@ def createPlaylist(request):
         'success': True,
         'playlist_uuid': playlist.playlist_uuid
     })
-
 
 
 @json_api(method='POST')
