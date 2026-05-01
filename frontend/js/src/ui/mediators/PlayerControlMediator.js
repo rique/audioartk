@@ -35,6 +35,10 @@ export const PlayerControlMediator = {
             this._updateSystemMetadata(track);
         });
 
+        this.audioPlayer.onTrackTimeReset(() => {
+            this.playerProgressBar.resetProgressBar();
+        }, this);
+
         // Time Update (Coming Next logic)
         this.audioPlayer.onTimeUpdate((evt) => {
             const { currentTime, duration } = evt.target;

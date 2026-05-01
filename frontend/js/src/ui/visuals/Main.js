@@ -1,7 +1,6 @@
 import VisualizerManager, {BGImagesProcessor, GraphProcessor} from './VisualizerManager.js'
+import { visualizerManifest } from './graphs/Registry.js';
 
 VisualizerManager.init();
-const bgImgProcessor = new BGImagesProcessor();
-const graphProcessor = new GraphProcessor();
 
-export {VisualizerManager, bgImgProcessor, graphProcessor}
+export {VisualizerManager, BGImagesProcessor, GraphProcessor, visualizerManifest}

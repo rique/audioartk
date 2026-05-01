@@ -1,5 +1,8 @@
 export default class BaseVisualizer {
+    static name = '';
+    static key = '';
     constructor(renderer) {
+        console.log({renderer})
         this.renderer = renderer;
         this.renderer.setGraph(this);
     }

@@ -241,6 +241,11 @@ export class HTMLItems {
         return this;
     }
 
+    appendTo(element) {
+        element.append(this.render());
+        return this;
+    }
+
     remove() {
         this.render().remove();
         return this;
@@ -322,6 +327,15 @@ export class HTMLItems {
         }
     }
 
+    val(value) {
+        if  (value) {
+            this.render().value = value;
+            return this;
+        }
+
+        return this.render().value;
+    }
+
     setSelectionRange(start, end) {
         this.render().setSelectionRange(start, end);
         return this;
@@ -378,6 +392,11 @@ export class HTMLItems {
             return console.error(`Unknown event name ${evtName}`);
         }
         this.render().dispatchEvent(this.events[evtName]);
+    }
+
+    hover(cbIn, cbOut) {
+        this.addEventListener('mouseenter', cbIn);
+        this.addEventListener('mouseleave', cbOut);
     }
 }
 

@@ -8,4 +8,4 @@ import './engines/VisualizerEngines.js';
 const manifest = VisualizerFactory.getManifest();
 console.log({manifest});
 
-export {VisualizerFactory, EngineFactory};
+export {manifest as visualizerManifest, EngineFactory, VisualizerFactory};

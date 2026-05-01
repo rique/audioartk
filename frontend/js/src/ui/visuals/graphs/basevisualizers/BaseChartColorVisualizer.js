@@ -2,6 +2,10 @@ import BaseVisualizer from "./BaseVisualizer.js"
 import {getFormatedDate} from '../../../../core/Utils.js';
 
 export class BaseChartColorVisualizer extends BaseVisualizer {
+    initialize(renderContext) {
+        const {ctx} = renderContext;
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)'
+    }
     _pulseLigthness(barHeight) {
         let intensity = barHeight / 250;
         // Map intensity to a radian (0 to PI)

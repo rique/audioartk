@@ -13,7 +13,7 @@ const RendererFactory = {
         'bar': BarRenderer
     },
 
-    create(renderer = 'horizontal', graph) {
+    create(renderer, graph) {
         const RendererClass = this.mapping[renderer];
         
         if (!RendererClass) {
@@ -21,7 +21,7 @@ const RendererFactory = {
             console.warn(`No renderer found for ${renderer}, defaulting to HorizontalGradientRenderer.`);
             return new HorizontalGradientRenderer(graph);
         }
-
+        console.log({RendererClass, graph});
         return new RendererClass(graph);
     }
 };

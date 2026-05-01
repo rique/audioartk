@@ -1,8 +1,11 @@
 import { CanvasItem } from './canvas/CanvasItem.js';
-import {VisualizerFactory, EngineFactory} from './graphs/Registry.js';
+import {VisualizerFactory, EngineFactory, visualizerManifest} from './graphs/Registry.js';
 import { API } from '../../core/HttpClient.js';
 import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngines.js';
 import RendererFactory from './Gradient/Renderers/RendererFactory.js';
+import { VisualizerDropdownComponent } from '../components/GroupeSelectItem.js';
+import { HTMLItems } from '../grid/RowTemplates.js';
+import { ListEvents } from '../../core/EventBus.js'
 
 const api = new API();
 
@@ -20,16 +23,17 @@ class BaseProcessor {
 export class BGImagesProcessor extends BaseProcessor {
     constructor() {
         super();
-
-        this.curImg = 'img1.jpg';
-        // this.curImg =  'binikini.jpg';
         this.alphaCoef = 0; 
         this.doFadeIn = true; 
         this.imgIdx = 0;
+        this.speed = 1;
     }
 
     async setup() {
         try {
+            this.curImg = 'img1.jpg';
+            // this.curImg =  'binikini.jpg';
+            // this.curImg =  'space.jpg';
             const res = await api.loadBGImages();
             this.imgList = res['img_list'];
             this.background = new Image();
@@ -57,15 +61,16 @@ export class BGImagesProcessor extends BaseProcessor {
         if (!this.background || !this.background.height) return;
 
         if (this.doFadeIn)
-            this.alphaCoef += 1;
+            this.alphaCoef += this.speed;
         else
-            this.alphaCoef -= 1;
+            this.alphaCoef -= this.speed;
         if (this.alphaCoef >= 2328)
             this.doFadeIn = false;
         else if (this.alphaCoef == 0) {
             this.doFadeIn = true;
             this.curImg = encodeURI(`${this.imgList[this.imgIdx]}`);
             this.background = new Image();
+            console.log('curImg', this.curImg);
             this.background.src = `https://audioartk.me/${this.curImg}`;
             ++this.imgIdx;
             if (this.imgIdx >= this.imgList.length)
@@ -110,7 +115,7 @@ VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave)
 VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
 VisualizerFactory.register('waveform', 'cycling-mirror-oscilloscope-wave', CyclingMirrorOscilloscope);
 VisualizerFactory.register('waveform', 'rainbow-mirror-oscilloscope-wave', RainbowMirrorWave);
-VisualizerFactory.register('waveform', 'heatmap-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
+VisualizerFactory.register('waveform', 'heatmap-cycling-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
 
 Bars:
 VisualizerFactory.register('barchart', 'classic-red', ClassicRed);
@@ -122,15 +127,17 @@ VisualizerFactory.register('barchart', 'ripple-waves', RippleWaves);
 VisualizerFactory.register('barchart', 'trigbased-rgb-plasma', TrigBasedRGBPlasma);
 */
 export class GraphProcessor extends BaseProcessor {
-    constructor(category = 'waveform', chartName = 'cycling-mirror-oscilloscope-wave', renderer = 'radial') {
+    constructor(audioPlayer, category = 'waveform', chartName = 'heatmap-cycling-mirror-oscilloscope-wave', renderer = 'radial') {
         super();
+        this.audioPlayer = audioPlayer;
         this.category = category;
         this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
         this.engine = EngineFactory.create(category);
+        VisualizerManager.onSwitchVisualizer(this.setChart.bind(this));
     }
 
-    async setup(audioPlayer, fftSize) {
-        await this.engine.setup(audioPlayer, fftSize);
+    async setup(fftSize) {
+        await this.engine.setup(this.audioPlayer, fftSize);
     }
 
     process() {
@@ -150,9 +157,12 @@ export class GraphProcessor extends BaseProcessor {
         this.graph.process(renderContext);
     }
 
-    setChart(chartType, chartName) {
-        if (!chartType || !chartName) return;
-        this.graph = VisualizerFactory.create(chartType, chartName, this.canvasCtx);
+    setChart(category, chartName) {
+        if (!category || !chartName) return;
+        const rendererType = category == 'waveform' ? RendererFactory.create('radial') : RendererFactory.create('bar');
+        this.graph = VisualizerFactory.create(category, chartName, rendererType);
+        this.engine = EngineFactory.create(category);
+        this.setup();
     }
 }
 
@@ -162,6 +172,8 @@ const VisualizerManager = {
         this._initCanvas();
         this._processors = [];
         this.isRunning = false;
+        this._events = new ListEvents();
+        this._buildVisualizerSelector();
     },
     
     addProcessor(processor, ...args) {
@@ -181,6 +193,7 @@ const VisualizerManager = {
         }
         
         this.isRunning = true;
+        this._stop = false;
         this._startMainLoop();
     },
 
@@ -205,12 +218,19 @@ const VisualizerManager = {
             } catch(e) {
                 return console.error(e);
             } 
-            requestAnimationFrame(loop);
+            if (!this._stop)
+                requestAnimationFrame(loop);
         }
         requestAnimationFrame(loop);
     },
 
     _initCanvas() {
+        this.container = new HTMLItems('div').css({
+            position: 'relative',
+            width: 'fit-content',
+            margin: 'auto'
+        }).appendTo(document.body);
+
         this.canvas = new CanvasItem({
             width: window.innerWidth, 
             height: window.innerHeight, 
@@ -219,11 +239,32 @@ const VisualizerManager = {
             autoResize: true
         }).css({
             display: 'block',
-            margin: 'auto'
-        }).appendTo(document.body);
+        }).appendTo(this.container.render());
 
         this.canvasCtx = this.canvas.context('2d');
     },
+
+    _buildVisualizerSelector() {
+        const visulizerSelector = new VisualizerDropdownComponent();
+        visulizerSelector.buildFromManifest(visualizerManifest);
+        visulizerSelector.appendAll();
+        visulizerSelector.appendToElement(this.container);
+        this.container.hover(visulizerSelector.show.bind(visulizerSelector), visulizerSelector.hide.bind(visulizerSelector));
+        visulizerSelector.onChange((e) => {
+            const target = e.target;
+            const category = target.options[target.selectedIndex].dataset.cat;
+            // this.isRunning = false;
+            // this._stop = true;
+            this._events.trigger('onSwitchVisualizer', category, e.target.value); //switchVisualizer(e.target.value, category);
+        });
+    },
+
+    onSwitchVisualizer(cb, subscriber) {
+        // Here you would tell your processor to update its internal 'graph'
+        // Example: this.mainProcessor.setVisualizer(type);
+        
+        this._events.onEventRegister({cb, subscriber}, 'onSwitchVisualizer');
+    }
 }
 
 export default VisualizerManager;

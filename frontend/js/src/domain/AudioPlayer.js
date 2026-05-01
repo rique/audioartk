@@ -103,6 +103,7 @@ export class AudioPlayer {
     prev() {
         if (this.getCurrentTime() > 3.6) {
             this.setCurrentTime(0);
+            this.audioPlayerEvents.trigger('onTrackTimeReset', this.currentTrack);
         } else {
             this.audioPlayerEvents.trigger('onAudioEnded', this.currentTrack);
             this.setCurrentTrackFromTrackList(true, true);
@@ -236,4 +237,5 @@ export class AudioPlayer {
     onPlayPause(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onPlayPause'); }
     onStop(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onStop'); }
     onTrackNearEnd(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onTrackNearEnd'); }
+    onTrackTimeReset(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onTrackTimeReset'); }
 }

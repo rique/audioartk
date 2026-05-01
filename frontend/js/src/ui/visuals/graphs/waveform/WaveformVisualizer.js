@@ -3,6 +3,8 @@ import VisualizerFactory from '../Factory.js';
 
 
 class WaveformVisualizer extends BaseWaveColorVisualizer {
+    static name = 'wave form visualizer';
+    static key = 'waveform-visualizer';
     /**
      * SETUP: Called once per frame.
      * Use this to set the 'base' state for the frame.
@@ -15,6 +17,7 @@ class WaveformVisualizer extends BaseWaveColorVisualizer {
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
     }
 
     /**
@@ -47,6 +50,8 @@ class WaveformVisualizer extends BaseWaveColorVisualizer {
 
 
 class NeonPulseWave extends BaseWaveColorVisualizer {
+    static name = 'neon pulse wave';
+    static key = 'neon-pulse-wave';
     initialize({ ctx, time }) {
         // Setup global frame state
         this.time = time;
@@ -54,6 +59,7 @@ class NeonPulseWave extends BaseWaveColorVisualizer {
         ctx.shadowBlur = 20;
         // We can't calculate a single intensity here if we want the 
         // colors to ripple along the wave.
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
     }
 
     getColorAt(i, { dataArray, time }) {
@@ -81,34 +87,43 @@ class NeonPulseWave extends BaseWaveColorVisualizer {
 
 
 class MirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
-    initialize({ audioValue, ctx, time }) {
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 20;
+    static name = 'mirror oscilloscope';
+    static key = 'mirror-oscilloscope-wave';
+
+    initialize({ ctx, time }) {
         this.time = time;
+        
+        // Setup styles once per frame
+        ctx.lineWidth = 2; // Moved from draw() for performance
+        ctx.lineJoin = 'miter'; 
+        
+        // Note: You had shadowBlur set to 20, but no shadowColor.
+        // If you want a glow, uncomment the line below:
+        // ctx.shadowBlur = 20;
+        // ctx.shadowColor = 'rgba(0, 191, 255, 0.5)'; 
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
     }
 
     getColorAt(i) {
         const r = this._shiftColor(0, i), 
-            g = this._shiftColor(191, i), 
-            b = 255;
+              g = this._shiftColor(191, i), 
+              b = 255;
         return { r, g, b };
     }
 
-    draw(x, y, i, r, g, b, ctx) {
-        const centerY = ctx.canvas.height / 2;
-        const offset = y - centerY;
+    // Normalized to accept 'side'
+    draw(x, y, i, r, g, b, ctx, side) {
+        const centerY = (ctx.canvas.height / 2) | 0;
+        const offset = (y - centerY) | 0;
 
-        ctx.lineWidth = 2;
-        
-        // Draw Top Half
-        if (i === 0) ctx.moveTo(x, centerY + offset);
-        else ctx.lineTo(x, centerY + offset);
-
-        // Draw Bottom Half (Mirrored)
-        // Note: This works because the Base class calls stroke() once at the end
-        // connecting all these segments into one mirrored path.
-        ctx.moveTo(x, centerY - offset);
-        ctx.lineTo(x, centerY - offset);
+        if (side === 'top') {
+            // Forward Path
+            if (i === 0) ctx.moveTo(x, centerY + offset);
+            else ctx.lineTo(x, centerY + offset);
+        } else {
+            // Backward Path (Mirrored)
+            ctx.lineTo(x, centerY - offset);
+        }
     }
 
     _shiftColor(colorVal, i) {
@@ -121,6 +136,8 @@ class MirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
 }
 
 class CyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
+    static name = 'cycling mirror oscilloscope';
+    static key = 'cycling-mirror-oscilloscope-wave';
     initialize({ time, ctx }) {
         // 1. Store time for the getColorAt method
         this.time = time;
@@ -129,6 +146,7 @@ class CyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
         ctx.lineWidth = 2;
         ctx.lineJoin = 'miter'; // 'miter' is faster than 'round' for complex paths
         ctx.lineCap = 'butt';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
     }
 
     // Added 'renderContext' as a second argument to access data if needed
@@ -137,31 +155,6 @@ class CyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
         // Using (i / 2) creates a nice spatial spread across the wave
         const hue = (time * 50 + (i / 2)) % 360;
         return this._hslToRgb(hue, 100, 70);
-    }
-
-    drawOld(x, y, i, r, g, b, ctx) {
-        const centerY = ctx.canvas.height / 2;
-        const offset = y - centerY;
-
-        /* CRITICAL CHANGE: 
-           Removed ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-           
-           Why? Because your HorizontalGradientRenderer is building a 
-           gradient ribbon. If you set a solid color here, you are 
-           essentially "overwriting" the gradient's instructions. 
-           Let the Renderer handle the color!
-        */
-
-        // Top line
-        if (i === 0) {
-            ctx.moveTo(x | 0, (centerY + offset) | 0);
-        } else {
-            ctx.lineTo(x | 0, (centerY + offset) | 0);
-        }
-
-        // Mirror line (Bottom)
-        ctx.moveTo(x | 0, (centerY - offset) | 0);
-        ctx.lineTo(x | 0, (centerY - offset) | 0);
     }
 
     draw(x, y, i, r, g, b, ctx, side) {
@@ -193,65 +186,49 @@ class CyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
 }
 
 class HeatmapCyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
-    /**
-     * SETUP: Runs once per frame.
-     * We calculate the "Time-based" part of the color here.
-     */
+    static name = 'heatmap cycling mirror oscilloscope';
+    static key = 'heatmap-cycling-mirror-oscilloscope-wave';
+
     initialize({ ctx, time }) {
-        // Roll the background color wheel slowly.
-        // Storing it on 'this' makes it accessible to getColorAt.
         this.rollingBaseline = (time * 0.4) % 360;
 
-        // Set global styles for the neon look.
         ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.shadowBlur = 15;
-        ctx.shadowColor = `rgba(255, 50, 50, 0.6)`;
+        // Setting a global fallback shadow based on the rolling baseline is safer 
+        // for single-fill paths than per-vertex shadows.
+        const fallbackRgb = this._hslToRgb(this.rollingBaseline, 100, 50);
+        ctx.shadowColor = `rgba(${fallbackRgb.r}, ${fallbackRgb.g}, ${fallbackRgb.b}, 0.6)`;
     }
 
-    /**
-     * COLOR: Runs for every gradient stop (e.g., 128 times).
-     * This combines the rolling time with the local audio volume.
-     */
     getColorAt(i, { dataArray }) {
-        // 1. Get the local loudness for THIS specific point 'i'
         const audioValue = dataArray[i];
         const deviation = Math.abs(audioValue - 128);
         const intensity = Math.min(1, deviation / 128); 
-
-        // 2. Map intensity to a Hue shift (0 to 270 degrees)
         const reactiveHue = intensity * 270; 
-        
-        // 3. Combine with the rolling baseline from initialize()
         const finalHue = (this.rollingBaseline + reactiveHue) % 360;
-
-        // Set the shadow color to match the current hue for a true glow
-        // Note: In some renderers, it's better to set this in initialize,
-        // but for a heatmap, a generic shadow based on rollingBaseline works best.
         
         return this._hslToRgb(finalHue, 100, 50);
     }
 
-    /**
-     * DRAW: Runs for every sample (2048 times).
-     * Just carves the path.
-     */
-    draw(x, y, i, r, g, b, ctx) {
-        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.6)`; // Add a purple glow
-        const centerY = ctx.canvas.height / 2;
-        const offset = y - centerY;
+    // 2. NORMALIZE DRAW METHOD: Match the signature and use the 'side' logic
+    draw(x, y, i, r, g, b, ctx, side) {
+        // Optional: Update the shadow color dynamically. 
+        // Be aware that only the final computed color of the loop will apply to the fill.
+        ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.6)`; 
+        
+        const centerY = (ctx.canvas.height / 2) | 0;
+        const offset = (y - centerY) | 0;
 
-        // Draw Top Half
-        if (i === 0) {
-            ctx.moveTo(x, centerY + offset);
+        if (side === 'top') {
+            // Forward Path
+            if (i === 0) ctx.moveTo(x, centerY + offset);
+            else ctx.lineTo(x, centerY + offset);
         } else {
-            ctx.lineTo(x, centerY + offset);
+            // Backward Path
+            ctx.lineTo(x, centerY - offset);
         }
-
-        // Draw Bottom Half (Mirrored)
-        ctx.moveTo(x, centerY - offset);
-        ctx.lineTo(x, centerY - offset);
     }
 
     _hslToRgb(h, s, l) {
@@ -267,6 +244,9 @@ class HeatmapCyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
 }
 
 class RainbowMirrorWave extends BaseMirrorWaveColorVisualizer {
+    static name = 'rainbow mirror oscilloscope';
+    static key = 'rainbow-mirror-oscilloscope-wave'; // Fixed: This was accidentally 'name' before
+
     /**
      * SETUP: Runs once per frame.
      */
@@ -278,6 +258,8 @@ class RainbowMirrorWave extends BaseMirrorWaveColorVisualizer {
         // Set global styles for the frame.
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
+        ctx.lineJoin = 'miter'; // Recommended for single continuous paths to prevent vertex lag
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
     }
 
     /**
@@ -294,21 +276,20 @@ class RainbowMirrorWave extends BaseMirrorWaveColorVisualizer {
 
     /**
      * DRAW: Carves the mirrored path.
+     * Normalized to use the 'side' parameter for two-pass rendering.
      */
-    draw(x, y, i, r, g, b, ctx) {
-        const centerY = ctx.canvas.height / 2;
-        const offset = y - centerY;
+    draw(x, y, i, r, g, b, ctx, side) {
+        const centerY = (ctx.canvas.height / 2) | 0;
+        const offset = (y - centerY) | 0;
 
-        // Top line segment
-        if (i === 0) {
-            ctx.moveTo(x, centerY + offset);
+        if (side === 'top') {
+            // Forward Path
+            if (i === 0) ctx.moveTo(x | 0, (centerY + offset) | 0);
+            else ctx.lineTo(x | 0, (centerY + offset) | 0);
         } else {
-            ctx.lineTo(x, centerY + offset);
+            // Backward Path (Mirrored)
+            ctx.lineTo(x | 0, (centerY - offset) | 0);
         }
-
-        // Mirror line segment (Bottom)
-        ctx.moveTo(x, centerY - offset);
-        ctx.lineTo(x, centerY - offset);
     }
 
     _hslToRgb(h, s, l) {
@@ -325,6 +306,8 @@ class RainbowMirrorWave extends BaseMirrorWaveColorVisualizer {
 
 
 class SolidMountainWave extends BaseWaveColorVisualizer {
+    static name = 'solid mountain wave';
+    static key = 'solid-mountain-wave';
     /**
      * SETUP: Runs once per frame.
      */
@@ -384,6 +367,8 @@ class SolidMountainWave extends BaseWaveColorVisualizer {
 
 
 class DigitalFragmentWave extends BaseWaveColorVisualizer {
+    static name = 'digital fragment wave';
+    static key = 'digital-fragment-wave';
     /**
      * SETUP: Runs once per frame.
      */
@@ -444,4 +429,4 @@ VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave)
 VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
 VisualizerFactory.register('waveform', 'cycling-mirror-oscilloscope-wave', CyclingMirrorOscilloscope);
 VisualizerFactory.register('waveform', 'rainbow-mirror-oscilloscope-wave', RainbowMirrorWave);
-VisualizerFactory.register('waveform', 'heatmap-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
+VisualizerFactory.register('waveform', 'heatmap-cycling-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);

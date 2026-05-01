@@ -15,14 +15,15 @@ const VisualizerFactory = {
         
         const cls = cat.get(type);
         if (!cls) throw new Error(`Type ${type} not found in ${category}`);
-        
+        console.log({category, type, cat, cls, args});
         return new cls(...args);
     },
 
     getManifest() {
         const manifest = {};
         this.categories.forEach((map, catName) => {
-            manifest[catName] = Array.from(map.keys());
+            // const values = preserveCls ? map.values() : map.keys(); 
+            manifest[catName] = Array.from(map.values().map(visCls => [visCls.name, visCls.key]));
         });
         return manifest;
     }

@@ -26,9 +26,4 @@ export class CanvasItem extends HTMLItems {
             this.attribute('height', window.innerHeight - this.padHeight);
         });
     }
-
-    appendTo(element) {
-        element.append(this.render());
-        return this;
-    }
 }

@@ -5,6 +5,8 @@ import { decorate } from '../../../../core/Decorators/Utils.js'
 
 
 class ClassicRed extends BaseChartColorVisualizer {
+    static name = 'classic red';
+    static key = 'classic-red';
     getColorAt(i, {dataArray}) {
         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
         return this._rgbaToHsla(Math.floor((barHeight / 1.4) + 140), 50, 50, 0.66);
@@ -13,6 +15,8 @@ class ClassicRed extends BaseChartColorVisualizer {
 }
 
 class MonoColor extends BaseChartColorVisualizer {
+    static name = 'mono color';
+    static key = 'mono-color';
     getColorAt(i, {dataArray, ctx, hue, saturation, light, alpha, pulse = false}) {
         if (pulse) {
             const barHeight = this._defaultCalculationBarHeight(i, dataArray);
@@ -32,6 +36,8 @@ decorate(MonoColor, 'getColorAt', withNumericContext({
 }));
 
 class RedToPurpel extends BaseChartColorVisualizer {
+    static name = 'red to purple';
+    static key = 'red-to-purple';
     /**
      * COLOR: Runs for every bar.
      * Takes the barHeight and determines the "Warm to Cold" color.
@@ -64,6 +70,8 @@ class RedToPurpel extends BaseChartColorVisualizer {
 
 
 class RedAndPurpel extends BaseChartColorVisualizer {
+    static name = 'red and purple';
+    static key = 'red-and-purple';
     getColorAt(i, {dataArray, saturation, light, alpha, ctx, pulse = false}) {
         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
         const minThreshold = 40;  // Everything below this is pure Purple
@@ -81,7 +89,9 @@ decorate(RedAndPurpel, 'getColorAt', withNumericContext({
     alpha: .6
 }));
 
-class RedToOrange extends BaseChartColorVisualizer { 
+class RedToOrange extends BaseChartColorVisualizer {
+    static name = 'red to orange';
+    static key = 'red-to-orange';
     getColorAt(i, {dataArray, saturation, light, alpha, ctx, pulse = false}) {
         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
         const minThreshold = 50; 
@@ -98,7 +108,9 @@ decorate(RedToOrange, 'getColorAt', withNumericContext({
 }));
 
 
-class RippleWaves extends BaseChartColorVisualizer { 
+class RippleWaves extends BaseChartColorVisualizer {
+    static name = 'ripple waves';
+    static key = 'ripple-waves';
     getColorAt(i, {time, saturation, light, alpha, ctx, pulse = false}) {
         const wave = Math.sin(i * 0.1 + time); 
         const hue = 36 + (wave * 40);
@@ -118,7 +130,9 @@ decorate(RippleWaves, 'getColorAt', withNumericContext({
     alpha: .6
 }));
 
-class TrigBasedRGBPlasma extends BaseChartColorVisualizer { 
+class TrigBasedRGBPlasma extends BaseChartColorVisualizer {
+    static name = 'trigonometry based RGB';
+    static key = 'trigbased-rgb-plasma';
     getColorAt(i, {dataArray, alpha, ctx}) {
         // Normalize: Divide barHeight by your typical "max" (e.g., 300 or 400)
         // This ensures intensity stays between 0 and 1

@@ -3,7 +3,6 @@ import BaseRenderer from "./BaseRenderer.js";
 export class RadialGradientRenderer extends BaseRenderer {
     render(renderContext) {
         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
-        // const sliceWidth = canvasWidth / bufferLength;
         
         const step = Math.max(1, Math.floor(bufferLength / 900));
         const sliceWidth = (canvasWidth / bufferLength) * step;
@@ -12,17 +11,15 @@ export class RadialGradientRenderer extends BaseRenderer {
         // 2. GRADIENT OPTIMIZATION: Create a gradient for the whole width
         // Center of the canvas
         const centerX = canvasWidth / 2;
-        // const centerY = canvasHeight / 2;
         // Start radius 0, End radius max
         // const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvasWidth / 2);
-        const gradient = ctx.createRadialGradient(canvasWidth/2, centerY, 0, canvasWidth/2, centerY, canvasWidth/2);
+        const gradient = ctx.createRadialGradient(canvasWidth / 2, centerY, 0, canvasWidth / 2, centerY, canvasWidth / 2);
 
         gradient.addColorStop(0, `white`); 
         gradient.addColorStop(.1, 'rgb(255, 218, 96)');
         gradient.addColorStop(.20, 'rgb(255, 240, 109)');
         gradient.addColorStop(.4, 'rgb(253, 255, 125)');
         gradient.addColorStop(.65, 'rgb(255, 172, 104)');
-        //gradient.addColorStop(.9, 'rgb(255, 140, 94)');
         gradient.addColorStop(.8, 'rgb(255, 105, 105)');
         gradient.addColorStop(1.0, 'rgb(83, 163, 255)');
         // 1. START OPTIMIZATION: Prepare a single path
@@ -80,10 +77,5 @@ export class RadialGradientRenderer extends BaseRenderer {
         // gradient.addColorStop(.1, `rgba(${r}, ${g}, ${b}, 1)`); 
         // gradient.addColorStop(.5, `rgba(${b}, ${r}, ${g}, 1)`);
         // gradient.addColorStop(1, `rgba(${g}, ${b}, ${r}, 1)`);
-        
-
-        // 6. SINGLE STROKE: Apply the gradient and draw once
-        // ctx.strokeStyle = gradient;
-        // ctx.stroke();
     }
 }
