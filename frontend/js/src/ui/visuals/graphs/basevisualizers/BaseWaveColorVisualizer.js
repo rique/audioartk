@@ -16,11 +16,11 @@ export class BaseWaveColorVisualizer extends BaseVisualizer {
         
         return this._hslToRgb(pointHue, 100, 70);
     }
-    process(renderContext) {
+    process(renderContext, renderer) {
         this.initialize(renderContext);
         const dateText = getFormatedDate();
         const {ctx} = renderContext;
-        this.renderer.render(renderContext);
+        renderer.render(renderContext, this);
         this._displayOverlay(dateText, ctx);
     }
     _displayOverlay(dateText, ctx) {

@@ -131,7 +131,8 @@ export class GraphProcessor extends BaseProcessor {
         super();
         this.audioPlayer = audioPlayer;
         this.category = category;
-        this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
+        this.graph = VisualizerFactory.create(category, chartName);
+        this.renderer = RendererFactory.create(renderer);
         this.engine = EngineFactory.create(category);
         VisualizerManager.onSwitchVisualizer(this.setChart.bind(this), this);
     }
@@ -154,22 +155,19 @@ export class GraphProcessor extends BaseProcessor {
             time: Date.now() * 0.002
         };
 
-        this.graph.process(renderContext);
+        this.graph.process(renderContext, this.renderer); // passing or injecting the renderer as param
     }
 
     setChart(category, chartName, renderer) {
         if (!category || !chartName) return;
-        console.log('setChart', {renderer});
+
         if (!renderer)
             renderer = category == 'waveform' ? 'radial' : 'bar';
-        console.log('setChart', {category, chartName, renderer});
-        this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
+
+        this.graph = VisualizerFactory.create(category, chartName);
+        this.renderer = RendererFactory.create(renderer);
         this.engine = EngineFactory.create(category);
         this.setup();
-    }
-
-    setRenderer() {
-
     }
 }
 

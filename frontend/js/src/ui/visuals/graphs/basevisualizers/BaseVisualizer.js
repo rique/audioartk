@@ -2,9 +2,8 @@ export default class BaseVisualizer {
     static name = '';
     static key = '';
     constructor(renderer) {
-        console.log({renderer})
-        this.renderer = renderer;
-        this.renderer.setGraph(this);
+        // this.renderer = renderer;
+        // this.renderer.setGraph(this); // circular reference here
     }
     initialize({...args}) {}
     getColorAt(i, renderContext, ...args) {}

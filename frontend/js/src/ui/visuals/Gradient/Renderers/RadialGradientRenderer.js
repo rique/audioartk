@@ -1,7 +1,7 @@
 import BaseRenderer from "./BaseRenderer.js";
 
 export class RadialGradientRenderer extends BaseRenderer {
-    render(renderContext) {
+    render(renderContext, graph) {
         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
         
         const step = Math.max(1, Math.floor(bufferLength / 900));
@@ -36,17 +36,17 @@ export class RadialGradientRenderer extends BaseRenderer {
             renderContext.i = i;
 
             // Get colors from subclass
-            ({ r, g, b } = this.graph.getColorAt(i, renderContext));
+            ({ r, g, b } = graph.getColorAt(i, renderContext));
 
             // Call draw with your exact signature
-            this.graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'top');
+            graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'top');
             
             x += sliceWidth;
         }
         
         // PASS 2: BACKWARD (Conditional)
         // Access the static property from the instance's constructor
-        if (this.graph.constructor.isMirror) {
+        if (graph.constructor.isMirror) {
         // Reset X to the end to walk backwards
             x = canvasWidth; 
 
@@ -58,10 +58,10 @@ export class RadialGradientRenderer extends BaseRenderer {
                 renderContext.audioValue = audioValue;
                 renderContext.i = i;
 
-                ({ r, g, b } = this.graph.getColorAt(i, renderContext));
+                ({ r, g, b } = graph.getColorAt(i, renderContext));
 
                 // Call draw backwards
-                this.graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'bottom');
+                graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'bottom');
                 
                 x -= sliceWidth;
             }

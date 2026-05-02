@@ -217,8 +217,16 @@ export class AudioPlayer {
     }
 
     // Helpers & Getters
-    increaseVolume() { this.audioEngine.gain().setVolume(this.audioEngine.gain().volume() + this.volumeStep); }
-    decreaseVolume() { this.audioEngine.gain().setVolume(this.audioEngine.gain().volume() - this.volumeStep); }
+    increaseVolume() { 
+        const volume = this.audioEngine.gain().volume() + this.volumeStep;
+        this._updateVolumeBar(volume);
+        this.audioEngine.gain().setVolume(volume); 
+    }
+    decreaseVolume() { 
+        const volume = this.audioEngine.gain().volume() - this.volumeStep;
+        this._updateVolumeBar(volume);
+        this.audioEngine.gain().setVolume(volume); 
+    }
     setCurrentTime(time) { this.audioElem.currentTime = time; }
     getCurrentTime() { return this.audioElem.currentTime; }
     getDuration() { return this.audioElem.duration; }
@@ -228,7 +236,7 @@ export class AudioPlayer {
 
     _updateVolumeBar(volume) {
         const pct = volume * 100;
-        this.volumeVal.innerText = Math.round(pct).toString();
+        this.volumeVal.innerText = Math.min(100, Math.round(pct)).toString();
         requestAnimationFrame(() => {
             this.volumeBarElem.style.width = `${pct}%`;
         });
