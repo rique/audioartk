@@ -2,18 +2,18 @@ import BaseEngine from "./BaseEngine.js";
 
 export class BarChartEngine extends BaseEngine {
     async setup(audioPlayer, fftSize = 256) {
-        this.audioCtx = new AudioContext();
-        this.audioSourceNode = this.audioCtx.createMediaElementSource(audioPlayer.audioElem);
+        // 1. Connect the source (the "Input Jack")
+        this.audioSourceNode = this.audioEngine.connectSource(audioPlayer.audioElem);
 
-        //Create analyser node
-        this.analyserNode = this.audioCtx.createAnalyser();
-        this.analyserNode.fftSize = fftSize ?? 256;
-        this.bufferLength = this.analyserNode.frequencyBinCount;
+        // 2. Configure the analyzer via the engine service
+        const { analyser, bufferLength } = this.audioEngine.analyser().setAnalyserConfig(fftSize ?? 256);
+        
+        this.analyserNode = analyser;
+        this.bufferLength = bufferLength;
+
+        // 3. Prepare the data array specifically for BarChart requirements
+        // BarCharts typically use Frequency data (Float32)
         this.dataArray = new Float32Array(this.bufferLength);
-
-        //Set up audio node network
-        this.audioSourceNode.connect(this.analyserNode);
-        this.analyserNode.connect(this.audioCtx.destination);
         
         this._buildContext();
     }
@@ -27,19 +27,15 @@ export class BarChartEngine extends BaseEngine {
 
 export class WaveformEngine extends BaseEngine {
     async setup(audioPlayer, fftSize = 2048) {
-        this.audioCtx = new AudioContext();
-        this.audioSourceNode = this.audioCtx.createMediaElementSource(audioPlayer.audioElem);
+        this.audioSourceNode = this.audioEngine.connectSource(audioPlayer.audioElem);
 
-        //Create analyser node
-        this.analyserNode = this.audioCtx.createAnalyser();
-        this.analyserNode.fftSize = fftSize ?? 2048;
-        this.bufferLength = this.analyserNode.frequencyBinCount;
+        // 2. Configure the analyzer via the engine service
+        const { analyser, bufferLength } = this.audioEngine.analyser().setAnalyserConfig(fftSize ?? 2048);
+        
+        this.analyserNode = analyser;
+        this.bufferLength = bufferLength;
         this.dataArray = new Uint8Array(this.bufferLength);
-
-        //Set up audio node network
-        this.audioSourceNode.connect(this.analyserNode);
-        this.analyserNode.connect(this.audioCtx.destination);
-
+        // console.log(this.audioEngine.source.connect(this.audioEngine.ctx.destination));
         this._buildContext();
     }
 

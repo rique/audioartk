@@ -457,6 +457,7 @@ export class AudioPlayerDisplay {
     }
 
     showMuteOverlay(isMuted) {
+        console.log('showMuteOverlay', isMuted);
         this.muteCnt.style.display = 'block';
         this.muteOn.style.display = isMuted ? 'block' : 'none';
         this.muteOff.style.display = isMuted ? 'none' : 'block';

@@ -4,22 +4,19 @@ import { whileMousePressed, whileMousePressedAndMove } from "../core/Utils.js";
 import { ResourceManager } from "./StateManager.js";
 
 export class AudioPlayer {
-    constructor(audioPlayerProgressBar) {
+    constructor(audioEngine) {
         this.audioElem = new Audio();
         this.audioPlayerEvents = new ListEvents();
-        this.audioPlayerProgressBar = audioPlayerProgressBar;
-        /*this.events = {
-            onTimeUpdate: this.onTimeUpdate.bind(this),
-            onTimeUpdateUnsub: this.onTimeUpdateUnsub.bind(this),
+        
+        this.audioEngine = audioEngine;
 
-        }*/
         this.volumeStep = 0.02;
-        this.isPaused = true;
         this.repeatMode = 0; // 0: no repeat, 1: all, 2: one
-
+        this.isPaused = true;
         this._isNearEnd = false;
 
         // DOM Elements
+        //FIXME: Remove the UI volume handling in it's own class  
         this.mainVolumeBarElem = document.getElementById('main-volume-bar');
         this.volumeBarElem = document.getElementById('volume-bar');
         this.volUpBtn = document.querySelector('span.vol-up');
@@ -30,9 +27,10 @@ export class AudioPlayer {
     init() {
         this._setUpPlayer();
 
+        //FIXME: Remove the UI volume handling in it's own class
         whileMousePressed(this.volUpBtn, () => this.increaseVolume(), 84);
         whileMousePressed(this.volDownBtn, () => this.decreaseVolume(), 84);
-        
+        //FIXME: Remove the UI volume handling in it's own class
         const handleVolumeMove = (evt, mouseUp) => this.changeVolume(evt, mouseUp);
         whileMousePressedAndMove(this.mainVolumeBarElem, handleVolumeMove);
         whileMousePressedAndMove(this.volumeBarElem, handleVolumeMove);
@@ -54,6 +52,7 @@ export class AudioPlayer {
     _setUpPlayer() {
         this.audioElem.autoplay = false;
         this.audioElem.preload = "auto";
+        // this.audioElem.volume = 1;
         this.audioElem.onended = () => this.audioEnded();
     }
 
@@ -65,13 +64,22 @@ export class AudioPlayer {
 
     setVolume(volume) {
         const clamped = Math.min(1, Math.max(0, volume));
-        this.audioElem.volume = clamped;
+        // this.audioElem.volume = clamped;
+        this.audioEngine.gain().setVolume(clamped);
         this._updateVolumeBar(clamped);
         this.audioPlayerEvents.trigger('onVolumeChange', clamped);
     }
 
-    playPause() {
-        this.isPaused ? this.play() : this.pause();
+    async playPause() {
+        console.log('playPause', this.isPaused, this.audioEngine.gain().volume())
+        if (this.isPaused) {
+            this.play();
+            await this.audioEngine.gain().fadeIn(.15);
+        } else {
+            await this.audioEngine.gain().fadeOut(.15);
+            this.pause();
+        }
+        
         return this.isPaused;
     }
 
@@ -209,14 +217,14 @@ export class AudioPlayer {
     }
 
     // Helpers & Getters
-    increaseVolume() { this.setVolume(this.audioElem.volume + this.volumeStep); }
-    decreaseVolume() { this.setVolume(this.audioElem.volume - this.volumeStep); }
+    increaseVolume() { this.audioEngine.gain().setVolume(this.audioEngine.gain().volume() + this.volumeStep); }
+    decreaseVolume() { this.audioEngine.gain().setVolume(this.audioEngine.gain().volume() - this.volumeStep); }
     setCurrentTime(time) { this.audioElem.currentTime = time; }
     getCurrentTime() { return this.audioElem.currentTime; }
     getDuration() { return this.audioElem.duration; }
-    getVolume() { return this.audioElem.volume; }
-    isMuted() { return this.audioElem.muted; }
-    mute() { this.audioElem.muted = !this.audioElem.muted; }
+    getVolume() { return this.audioEngine.gain().volume(); }
+    isMuted() { return this.audioEngine.gain().isMuted; }
+    async mute() { await this.audioEngine.gain().mute(); }
 
     _updateVolumeBar(volume) {
         const pct = volume * 100;

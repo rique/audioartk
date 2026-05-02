@@ -1,7 +1,11 @@
+import { AudioEngine } from "../../../../domain/sounds/AudioEngine.js";
+
 export default class BaseEngine {
     constructor() {
         this.context = {};
+        this.audioEngine = AudioEngine;
     }
+
     setup(audioPlayer, fftSize) {}
     
     getContext() {

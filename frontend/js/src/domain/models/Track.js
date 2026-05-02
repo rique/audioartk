@@ -1,7 +1,7 @@
 import { ListEvents, keyCotrols } from "../../core/EventBus.js";
 import {API} from "../../core/HttpClient.js";
 import { TrackListManager } from "../../domain/TrackList.js";
-import { AlbumArtLoader } from "../../domain/AudioEngine.js";
+import { AlbumArtLoader } from "../ResourceLoader.js";
 
 const api = new API();
 

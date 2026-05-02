@@ -45,6 +45,11 @@ export class HTMLItems {
         return this.seekParent && !getReal ? this.getParent() : this.element;
     }
 
+    clearChilds() {
+        clearElementInnerHTML(this.render());
+        return this;
+    }
+
     setSeekParent() {
         this.seekParent = true;
     }
@@ -301,8 +306,9 @@ export class HTMLItems {
         return this.render().className;
     }
 
-    css(style, replace) {
+    css(style, replace, d) {
         style = style || {};
+        if (replace && d) console.log('css', style);
         Object.assign(this.render().style, style);
 
         return this;

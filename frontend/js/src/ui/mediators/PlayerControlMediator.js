@@ -101,8 +101,8 @@ export const PlayerControlMediator = {
     },
 
     _bindKeyboardShortcuts() {
-         this.keyControls.registerKeyDownAction('m', () => {
-            this.audioPlayer.mute();
+         this.keyControls.registerKeyDownAction('m', async () => {
+            await this.audioPlayer.mute();
             this.playerDisplay.showMuteOverlay(this.audioPlayer.isMuted());
         }, this);
         

@@ -3,7 +3,7 @@ import {VisualizerFactory, EngineFactory, visualizerManifest} from './graphs/Reg
 import { API } from '../../core/HttpClient.js';
 import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngines.js';
 import RendererFactory from './Gradient/Renderers/RendererFactory.js';
-import { VisualizerDropdownComponent } from '../components/GroupeSelectItem.js';
+import { VisualizerDropdownComponent, VisualSelectManager } from '../components/GroupeSelectItem.js';
 import { HTMLItems } from '../grid/RowTemplates.js';
 import { ListEvents } from '../../core/EventBus.js'
 
@@ -133,7 +133,7 @@ export class GraphProcessor extends BaseProcessor {
         this.category = category;
         this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
         this.engine = EngineFactory.create(category);
-        VisualizerManager.onSwitchVisualizer(this.setChart.bind(this));
+        VisualizerManager.onSwitchVisualizer(this.setChart.bind(this), this);
     }
 
     async setup(fftSize) {
@@ -157,12 +157,19 @@ export class GraphProcessor extends BaseProcessor {
         this.graph.process(renderContext);
     }
 
-    setChart(category, chartName) {
+    setChart(category, chartName, renderer) {
         if (!category || !chartName) return;
-        const rendererType = category == 'waveform' ? RendererFactory.create('radial') : RendererFactory.create('bar');
-        this.graph = VisualizerFactory.create(category, chartName, rendererType);
+        console.log('setChart', {renderer});
+        if (!renderer)
+            renderer = category == 'waveform' ? 'radial' : 'bar';
+        console.log('setChart', {category, chartName, renderer});
+        this.graph = VisualizerFactory.create(category, chartName, RendererFactory.create(renderer));
         this.engine = EngineFactory.create(category);
         this.setup();
+    }
+
+    setRenderer() {
+
     }
 }
 
@@ -182,7 +189,7 @@ const VisualizerManager = {
     
     async executeProcessors() {
         if (this.isRunning) return;
-
+        
         const tasks = this._processors.map(({processor, args}) => processor.setup(...args));
 
         try {
@@ -215,6 +222,7 @@ const VisualizerManager = {
                 this.canvasCtx.lineWidth = 2;
                 this.canvasCtx.lineCap = 'round';
                 this._processors.forEach(({processor}) => processor.process());
+                
             } catch(e) {
                 return console.error(e);
             } 
@@ -245,17 +253,9 @@ const VisualizerManager = {
     },
 
     _buildVisualizerSelector() {
-        const visulizerSelector = new VisualizerDropdownComponent();
-        visulizerSelector.buildFromManifest(visualizerManifest);
-        visulizerSelector.appendAll();
-        visulizerSelector.appendToElement(this.container);
-        this.container.hover(visulizerSelector.show.bind(visulizerSelector), visulizerSelector.hide.bind(visulizerSelector));
-        visulizerSelector.onChange((e) => {
-            const target = e.target;
-            const category = target.options[target.selectedIndex].dataset.cat;
-            // this.isRunning = false;
-            // this._stop = true;
-            this._events.trigger('onSwitchVisualizer', category, e.target.value); //switchVisualizer(e.target.value, category);
+        VisualSelectManager.init(this.container);
+        VisualSelectManager.onCategoryChange((category, graphName, renderer) => {
+            this._events.trigger('onSwitchVisualizer', category, graphName, renderer);
         });
     },
 

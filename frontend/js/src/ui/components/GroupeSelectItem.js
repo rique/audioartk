@@ -1,4 +1,6 @@
 import { HTMLItems, RawHTMLItem } from "../grid/RowTemplates.js";
+import { ListEvents } from "../../core/EventBus.js";
+import {visualizerManifest} from '../visuals/graphs/Registry.js';
 
 class Option extends HTMLItems {
     constructor() {
@@ -41,6 +43,11 @@ class SelectItem extends HTMLItems {
         return this;
     }
 
+    clearOptions() {
+        this.options = [];
+        this.clearChilds();
+    }
+
     appendOptions() {
         this.append(...this.options);
         return this;
@@ -71,6 +78,11 @@ class SelectGroup extends SelectItem {
         this.append(...this.optgroups.map(optgroup => optgroup.appendOptions()));
         return this;
     }
+
+    clearOptions() {
+        this.options = [];
+        this.clearChilds();
+    }
 }
 
 
@@ -96,27 +108,6 @@ export class VisualizerDropdownComponent {
         });
 
         this.select.appendOptGroups();
-
-        this.select.css({
-            position: 'absolute',
-            top: '4px',
-            right: '20px',
-            zIndex: '100',
-            opacity: '0',
-            transition: 'opacity 0.36s ease',
-            cursor: 'pointer',
-            padding: '8px',
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            color: '#e3e3e3',
-            border: '1px solid #444',
-            borderRadius: '6px'
-        });
-
-        this.select.hover(e => this.select.css({
-            backgroundColor: 'rgba(0,0,0,0.7)',
-        }), e => this.select.css({
-            backgroundColor: 'rgba(0,0,0,0.3)',
-        }))
     }
 
     appendAll() {
@@ -136,5 +127,95 @@ export class VisualizerDropdownComponent {
 
     appendToElement(htmlItem) {
         this.select.appendToElement(htmlItem);
+    }
+}
+
+export class RendererSelectComponent {
+    constructor() {
+        this.select = new SelectItem();
+        this.renderers = {
+            'barchart': ['bar'],
+            'waveform': ['horizontal', 'vertical', 'radial']
+        }
+    }
+
+    build(renderers = []) {
+        if (!renderers) return;
+        this.select.clearOptions();
+        this.addDefaultOption();
+        renderers.forEach((renderer) => {
+            const option = new Option();
+            option.innerContent(renderer).val(renderer);
+            this.select.addOption(option);
+        });
+
+        this.select.appendOptions();
+    }
+
+    buildByCategory(category) {
+        this.build(this.renderers[category]);
+    }
+
+    appendToElement(htmlItem) {
+        this.select.appendToElement(htmlItem);
+    }
+
+    addDefaultOption() {
+        const option = new Option();
+        option.innerContent(' ').val('default');
+        this.select.addOption(option);
+    }
+
+    onChange(cb) {
+        this.select.onChange(cb);
+    }
+}
+
+export const VisualSelectManager = {
+    init(parentItem) {
+        this.visualizerSelect = new VisualizerDropdownComponent();
+        this.rendererSelect = new RendererSelectComponent();
+        this.events = new ListEvents();
+        
+        this.parentItem = parentItem;
+
+        this.visualizerSelect.onChange((e) => {
+            const target = e.target;
+            this.category = target.options[target.selectedIndex].dataset.cat;
+            this.graphName = target.value;
+            this.rendererSelect.buildByCategory(this.category);
+            this.rendererSelect.appendToElement(this.container);
+        });
+
+        this.rendererSelect.onChange((e) => {
+            this.renderer = e.target.value;
+            this.events.trigger('onCategoryChange', this.category, this.graphName, this.renderer);
+        });
+
+        this.container = new HTMLItems('div');
+
+        this.container.classAdd('visualizer-selects');
+
+        this.container.hover(e => this.container.css({
+            backgroundColor: 'rgba(0,0,0,.7)',
+        }), e => this.container.css({
+            backgroundColor: 'rgba(0,0,0,.3)',
+        }));
+
+        this.parentItem.hover(e => this.container.css({
+            opacity: '1',
+        }), e => this.container.css({
+            opacity: '0',
+        }));
+
+        this.visualizerSelect.buildFromManifest(visualizerManifest);
+
+        this.visualizerSelect.appendAll();
+        this.visualizerSelect.appendToElement(this.container);
+        this.parentItem.append(this.container);
+    },
+
+    onCategoryChange(cb, subscriber) {
+        this.events.onEventRegister({cb, subscriber}, 'onCategoryChange');
     }
 }

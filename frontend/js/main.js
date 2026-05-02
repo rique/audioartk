@@ -20,7 +20,7 @@ import {
     ActionButtonsItem, PlaylistItem
 } from './src/ui/components/SideBarItem.js';
 import {VisualizerManager, BGImagesProcessor, GraphProcessor, visualizerManifest} from "./src/ui/visuals/Main.js"
-
+import { AudioEngine } from "./src/domain/sounds/AudioEngine.js"
 
 const api = new API();
 
@@ -56,9 +56,8 @@ try {
     console.error(e);
 }
 
-
+const audioPlayer = new AudioPlayer(AudioEngine);
 const audioPlayerProgressBar = new AudioPlayerProgressBar();
-const audioPlayer = new AudioPlayer(audioPlayerProgressBar);
 const audioPlayerDisplay = new AudioPlayerDisplay(audioPlayer);
 audioPlayerProgressBar.setAudioPlayer(audioPlayer);
 
