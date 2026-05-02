@@ -1,13 +1,13 @@
 import BaseRenderer from "./BaseRenderer.js";
 
 export class BarRenderer extends BaseRenderer {
-    render(renderContext) {
+    render(renderContext, graph) {
         const {ctx, canvasHeight, bufferLength, canvasWidth} = renderContext;
         const barWidth = (canvasWidth / bufferLength);
         let posX = 0;
 
         // 1. Prepare the graph for the frame
-        this.graph.initialize(renderContext);
+        graph.initialize(renderContext);
 
         for (let i = 0; i < bufferLength; i++) {
             const audioValue = renderContext.dataArray[i];
@@ -15,7 +15,7 @@ export class BarRenderer extends BaseRenderer {
             const posY = canvasHeight - barHeight * 2;
 
             // 2. Get the specific color for THIS bar from the graph
-            const { h, s, l, a } = this.graph.getColorAt(i, renderContext);
+            const { h, s, l, a } = graph.getColorAt(i, renderContext);
             
             // 3. Apply the color and draw the bar
             ctx.fillStyle = `hsla(${h}, ${s}%, ${l}%, ${a})`;

@@ -66,7 +66,7 @@ export class BGImagesProcessor extends BaseProcessor {
             this.alphaCoef -= this.speed;
         if (this.alphaCoef >= 2328)
             this.doFadeIn = false;
-        else if (this.alphaCoef == 0) {
+        else if (this.alphaCoef >= 0) {
             this.doFadeIn = true;
             this.curImg = encodeURI(`${this.imgList[this.imgIdx]}`);
             this.background = new Image();
@@ -106,26 +106,6 @@ export class BGImagesProcessor extends BaseProcessor {
     }
 }
 
-/*
-WaveForm:
-VisualizerFactory.register('waveform', 'waveform-visualizer', WaveformVisualizer);
-VisualizerFactory.register('waveform', 'neon-pulse-wave', NeonPulseWave);
-VisualizerFactory.register('waveform', 'mirror-oscilloscope-wave', MirrorOscilloscope);
-VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave);
-VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
-VisualizerFactory.register('waveform', 'cycling-mirror-oscilloscope-wave', CyclingMirrorOscilloscope);
-VisualizerFactory.register('waveform', 'rainbow-mirror-oscilloscope-wave', RainbowMirrorWave);
-VisualizerFactory.register('waveform', 'heatmap-cycling-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
-
-Bars:
-VisualizerFactory.register('barchart', 'classic-red', ClassicRed);
-VisualizerFactory.register('barchart', 'mono-color', MonoColor);
-VisualizerFactory.register('barchart', 'red-to-purple', RedToPurpel);
-VisualizerFactory.register('barchart', 'red-and-purple', RedAndPurpel);
-VisualizerFactory.register('barchart', 'red-to-orange', RedToOrange);
-VisualizerFactory.register('barchart', 'ripple-waves', RippleWaves);
-VisualizerFactory.register('barchart', 'trigbased-rgb-plasma', TrigBasedRGBPlasma);
-*/
 export class GraphProcessor extends BaseProcessor {
     constructor(audioPlayer, category = 'waveform', chartName = 'heatmap-cycling-mirror-oscilloscope-wave', renderer = 'radial') {
         super();
@@ -155,19 +135,19 @@ export class GraphProcessor extends BaseProcessor {
             time: Date.now() * 0.002
         };
 
-        this.graph.process(renderContext, this.renderer); // passing or injecting the renderer as param
+        this.graph.process(renderContext, this.renderer);
     }
 
-    setChart(category, chartName, renderer) {
+    async setChart(category, chartName, renderer) {
         if (!category || !chartName) return;
 
         if (!renderer)
             renderer = category == 'waveform' ? 'radial' : 'bar';
-
+        
         this.graph = VisualizerFactory.create(category, chartName);
         this.renderer = RendererFactory.create(renderer);
         this.engine = EngineFactory.create(category);
-        this.setup();
+        await this.setup();
     }
 }
 
@@ -178,7 +158,7 @@ const VisualizerManager = {
         this._processors = [];
         this.isRunning = false;
         this._events = new ListEvents();
-        this._buildVisualizerSelector();
+        this._initVisualizerSelector();
     },
     
     addProcessor(processor, ...args) {
@@ -245,22 +225,20 @@ const VisualizerManager = {
             autoResize: true
         }).css({
             display: 'block',
+            margin: 'auto'
         }).appendTo(this.container.render());
 
         this.canvasCtx = this.canvas.context('2d');
     },
 
-    _buildVisualizerSelector() {
+    _initVisualizerSelector() {
         VisualSelectManager.init(this.container);
         VisualSelectManager.onCategoryChange((category, graphName, renderer) => {
             this._events.trigger('onSwitchVisualizer', category, graphName, renderer);
         });
     },
 
-    onSwitchVisualizer(cb, subscriber) {
-        // Here you would tell your processor to update its internal 'graph'
-        // Example: this.mainProcessor.setVisualizer(type);
-        
+    onSwitchVisualizer(cb, subscriber) { 
         this._events.onEventRegister({cb, subscriber}, 'onSwitchVisualizer');
     }
 }

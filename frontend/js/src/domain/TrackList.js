@@ -498,6 +498,7 @@ const TrackListManager =  {
             this.shuffleTracklist(trackIndex);
             this.shuffledTracklist.setTrackIndex(curIndex);
             currentTrack = this.shuffledTracklist.current();
+            this.lastTrack = false;
         }
 
         this.trackListEvents.trigger('onShuffleTracklist', currentTrack.track, currentTrack.index, this.isShuffle());

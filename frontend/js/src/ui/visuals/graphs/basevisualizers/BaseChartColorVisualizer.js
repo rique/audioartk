@@ -33,9 +33,9 @@ export class BaseChartColorVisualizer extends BaseVisualizer {
         return {h: hue, s: saturation, l: light, a: alpha};
     }
 
-    process(renderContext) {
+    process(renderContext, renderer) {
         const {ctx} = renderContext;
-        this.renderer.render(renderContext);
+        renderer.render(renderContext, this);
         this._displayOverlay(getFormatedDate(), ctx);
     }
 

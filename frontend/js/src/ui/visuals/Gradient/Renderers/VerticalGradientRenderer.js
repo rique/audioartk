@@ -1,7 +1,7 @@
 import BaseRenderer from "./BaseRenderer.js";
 
 export class VerticalGradientRenderer extends BaseRenderer {
-    render(renderContext) {
+    render(renderContext, graph) {
         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
         const sliceWidth = canvasWidth / bufferLength;
         let x = 0;
@@ -31,10 +31,10 @@ export class VerticalGradientRenderer extends BaseRenderer {
             renderContext.i = i;
 
             // 3. Get color components from the subclass
-            ({ r, g, b } = this.graph.getColorAt(i, renderContext));
+            ({ r, g, b } = graph.getColorAt(i, renderContext));
 
             // 5. Connect the coordinates
-            this.graph.draw(x, y, i, r, g, b, ctx);
+            graph.draw(x, y, i, r, g, b, ctx);
 
             x += sliceWidth;
         }

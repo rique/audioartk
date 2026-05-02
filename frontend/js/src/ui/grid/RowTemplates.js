@@ -1210,7 +1210,7 @@ export class FileBrowser {
                     break;
                 }
             }
-            this.scrollToTarget = null; // Clear the target
+            this.scrollToTarget = null;
         }
     }
 
