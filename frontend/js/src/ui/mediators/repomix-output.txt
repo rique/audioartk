@@ -1,0 +1,514 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where empty lines have been removed, line numbers have been added.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: **/node_modules/**, .venv/**, .git/**, .gitignore, .pg_pass, *.log, dist/**, build/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+AudioPlayerControlsMediator.js
+AutoCompleteMediator.js
+MetadataMediator.js
+PlaybackMediator.js
+PlaybackNotificationMediator.js
+PlayerControlMediator.js
+repomix.config.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="AudioPlayerControlsMediator.js">
+ 1: import {ListEvents} from '../../core/EventBus.js';
+ 2: export const AudioPlayerControlsMediator = {
+ 3:     init(keyEventsCotrols, tracklistBrowser) {
+ 4:         this.keyValues = {
+ 5:             SPACE: ' ',
+ 6:             PLUS: '+',
+ 7:             MINUS: '-',
+ 8:             T: 't',
+ 9:             CAP_P: 'P',
+10:             ArrowRight: 'ArrowRight',
+11:             ArrowLeft: 'ArrowLeft',
+12:         };
+13:         this.tracklistBrowser = tracklistBrowser;
+14:         this.keyEventsCotrols = keyEventsCotrols;
+15:         this.listEvents = new ListEvents();
+16:         this._setUpKeyBindings();
+17:     },
+18:     setPlayerControls(playerControls) {
+19:         if (typeof playerControls === 'undefined') {
+20:             const e = new Error('A player control is required!');
+21:             console.error(e);
+22:             throw e;
+23:         }
+24:         this.playerControls = playerControls;
+25:     },
+26:     playPause() {
+27:         this.playerControls.playPause();
+28:     },
+29:     volumeUp() {
+30:         this.playerControls.increaseVolume();
+31:     },
+32:     volumeDown() {
+33:         this.playerControls.decreaseVolume();
+34:     },
+35:     nextTrack({ctrlKey, repeat}={}) {
+36:         if (ctrlKey || repeat)
+37:             return;
+38:         this.playerControls.next();
+39:     },
+40:     prevTrack({ctrlKey, repeat}={}) {
+41:         if (ctrlKey || repeat)
+42:             return;
+43:         this.playerControls.prev();
+44:     },
+45:     fastFoward({ctrlKey, repeat, shiftKey, type}={}) {
+46:         if (ctrlKey && repeat || shiftKey && repeat) {
+47:             this.playerControls.fastForward();
+48:             this.listEvents.trigger('onFastForward');
+49:         }
+50:     },
+51:     rewind({ctrlKey, repeat, shiftKey, type}={}) {
+52:         if (ctrlKey && repeat || shiftKey && repeat) {
+53:             this.playerControls.rewind();
+54:             this.listEvents.trigger('onRewind');
+55:         }
+56:     },
+57:     onFastForward(cb, subscriber) {
+58:         this.listEvents.onEventRegister({cb, subscriber}, 'onFastForward');
+59:     },
+60:     onRewind(cb, subscriber) {
+61:         this.listEvents.onEventRegister({cb, subscriber}, 'onRewind');
+62:     },
+63:     _setUpKeyBindings() {
+64:         this.keyEventsCotrols.registerKeyUpAction(this.keyValues.SPACE, this.playPause.bind(this), this);
+65:         this.keyEventsCotrols.registerKeyDownAction(this.keyValues.PLUS, this.volumeUp.bind(this), this);
+66:         this.keyEventsCotrols.registerKeyDownAction(this.keyValues.MINUS, this.volumeDown.bind(this), this);
+67:         this.keyEventsCotrols.registerKeyUpAction(this.keyValues.ArrowRight, this.nextTrack.bind(this), this);
+68:         this.keyEventsCotrols.registerKeyUpAction(this.keyValues.ArrowLeft, this.prevTrack.bind(this), this);
+69:         this.keyEventsCotrols.registerKeyDownAction(this.keyValues.ArrowRight, this.fastFoward.bind(this), this);
+70:         this.keyEventsCotrols.registerKeyDownAction(this.keyValues.ArrowLeft, this.rewind.bind(this), this);
+71:     }
+72: }
+</file>
+
+<file path="AutoCompleteMediator.js">
+ 1: import {MetadataIndex} from '../../domain/MetadataIndex.js';
+ 2: import {TrackListManager} from "../../domain/TrackList.js";
+ 3: export const AutocompleteMediator = {
+ 4:     _lastLength: 0,
+ 5:     _activeInput: null, // Track the current DOM element
+ 6:     init(trackGrid) {
+ 7:         this.trackGrid = trackGrid;
+ 8:         this._lastLength = 0;
+ 9:         // Subscribe to the events defined in your TracklistGrid config
+10:         this.trackGrid.onTrackArtistEditing((track, inputEl, val) => 
+11:             this.handleInlineCompletion('artist', inputEl, val)
+12:         , this);
+13:         this.trackGrid.onTrackAlbumEditing((track, inputEl, val) => 
+14:             this.handleInlineCompletion('album', inputEl, val)
+15:         , this);
+16:         TrackListManager.onTrackAddedToTrackList(MetadataIndex.addTrack.bind(MetadataIndex), this);
+17:         TrackListManager.onRemoveTrackFromTrackList(MetadataIndex.removedTrack.bind(MetadataIndex), this);
+18:     },
+19:     handleInlineCompletion(field, inputEl, value, evt) {
+20:         if (this._activeInput !== inputEl) {
+21:             this._activeInput = inputEl;
+22:             this._lastLength = 0; // Reset length tracking for new input
+23:         }
+24:         // 1. If user is deleting (backspace/selection delete), don't autocomplete
+25:         if (value.length <= this._lastLength) {
+26:             this._lastLength = value.length;
+27:             return;
+28:         }
+29:         this._lastLength = value.length;
+30:         // 2. Find a match in our local index
+31:         const match = MetadataIndex.findMatch(field, value);
+32:         if (match && match.length > value.length) {
+33:             const originalLength = value.length;
+34:             // 3. Update the value (programmatic change doesn't re-trigger 'input' usually)
+35:             inputEl.value(match);
+36:             // 4. The iTunes Magic: Select only the suggested part
+37:             // Selection starts where the user stopped typing, and ends at the end of the match
+38:             inputEl.setSelectionRange(originalLength, match.length);
+39:         }
+40:     },
+41: };
+</file>
+
+<file path="MetadataMediator.js">
+ 1: import {Track} from '../../domain/models/Track.js';
+ 2: import {MetadataIndex} from '../../domain/MetadataIndex.js';
+ 3: export const MetadataMediator = {
+ 4:     init() {
+ 5:         Track.onTagChange(this._updateMetadataIndex.bind(this), this);
+ 6:     },
+ 7:     _updateMetadataIndex(tag, value, track) {
+ 8:         if (tag === 'artist' || tag === 'album') {
+ 9:             MetadataIndex.addKeyValue(tag, value);
+10:         }
+11:     }
+12: };
+</file>
+
+<file path="PlaybackMediator.js">
+ 1: import { TrackListManager } from "../../domain/TrackList.js";
+ 2: export const PlaybackMediator = {
+ 3:     _comingNextFired: false,
+ 4:     init(tracklistBrowser, mainGrid, queueGrid, audioPlayer) {
+ 5:         this.browser = tracklistBrowser;
+ 6:         this.mainGrid = mainGrid;
+ 7:         this.queueGrid = queueGrid;
+ 8:         this.audioPlayer = audioPlayer;
+ 9:         // Listen for Global Track Events
+10:         TrackListManager.onQueueFinished(() => this.handleQueueEnd());
+11:         TrackListManager.onTrackListLoaded(() => this._initializeMainGrid());
+12:         TrackListManager.onTrackChanged((track, index, isQueue, hasQueue) => this.handleTrackChange(track, index, isQueue, hasQueue));
+13:         TrackListManager.onGridSyncRequired((track, index, isQueue, hasQueue) => this.handleTrackChange(track, index, isQueue, hasQueue));
+14:         TrackListManager.onShuffleTracklist((track, index) => {
+15:             this.mainGrid.redrawGrid();
+16:             this.handleTrackChange(track, index, false, TrackListManager.queueList.length() > 0);
+17:             if (this.audioPlayer.isPlayerPaused()) {
+18:                 this.audioPlayer.setCurrentTrackFromTrackList(true, undefined, {track, index});
+19:             }
+20:         });
+21:         this.queueGrid.onQueueRendered((row) => {
+22:             this.handleNowPlaying(this.audioPlayer.isPlayerPaused(), row);
+23:         });
+24:         this.mainGrid.onDraggedTrackDropped((htmlItem, isQueuePlaying, draggedStartIndx, draggedEndIndx) => {
+25:             TrackListManager.switchTrackIndex(draggedStartIndx, draggedEndIndx, isQueuePlaying);
+26:             this.mainGrid._syncQueuePosition();
+27:         });
+28:         this.audioPlayer.onPlayPause((isPaused) => {
+29:             const index = TrackListManager.getCurrentTrackIndex();
+30:             const row = this.browser.getGrid().getRowByIndex(index);
+31:             this.handleNowPlaying(isPaused, row);
+32:         });
+33:         this.audioPlayer.onStop(() => {
+34:             const index = TrackListManager.getCurrentTrackIndex();
+35:             const row = this.browser.getGrid().getRowByIndex(index);
+36:             this.handleNowPlaying(true, row);
+37:         });
+38:     },
+39:     async handleTrackChange(track, index, isQueue, hasQueue) {
+40:         console.log('handleTrackChange', {track, index, isQueue, hasQueue});
+41:         if (isQueue) {
+42:             this.queueGrid.syncQueue(TrackListManager.queueList.length());
+43:             this.browser.setGrid(this.queueGrid);
+44:         } else {
+45:             if (!hasQueue) 
+46:                 this.queueGrid.deactivate();
+47:             else
+48:                 this.mainGrid._syncQueuePosition();
+49:             this.browser.setGrid(this.mainGrid);
+50:         }
+51:         this.browser.setCurrentlyPlayingTrack(index);
+52:         this.handleNowPlaying(this.audioPlayer.isPlayerPaused());
+53:     },
+54:     handleNowPlaying(isPaused, row) {
+55:         this.browser.toggleNowPlaying(isPaused, row);
+56:     },
+57:     handleQueueEnd() {
+58:         this.mainGrid.releaseQueueAnchor();
+59:     },
+60:     _initializeMainGrid() {
+61:         this.mainGrid.setUp();
+62:         this.mainGrid.buildGrid();
+63:         this.mainGrid.render();
+64:     },
+65: }
+</file>
+
+<file path="PlaybackNotificationMediator.js">
+ 1: import { TrackListManager } from "../../domain/TrackList.js";
+ 2: import { PlayerNotifier } from "../Notifier.js";
+ 3: export const PlaybackNotificationMediator = {
+ 4:     init(audioPlayer, playerControls, playerProgressBar) {
+ 5:         this.audioPlayer = audioPlayer;
+ 6:         this.playerControls = playerControls;
+ 7:         this.playerProgressBar = playerProgressBar;
+ 8:         this._isNextTrackfired = false;
+ 9:         this._setupSubscriptions();
+10:     },
+11:     _setupSubscriptions() {
+12:         // 1. Listen for the 30-second threshold (from AudioPlayer/PlayerManager)
+13:         this.audioPlayer.onTrackNearEnd(this._handleNearEnd.bind(this), this);
+14:         this.audioPlayer.onPlayerSongChange(this._hideNextTrackNotification.bind(this), this);
+15:         this.audioPlayer.onPlayPause((isPaused, track) => {
+16:             if (isPaused) return PlayerNotifier.pause();
+17:             return PlayerNotifier.play();
+18:         });
+19:         this.playerControls.onPrevTrack(this._hideNextTrackNotification.bind(this), this);
+20:         this.playerProgressBar.progressBar.onSeek((percent, mouseDown) => {
+21:             if (!this.audioPlayer.isNearEnd())
+22:                 this._hideNextTrackNotification();
+23:             this.playerProgressBar.seek(percent, mouseDown);
+24:         }, this);
+25:         // 2. Listen for Queue Updates (The case you mentioned)
+26:         TrackListManager.onAddedToQueue(this._handleQueueUpdate.bind(this), this);
+27:         TrackListManager.onTrackIndexSwitch(this._handleSwitchTrack.bind(this), this);
+28:     },
+29:     _handleNearEnd() {
+30:         if (this._isNextTrackfired) return;
+31:         const currentTrack = this.audioPlayer.getCurrentTrack();
+32:         const {track} = TrackListManager.getNextTrackInList();
+33:         if (track && currentTrack) {
+34:             PlayerNotifier.showNext(track, currentTrack.getTimeRemaining() * 1000);
+35:             this._isNextTrackfired = true;
+36:         }
+37:     },
+38:     _handleQueueUpdate() {
+39:         if (!PlayerNotifier.isActive()) return;
+40:         const currentTrack = this.audioPlayer.getCurrentTrack();
+41:         const {track} = TrackListManager.getNextTrackInList();
+42:         if (!track || !currentTrack) return;
+43:         PlayerNotifier.hide(() => {
+44:             PlayerNotifier.showNext(track, currentTrack.getTimeRemaining() * 1000);
+45:         });
+46:     },
+47:     _handleSwitchTrack() {
+48:         if (!this.audioPlayer.isNearEnd()) return;
+49:         this._hideNextTrackNotification();
+50:         this._handleNearEnd();
+51:     },
+52:     _hideNextTrackNotification() {
+53:         if (!this._isNextTrackfired) return;
+54:         this._isNextTrackfired = false;
+55:         PlayerNotifier.hide();
+56:     }
+57: };
+</file>
+
+<file path="PlayerControlMediator.js">
+  1: import { TrackListManager } from "../../domain/TrackList.js";
+  2: import { ResourceManager } from "../../domain/StateManager.js";
+  3: export const PlayerControlMediator = {
+  4:     init(audioPlayer, playerDisplay, playerProgressBar, notifications, playerControls, keyControls, uiModules) {
+  5:         this.audioPlayer = audioPlayer;
+  6:         this.playerDisplay = playerDisplay;
+  7:         this.playerProgressBar = playerProgressBar;
+  8:         this.notifications = notifications;
+  9:         this.playerControls = playerControls;
+ 10:         this.keyControls = keyControls;
+ 11:         this.uiModules = uiModules;
+ 12:         this.overlayDiv = document.querySelector('.cnt-overlay');
+ 13:         this._trackNearEndFired = false;
+ 14:         this._bindEvents();
+ 15:     },
+ 16:     _bindEvents() {
+ 17:         this._bindCorePlayerEvents();
+ 18:         this._bindUIInteractions();
+ 19:         this._bindKeyboardShortcuts();
+ 20:         this._bindSystemMediaSession();
+ 21:     },
+ 22:     _bindCorePlayerEvents() {
+ 23:         // Song Change
+ 24:         this.audioPlayer.onPlayerSongChange((track) => {
+ 25:             this.playerDisplay.setTrack(track);
+ 26:             this.playerProgressBar.resetProgressBar();
+ 27:             this.audioPlayer.setIsNearEnd(false)
+ 28:             this._trackNearEndFired = false;
+ 29:             this._preloadNextTrackArt();
+ 30:             this._updateSystemMetadata(track);
+ 31:         });
+ 32:         this.audioPlayer.onTrackTimeReset(() => {
+ 33:             this.playerProgressBar.resetProgressBar();
+ 34:         }, this);
+ 35:         // Time Update (Coming Next logic)
+ 36:         this.audioPlayer.onTimeUpdate((evt) => {
+ 37:             const { currentTime, duration } = evt.target;
+ 38:             if (isNaN(duration)) return;
+ 39:             if (duration === 0)
+ 40:                 return this.audioPlayer.currentTrack?.setCurrentTime(0);
+ 41:             this.audioPlayer.currentTrack?.setCurrentTime(currentTime);
+ 42:             const isNearEnd = (duration - currentTime <= 30);
+ 43:             this.audioPlayer.setIsNearEnd(isNearEnd);
+ 44:             if (isNearEnd && !this._trackNearEndFired) {
+ 45:                 this.audioPlayer.audioPlayerEvents.trigger('onTrackNearEnd');
+ 46:                 this._trackNearEndFired = true;
+ 47:             }
+ 48:         });
+ 49:     },
+ 50:     _bindUIInteractions() {
+ 51:         this._setAudioElementEvents();
+ 52:         // Backdrop click to close modals
+ 53:         this.overlayDiv.addEventListener('click', (e) => {
+ 54:             if (e.target === e.currentTarget) this._closeAllActiveWindows(e);
+ 55:         });
+ 56:         // Handle left menu buttons
+ 57:         this.fileBrowserElem = document.querySelector('#file-browser-action button.open-file-browser');
+ 58:         this.gridElement = document.querySelector('#file-browser-action button.open-tracklist-browser');
+ 59:         this.playlistCreationElement = document.querySelector('#file-browser-action button.open-playlist-create');
+ 60:         this.fileBrowserElem.addEventListener('click', (evt) => {
+ 61:             this._showBackDrop();
+ 62:             this.uiModules.fileBrowser.loadFileBrowser.bind(this.uiModules.fileBrowser)(evt);
+ 63:         });
+ 64:         this.gridElement.addEventListener('click', (evt) => {
+ 65:             this._showBackDrop();
+ 66:             this.uiModules.tracklistGrid.open(evt);
+ 67:         });
+ 68:         this.playlistCreationElement.addEventListener('click', this._displayPlaylistCreationUI.bind(this));
+ 69:         // Player state sync
+ 70:         this.audioPlayer.onPlayPause((isPaused, track) => {
+ 71:             this.playerProgressBar.togglePauseProgress(isPaused);
+ 72:             this._updateSystemMetadata(track);
+ 73:         });
+ 74:         this.audioPlayer.onStop(this.playerProgressBar.resetProgressBar.bind(this.playerProgressBar));
+ 75:         this.audioPlayer.onRepeatSwitch((repeatMode) => {
+ 76:             this._preloadNextTrackArt();
+ 77:             TrackListManager.switchRepeatMode(repeatMode);
+ 78:         }, this);
+ 79:     },
+ 80:     _setAudioElementEvents() {
+ 81:         this.audioPlayer.audioElem.onloadedmetadata = () => {
+ 82:             this.playerProgressBar.doProgress(this.audioPlayer.getCurrentTime(), this.audioPlayer.getDuration());
+ 83:         };
+ 84:     },
+ 85:     _bindKeyboardShortcuts() {
+ 86:          this.keyControls.registerKeyDownAction('m', async () => {
+ 87:             await this.audioPlayer.mute();
+ 88:             this.playerDisplay.showMuteOverlay(this.audioPlayer.isMuted());
+ 89:         }, this);
+ 90:         ['+', '-'].forEach(key => {
+ 91:             this.keyControls.registerKeyDownAction(key, () => {
+ 92:                 // When key is held down, just show/reset the UI
+ 93:                 this.playerDisplay.showVolumeOverlay(this.audioPlayer.getVolume());
+ 94:             }, this);
+ 95:             this.keyControls.registerKeyUpAction(key, () => {
+ 96:                 // When key is released, start the fade out
+ 97:                 this.playerDisplay.hideVolumeOverlay();
+ 98:             }, this);
+ 99:         });
+100:         this.keyControls.registerKeyDownAction('t', () => {
+101:             this.playerDisplay.changeTrackTimeDisplayMode();
+102:         });
+103:         const {tracklistGrid, playlistCreation} = this.uiModules;
+104:         this.keyControls.registerKeyDownAction('a', () => {
+105:             this._showBackDrop();
+106:             tracklistGrid.open();
+107:         }, tracklistGrid);
+108:         this.keyControls.registerKeyDownAction('n', this._displayPlaylistCreationUI.bind(this), playlistCreation);
+109:         this.keyControls.registerKeyDownAction('Escape', (evt) => {
+110:             this._hideBackDrop();
+111:             this._closeAllActiveWindows(evt.evt);
+112:         }, 'BYPASS_EXCLUSIVITY');
+113:     },
+114:     _displayPlaylistCreationUI(evt) { 
+115:         if (evt instanceof Event)
+116:             evt.stopPropagation();
+117:         const {playlistCreation} = this.uiModules;
+118:         this._showBackDrop();
+119:         playlistCreation.show();
+120:         const modalElement = playlistCreation.getHTMLItem().render();
+121:         modalElement.onclick = (evt) => evt.stopPropagation();
+122:         playlistCreation.onPlaylistCreated((res) => {
+123:             this._hideBackDrop();
+124:             this._closeAllActiveWindows();
+125:         }, this);
+126:         this.overlayDiv.append(modalElement);
+127:         this.keyControls.setExclusivityCallerKeyUpV2(playlistCreation);
+128:         this.keyControls.setExclusivityCallerKeyDownV2(playlistCreation);
+129:     },
+130:     _bindSystemMediaSession() {
+131:         if (!('mediaSession' in navigator)) return;
+132:         navigator.mediaSession.setActionHandler('play', () => this.audioPlayer.playPause());
+133:         navigator.mediaSession.setActionHandler('pause', () => this.audioPlayer.playPause());
+134:         navigator.mediaSession.setActionHandler('previoustrack', () => this.audioPlayer.prev());
+135:         navigator.mediaSession.setActionHandler('nexttrack', () => this.audioPlayer.next());
+136:     },
+137:     _showBackDrop() {
+138:         this.overlayDiv.style.display = 'block';
+139:     },
+140:     _hideBackDrop() {
+141:         this.overlayDiv.style.display = 'none';
+142:     },
+143:     _updateSystemMetadata(track) {
+144:         document.title = `${track.getTitle()} - ${track.getArtist()}`;
+145:         if (!('mediaSession' in navigator)) return;
+146:         navigator.mediaSession.metadata = new MediaMetadata({
+147:             title: track.getTitle(),
+148:             artist: track.getArtist(),
+149:             album: track.getAlbum(),
+150:             artwork: [{ src: ResourceManager.getAlbumArtURL(track) }]
+151:         });
+152:     },
+153:     _closeAllActiveWindows(e) {
+154:         this.overlayDiv.style.display = 'none';
+155:         Object.values(this.uiModules).forEach(m => {
+156:             m.close?.(e) || m.hide?.(e) || m.setVisible?.(false);
+157:         });
+158:         this.keyControls.unsetExclusivityCallerKeyUpV2(this.uiModules.playlistCreation);
+159:         this.keyControls.unsetExclusivityCallerKeyDownV2(this.uiModules.playlistCreation);
+160:     },
+161:     _preloadNextTrackArt() {
+162:         const next = TrackListManager.getNextTrackInList();
+163:         if (next?.track) ResourceManager.preloadAlbumArt(next.track);
+164:     },
+165: }
+</file>
+
+<file path="repomix.config.json">
+ 1: {
+ 2:   "output": {
+ 3:     "filePath": "repomix-output.txt",
+ 4:     "removeComments": false,
+ 5:     "showLineNumbers": true,
+ 6:     "removeEmptyLines": true
+ 7:   },
+ 8:   "ignore": {
+ 9:     "customPatterns": [
+10:       "**/node_modules/**",
+11:       ".venv/**",
+12:       ".git/**",
+13:       ".gitignore",
+14:       ".pg_pass",
+15:       "*.log",
+16:       "dist/**",
+17:       "build/**"
+18:     ],
+19:     "useGitignore": true,
+20:     "useDefaultPatterns": true
+21:   }
+22: }
+</file>
+
+</files>

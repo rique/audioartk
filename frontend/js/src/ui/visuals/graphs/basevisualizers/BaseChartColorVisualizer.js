@@ -4,7 +4,9 @@ import {getFormatedDate} from '../../../../core/Utils.js';
 export class BaseChartColorVisualizer extends BaseVisualizer {
     initialize(renderContext) {
         const {ctx} = renderContext;
-        ctx.shadowColor = 'rgba(255, 255, 255, 0)'
+        ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = 'center';
     }
     _pulseLigthness(barHeight) {
         let intensity = barHeight / 250;

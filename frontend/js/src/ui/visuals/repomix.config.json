@@ -1,0 +1,23 @@
+{
+  "output": {
+    "filePath": "repomix-output.txt",
+    "removeComments": false,
+    "showLineNumbers": true,
+    "removeEmptyLines": true
+  },
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      ".venv/**",
+      ".git/**",
+      ".gitignore",
+      ".pg_pass",
+      "*.log",
+      "dist/**",
+      "build/**"
+    ],
+    "useGitignore": true,
+    "useDefaultPatterns": true
+  }
+}
+

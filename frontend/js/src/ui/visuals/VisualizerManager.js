@@ -5,11 +5,14 @@ import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngin
 import RendererFactory from './Gradient/Renderers/RendererFactory.js';
 import { VisualizerDropdownComponent, VisualSelectManager } from '../components/GroupeSelectItem.js';
 import { HTMLItems } from '../grid/RowTemplates.js';
-import { ListEvents } from '../../core/EventBus.js'
+import { ListEvents } from '../../core/EventBus.js';
+import { AnimationFactory, ImageRenderer, ImageProviderFactory } from './Main.js';
+import { ResourceManager } from '../../domain/StateManager.js';
+import { TrackListManager } from '../../domain/TrackList.js';
 
-const api = new API();
+export const api = new API();
 
-class BaseProcessor {
+export class BaseProcessor {
     constructor() {
         this.canvas = VisualizerManager.getCanvas();
         this.canvasCtx = VisualizerManager.getContext();
@@ -21,81 +24,49 @@ class BaseProcessor {
 
 
 export class BGImagesProcessor extends BaseProcessor {
-    constructor() {
+    //pulse-zoom, track-art, trackart-provider, api-provider
+    constructor(strategyType = 'track-art', imageProvider = 'trackart-provider') {
         super();
-        this.alphaCoef = 0; 
-        this.doFadeIn = true; 
         this.imgIdx = 0;
-        this.speed = 1;
+        this.imgList = [];
+        this.background = null;
+        // Use a Factory to set the behavior
+        this.strategy = AnimationFactory.create(strategyType); 
+        this.imageProvider = ImageProviderFactory.create(imageProvider, this.strategy);
     }
 
     async setup() {
-        try {
-            this.curImg = 'img1.jpg';
-            // this.curImg =  'binikini.jpg';
-            // this.curImg =  'space.jpg';
-            const res = await api.loadBGImages();
-            this.imgList = res['img_list'];
-            this.background = new Image();
-            this.background.src = `https://audioartk.me/static/${this.curImg}`;
-            this.background = await this.imageLoader(this.background);
-        } catch (e) {
-            console.error(e);
-        }
+        // this.curImg = "def_geo.jpg";
+        // this.curImg = 'img1.jpg';
+        // this.curImg =  'binikini.jpg';
+        // this.curImg =  'space.jpg';
+        // Load the "Welcome" image first
+        // await this._loadNext(`static/img1.jpg`);
         
-        console.log(
-            'img loaded', this.background.width, this.background.height, this.canvas.attribute('width'), this.canvas.attribute('height')
-        );
-        let width = 0, height = 0, x = 0, y = 0;
-        //let coef = (canvas.width / background.width) * .8;
-        let coef = (this.canvas.attribute('width') / this.background.height) * 1.05;
-        width = this.background.width * coef;
-        height = this.background.height * coef;
-        x = parseInt((this.canvas.attribute('width') / 2) - (width / 2));
-        this.canvasCtx.globalAlpha = .1;
-        this.canvasCtx.drawImage(this.background, x, y, width, height);
-        this.canvasCtx.globalAlpha = 1;
+        await this.imageProvider.setup();
+        this.background = await this.imageProvider.getNextImage();
+        console.log('setup this.background', this.background);
     }
 
-    process() {
-        if (!this.background || !this.background.height) return;
+    async process() {
+        // 1. Logic: Update the strategy (the "Film")
+        const cycleFinished = this.strategy.update();
 
-        if (this.doFadeIn)
-            this.alphaCoef += this.speed;
-        else
-            this.alphaCoef -= this.speed;
-        if (this.alphaCoef >= 2328)
-            this.doFadeIn = false;
-        else if (this.alphaCoef >= 0) {
-            this.doFadeIn = true;
-            this.curImg = encodeURI(`${this.imgList[this.imgIdx]}`);
-            this.background = new Image();
-            console.log('curImg', this.curImg);
-            this.background.src = `https://audioartk.me/${this.curImg}`;
-            ++this.imgIdx;
-            if (this.imgIdx >= this.imgList.length)
-                this.imgIdx = 0;
+        if (cycleFinished || !this.background) {
+            this.background = await this.imageProvider.getNextImage();
         }
 
-        this.canvasCtx.fillStyle = "#181717";
-        this.canvasCtx.fillRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
-        
-        let width, height, x, y = 0;
-        
-        let coef = (this.canvas.attribute('height') / this.background.height) * (1.05 + (this.alphaCoef / 3008)); // <-- HERE!
-        width =  this.background.width * coef;
-        height = this.background.height * coef;
-        let alphaVal = this.alphaCoef;
+        // 3. Rendering: Hand everything to the Renderer
+        const renderContext = {
+            ctx: this.canvasCtx,
+            canvasWidth: this.canvas.attribute('width'),
+            canvasHeight: this.canvas.attribute('height')
+        };
 
-        if (alphaVal >= 610)
-            alphaVal = 610;
-        else if (alphaVal <= 0)
-            alphaVal = 0
+        const transform = this.strategy.getTransform(this.canvas, this.background);
 
-        this.canvasCtx.globalAlpha = alphaVal / 1000;
-        x = parseInt((this.canvas.attribute('width') / 2) - (width / 2));
-        this.canvasCtx.drawImage(this.background, x, y, width, height);
-        this.canvasCtx.globalAlpha = 1;
+        // The Processor no longer draws! It just calls the Renderer.
+        ImageRenderer.render(renderContext, this.background, transform);
     }
 
     async imageLoader(img) {
@@ -106,19 +77,24 @@ export class BGImagesProcessor extends BaseProcessor {
     }
 }
 
+
 export class GraphProcessor extends BaseProcessor {
     constructor(audioPlayer, category = 'waveform', chartName = 'heatmap-cycling-mirror-oscilloscope-wave', renderer = 'radial') {
         super();
         this.audioPlayer = audioPlayer;
-        this.category = category;
+        this.isReady = false;
+
+        // 1. Synchronously create the initial engine/graph so .setup() works immediately
         this.graph = VisualizerFactory.create(category, chartName);
         this.renderer = RendererFactory.create(renderer);
         this.engine = EngineFactory.create(category);
+
         VisualizerManager.onSwitchVisualizer(this.setChart.bind(this), this);
     }
 
     async setup(fftSize) {
         await this.engine.setup(this.audioPlayer, fftSize);
+        this.isReady = true;
     }
 
     process() {
@@ -140,14 +116,22 @@ export class GraphProcessor extends BaseProcessor {
 
     async setChart(category, chartName, renderer) {
         if (!category || !chartName) return;
+        if (!renderer) renderer = category === 'waveform' ? 'radial' : 'bar';
 
-        if (!renderer)
-            renderer = category == 'waveform' ? 'radial' : 'bar';
+        // 2. Background creation for "Hot Swapping"
+        const newGraph = VisualizerFactory.create(category, chartName);
+        const newRenderer = RendererFactory.create(renderer);
+        const newEngine = EngineFactory.create(category);
+
+        // Await the setup of the NEW engine without touching the current one
+        await newEngine.setup(this.audioPlayer);
+
+        // 3. Atomic swap
+        this.graph = newGraph;
+        this.renderer = newRenderer;
+        this.engine = newEngine;
         
-        this.graph = VisualizerFactory.create(category, chartName);
-        this.renderer = RendererFactory.create(renderer);
-        this.engine = EngineFactory.create(category);
-        await this.setup();
+        console.log("Visualizer swapped seamlessly.", {category, chartName, renderer});
     }
 }
 
@@ -157,6 +141,7 @@ const VisualizerManager = {
         this._initCanvas();
         this._processors = [];
         this.isRunning = false;
+        this.animationId = null;
         this._events = new ListEvents();
         this._initVisualizerSelector();
     },
@@ -190,24 +175,27 @@ const VisualizerManager = {
         return this.canvasCtx;
     },
 
+    requestStopAnimation() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        this.isRunning = false;
+    },
+
     _startMainLoop() {
         const loop = () => {
-            try {
-                // SET AND RESET CANVAS CONTEXT TO DEFAULTS
-                this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
-                this.canvasCtx.font = "11px sans-serif";
-                this.canvasCtx.textAlign = 'center';
-                this.canvasCtx.lineWidth = 2;
-                this.canvasCtx.lineCap = 'round';
-                this._processors.forEach(({processor}) => processor.process());
-                
-            } catch(e) {
-                return console.error(e);
-            } 
-            if (!this._stop)
-                requestAnimationFrame(loop);
-        }
-        requestAnimationFrame(loop);
+            if (!this.isRunning) return;
+
+            // We keep the canvas clearing and rendering at 60fps
+            this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
+            
+            // This will now call processor.process(), which checks its own "isReady" flag
+            this._processors.forEach(({processor}) => processor.process());
+
+            this.animationId = requestAnimationFrame(loop);
+        };
+        this.animationId = requestAnimationFrame(loop);
     },
 
     _initCanvas() {
@@ -234,11 +222,13 @@ const VisualizerManager = {
     _initVisualizerSelector() {
         VisualSelectManager.init(this.container);
         VisualSelectManager.onCategoryChange((category, graphName, renderer) => {
+            // NOTICE: We no longer call requestStopAnimation() here!
+            // We just tell the processors to start their background swap.
             this._events.trigger('onSwitchVisualizer', category, graphName, renderer);
         });
     },
 
-    onSwitchVisualizer(cb, subscriber) { 
+    onSwitchVisualizer(cb, subscriber) {
         this._events.onEventRegister({cb, subscriber}, 'onSwitchVisualizer');
     }
 }

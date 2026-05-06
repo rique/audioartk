@@ -1,0 +1,584 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where empty lines have been removed, line numbers have been added.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: **/node_modules/**, .venv/**, .git/**, .gitignore, .pg_pass, *.log, dist/**, build/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+imageproviders/
+  ImageProviderFactory.js
+  ImageProviders.js
+mediators/
+  ApiImageMediator.js
+  TrackArtMediator.js
+renderers/
+  ImageRenderer.js
+strategies/
+  AnimationFactory.js
+  AnimationStrategies.js
+Registry.js
+repomix.config.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="imageproviders/ImageProviderFactory.js">
+ 1: export class ImageProviderFactory {
+ 2:     // Private registry of strategies
+ 3:     static #registry = new Map();
+ 4:     /**
+ 5:      * Registers a new animation strategy.
+ 6:      * @param {string} key - The name used to identify the animation.
+ 7:      * @param {class} ImageProviderClass - The class definition.
+ 8:      */
+ 9:     static register(key, ImageProviderClass, MediaTorClass) {
+10:         this.#registry.set(key, {ImageProviderClass, MediaTorClass});
+11:         console.log(`Image Provider registered: ${key}`);
+12:     }
+13:     /**
+14:      * Creates an instance of a registered strategy.
+15:      */
+16:     static create(key, startegy, config = {}) {
+17:         let {ImageProviderClass, MediaTorClass} = this.#registry.get(key);
+18:         if (!ImageProviderClass) {
+19:             console.warn(`Image Provider "${key}" not found. Falling back to default.`);
+20:             // You can return a default or the first one registered
+21:             ({ImageProviderClass, MediaTorClass} = this.#registry.values().next().value);
+22:         }
+23:         if (!ImageProviderClass)
+24:             return null;
+25:         const provider = new ImageProviderClass(config);
+26:         return new MediaTorClass(startegy, provider);
+27:     }
+28:     static getAvailableTypes() {
+29:         return Array.from(this.#registry.keys());
+30:     }
+31: }
+</file>
+
+<file path="imageproviders/ImageProviders.js">
+ 1: import { API } from "../../../../core/HttpClient.js";
+ 2: import { ResourceManager } from "../../../../domain/StateManager.js";
+ 3: import { ImageProviderFactory } from "./ImageProviderFactory.js";
+ 4: import { AudioPlayer } from "../../../../domain/AudioPlayer.js";
+ 5: import { ApiImageMediator } from "../mediators/ApiImageMediator.js";
+ 6: import { TrackArtMediator } from "../mediators/TrackArtMediator.js";
+ 7: class BaseImageProvider {
+ 8:     getNextImage() {}
+ 9:     async setup() {}
+10:     async _imageLoader(img) {
+11:         return new Promise((resolve, reject) => {
+12:             img.onload = () => resolve(img);
+13:             img.onerror = reject;
+14:         });
+15:     }
+16: }
+17: export class ApiImageProvider extends BaseImageProvider {
+18:     constructor()  {
+19:         super()
+20:         this.api = new API();
+21:         this.imgList = [];
+22:         this.imgIdx = 0;
+23:     }
+24:     async setup() {
+25:         await this._loadImageList();
+26:     }
+27:     async getNextImage() {
+28:         console.log('getNextImage')
+29:         const img = await this._loadImage();
+30:         this.imgIdx = (this.imgIdx + 1) % this.imgList.length;
+31:         return img;
+32:     }
+33:     async _loadImage() {
+34:         let img = new Image();
+35:         const path = '/' + this.imgList[this.imgIdx].split('/').map(segment => encodeURIComponent(segment)).join('/');
+36:         img.src = path;
+37:         try {
+38:             // We update this.background only after the new image has fully loaded
+39:             img = await this._imageLoader(img);
+40:         } catch (e) {
+41:             console.error(`Failed to load background image at ${path}`, e);
+42:             return;
+43:         }
+44:         return img;
+45:     }
+46:     async getPreviousImage() {
+47:         this.imgIdx = (this.imgIdx - 1 + this.imgList.length) % this.imgList.length; 
+48:         return await this._loadImage();
+49:     }
+50:     async _loadImageList() {
+51:         const result = await this.api.loadBGImages();
+52:         this.imgList = result['img_list'];
+53:     }
+54: }
+55: export class TrackAlbumArtImageProvider extends BaseImageProvider {
+56:     constructor() {
+57:         super()
+58:         this.img = null;
+59:         this.hasChangedTrack = false;
+60:     }
+61:     async trackChange(track) {
+62:         this.hasChangedTrack = false;
+63:         // 2. Fetch the new image using your ResourceManager
+64:         const url = ResourceManager.getAlbumArtURL(track);
+65:         // 3. Load the image object
+66:         const img = new Image();
+67:         img.src = url;
+68:         // 4. Wait for it to load, then assign it to the property 
+69:         // the renderer uses (likely this.background or this.img)
+70:         this.img = await this._imageLoader(img);
+71:         this.hasChangedTrack = true;
+72:     }
+73:     async getNextImage() {
+74:         if (!this.img || !this.hasChangedTrack) return;
+75:         this.hasChangedTrack = false;
+76:         return await this.img;
+77:     }
+78: }
+79: ImageProviderFactory.register('api-provider', ApiImageProvider, ApiImageMediator);
+80: ImageProviderFactory.register('trackart-provider', TrackAlbumArtImageProvider, TrackArtMediator);
+</file>
+
+<file path="mediators/ApiImageMediator.js">
+ 1: export class ApiImageMediator {
+ 2:     constructor(strategy, provider) {
+ 3:         this.strategy = strategy;
+ 4:         this.provider = provider;
+ 5:     }
+ 6:     async getNextImage() {
+ 7:         return await this.provider.getNextImage();
+ 8:     }
+ 9:     async setup() {
+10:         return await this.provider.setup();
+11:     }
+12:     destroy() {}
+13: }
+</file>
+
+<file path="mediators/TrackArtMediator.js">
+ 1: import { AudioPlayer } from "../../../../domain/AudioPlayer.js"
+ 2: export class TrackArtMediator {
+ 3:     constructor(strategy, provider) {
+ 4:         this.strategy = strategy;
+ 5:         this.provider = provider;
+ 6:         this.previousTrack = null;
+ 7:     }
+ 8:     async getNextImage() {
+ 9:         return await this.provider.getNextImage();
+10:     }
+11:     async setup() {
+12:         if (!this.isSubscribed) {
+13:             AudioPlayer.onSetCurrentTrackFromTrackList(this._handleNextTrack.bind(this), this);
+14:             this.isSubscribed = true;
+15:         }
+16:         return await this.provider.setup();
+17:     }
+18:     destroy() {
+19:         AudioPlayer.unsubscribeEVent('onSetCurrentTrackFromTrackList', this);
+20:     }
+21:     async _handleNextTrack(track) {
+22:         await this.provider.trackChange(track);
+23:         if (this.previousTrack)
+24:             this.strategy.triggerTrackChange();
+25:         this.previousTrack = track;
+26:     }
+27: }
+</file>
+
+<file path="renderers/ImageRenderer.js">
+ 1: export class ImageRenderer {
+ 2:     static render(renderContext, img, transform) {
+ 3:         const { ctx, canvasWidth, canvasHeight } = renderContext;
+ 4:         const { scale, alpha, offsetX = 0, offsetY = 0 } = transform;
+ 5:         // 1. Clear the frame
+ 6:         ctx.fillStyle = "#181717";
+ 7:         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+ 8:         if (!img) return;
+ 9:         // 2. Calculate dimensions based on the scale provided by the strategy
+10:         const w = img.width * scale;
+11:         const h = img.height * scale;
+12:         // 3. Center the image
+13:         const x = (canvasWidth / 2) - (w / 2) + offsetX; // Apply the glitch shift!
+14:         const y = (canvasHeight / 2) - (h / 2) + offsetY;
+15:         // 4. Paint
+16:         ctx.globalAlpha = alpha;
+17:         ctx.drawImage(img, x, y, w, h);
+18:         ctx.globalAlpha = 1;
+19:     }
+20: }
+</file>
+
+<file path="strategies/AnimationFactory.js">
+ 1: // AnimationFactory.js
+ 2: export class AnimationFactory {
+ 3:     // Private registry of strategies
+ 4:     static #registry = new Map();
+ 5:     /**
+ 6:      * Registers a new animation strategy.
+ 7:      * @param {string} key - The name used to identify the animation.
+ 8:      * @param {class} StrategyClass - The class definition.
+ 9:      */
+10:     static register(key, StrategyClass) {
+11:         this.#registry.set(key, StrategyClass);
+12:         console.log(`Animation registered: ${key}`);
+13:     }
+14:     /**
+15:      * Creates an instance of a registered strategy.
+16:      */
+17:     static create(key, config = {}) {
+18:         const StrategyClass = this.#registry.get(key);
+19:         if (!StrategyClass) {
+20:             console.warn(`Strategy "${key}" not found. Falling back to default.`);
+21:             // You can return a default or the first one registered
+22:             const DefaultClass = this.#registry.values().next().value;
+23:             return DefaultClass ? new DefaultClass(config) : null;
+24:         }
+25:         return new StrategyClass(config);
+26:     }
+27:     static getAvailableTypes() {
+28:         return Array.from(this.#registry.keys());
+29:     }
+30: }
+</file>
+
+<file path="strategies/AnimationStrategies.js">
+  1: import { BaseProcessor, api } from "../../VisualizerManager.js";
+  2: import { AnimationFactory } from "./AnimationFactory.js";
+  3: class BaseAnimation {
+  4:     constructor(config = {}) {
+  5:         this.alphaCoef = 0;
+  6:         this.doFadeIn = true;
+  7:         this.config = {
+  8:             maxAlphaCoef: 2328,
+  9:             zoomThreshold: 610,
+ 10:             fadeSpeed: 10,
+ 11:             ...config
+ 12:         };
+ 13:         this.type = 'random';
+ 14:     }
+ 15:     // This replaces the logic inside your process loop
+ 16:     update() {
+ 17:         if (this.doFadeIn) {
+ 18:             this.alphaCoef += this.config.fadeSpeed;
+ 19:             if (this.alphaCoef >= this.config.maxAlphaCoef) this.doFadeIn = false;
+ 20:         } else {
+ 21:             this.alphaCoef -= this.config.fadeSpeed;
+ 22:             if (this.alphaCoef <= 0) {
+ 23:                 this.alphaCoef = 0;
+ 24:                 this.doFadeIn = true;
+ 25:                 return true; // Signal that the cycle finished (time to swap images)
+ 26:             }
+ 27:         }
+ 28:         return false;
+ 29:     }
+ 30:     getTransform(canvas, img) {
+ 31:         throw new Error("getTransform must be implemented by subclass");
+ 32:     }
+ 33: }
+ 34: export class PulseZoomStrategy extends BaseAnimation {
+ 35:     getTransform(canvas, img) {
+ 36:         if (!img)
+ 37:             return { scale: 0, alpha: 0 };
+ 38:         const canvasH = canvas.attribute('height');
+ 39:         const coef = (canvasH / img.height) * (1.05 + (this.alphaCoef / 3008));
+ 40:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 41:         return { scale: coef, alpha: alpha };
+ 42:     }
+ 43: }
+ 44: // Strategy 2: A simple static fade (no movement)
+ 45: export class StaticStrategy extends BaseAnimation {
+ 46:     getTransform(canvas, img) {
+ 47:         const canvasH = canvas.attribute('height');
+ 48:         const scale = (canvasH / img.height) * 1.05; // Fixed scale
+ 49:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 50:         return { scale, alpha };
+ 51:     }
+ 52: }
+ 53: export class GlitchStrategy extends BaseAnimation {
+ 54:     constructor(config = {}) {
+ 55:         super(config);
+ 56:         this.jitterX = 0;
+ 57:         this.jitterY = 0;
+ 58:     }
+ 59:     update() {
+ 60:         // 1. Run the normal fade in/out logic
+ 61:         const cycleFinished = super.update();
+ 62:         // 2. Add some "Randomness"
+ 63:         // Most of the time (95%), no jitter. 
+ 64:         // 5% of the time, create a sudden offset.
+ 65:         if (Math.random() > 0.95) {
+ 66:             this.jitterX = (Math.random() - 0.5) * 40; // Shift up to 20px
+ 67:             this.jitterY = (Math.random() - 0.5) * 40;
+ 68:         } else {
+ 69:             // Quickly "ease" back to zero jitter
+ 70:             this.jitterX *= 0.8;
+ 71:             this.jitterY *= 0.8;
+ 72:         }
+ 73:         return cycleFinished;
+ 74:     }
+ 75:     getTransform(canvas, img) {
+ 76:         const canvasH = canvas.attribute('height');
+ 77:         // Base scale + a tiny bit of "shiver" from the jitter
+ 78:         const scale = (canvasH / img.height) * (1.05 + (Math.abs(this.jitterX) / 2000));
+ 79:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 80:         return { 
+ 81:             scale, 
+ 82:             alpha,
+ 83:             // We can pass extra data like offsets to our Renderer!
+ 84:             offsetX: this.jitterX,
+ 85:             offsetY: this.jitterY
+ 86:         };
+ 87:     }
+ 88: }
+ 89: export class PanScanStrategy extends BaseAnimation {
+ 90:     constructor(config = {}) {
+ 91:         super(config);
+ 92:         // We want to track the "horizontal progress"
+ 93:         this.panProgress = 0;
+ 94:         this.direction = Math.random() > 0.5 ? 1 : -1;
+ 95:     }
+ 96:     update() {
+ 97:         const cycleFinished = super.update();
+ 98:         // While the image is fading in/staying visible, we move the pan
+ 99:         // We use a very small increment so it looks smooth
+100:         if (this.alphaCoef > 0) {
+101:             this.panProgress += 0.001; 
+102:         }
+103:         // Reset the pan when the image is fully hidden
+104:         if (cycleFinished) {
+105:             this.direction = Math.random() > 0.5 ? 1 : -1;
+106:             this.panProgress = 0;
+107:         }
+108:         return cycleFinished;
+109:     }
+110:     getTransform(canvas, img) {
+111:         const canvasH = canvas.attribute('height');
+112:         // 1. We scale it slightly larger than the screen so we have "room" to slide
+113:         const scale = (canvasH / img.height) * 1.2;
+114:         // 2. Standard Alpha logic
+115:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+116:         // 3. Calculate the Pan Offset
+117:         // We figure out how much "extra" width we have, then multiply by progress
+118:         const scaledWidth = img.width * scale;
+119:         const extraWidth = scaledWidth - canvas.attribute('width');
+120:         // Slide from +extraWidth/2 to -extraWidth/2
+121:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+122:         return { 
+123:             scale, 
+124:             alpha,
+125:             offsetX: offsetX * this.direction,
+126:             offsetY: 0 
+127:         };
+128:     }
+129: }
+130: export class SmartPanStrategy extends BaseAnimation {
+131:     constructor(config = {}) {
+132:         super(config);
+133:         this.panProgress = 0;
+134:         this.direction = Math.random() > 0.5 ? 1 : -1;
+135:     }
+136:     update() {
+137:         const cycleFinished = super.update();
+138:         // Only progress the pan if we are in a visible state
+139:         if (this.alphaCoef > 0) {
+140:             this.panProgress += 0.001; 
+141:         }
+142:         if (cycleFinished) {
+143:             this.panProgress = 0;
+144:             this.direction = Math.random() > 0.5 ? 1 : -1;
+145:         }
+146:         return cycleFinished;
+147:     }
+148:     getTransform(canvas, img) {
+149:         const canvasW = canvas.attribute('width');
+150:         const canvasH = canvas.attribute('height');
+151:         // 1. "Cover" Logic: Ensure the image at least fills the whole canvas
+152:         const scaleW = canvasW / img.width;
+153:         const scaleH = canvasH / img.height;
+154:         // Use the larger of the two scales so no black bars are visible,
+155:         // then add our 1.1 buffer to guarantee room for movement.
+156:         const scale = Math.max(scaleW, scaleH) * 1.1; 
+157:         const scaledWidth = img.width * scale;
+158:         const extraWidth = scaledWidth - canvasW;
+159:         // 2. The Pan Logic
+160:         // Even if it's portrait, it's now wide enough to slide
+161:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+162:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+163:         return { 
+164:             scale, 
+165:             alpha, 
+166:             offsetX, 
+167:             offsetY: 0 
+168:         };
+169:     }
+170: }
+171: export class CrossfadeStrategy extends BaseAnimation {
+172:     constructor(config = {}) {
+173:         super(config);
+174:         this.nextAlpha = 0;
+175:     }
+176:     update() {
+177:         // 1. Fade the current one out
+178:         if (this.alphaCoef > 0) {
+179:             this.alphaCoef -= this.config.fadeSpeed;
+180:         }
+181:         // 2. Fade the next one in at the same time
+182:         this.nextAlpha += this.config.fadeSpeed;
+183:         // 3. Cycle ends when the next image is fully opaque
+184:         if (this.nextAlpha >= this.config.maxAlphaCoef) {
+185:             this.alphaCoef = this.config.maxAlphaCoef; // Reset for next cycle
+186:             this.nextAlpha = 0;
+187:             return true; 
+188:         }
+189:         return false;
+190:     }
+191:     getTransform(canvas, img, isNext = false) {
+192:         const canvasH = canvas.attribute('height');
+193:         const scale = (canvasH / img.height) * 1.05;
+194:         // Use the correct alpha depending on if we are drawing the "Outgoing" or "Incoming" image
+195:         const targetCoef = isNext ? this.nextAlpha : this.alphaCoef;
+196:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, targetCoef)) / 1000;
+197:         return { scale, alpha };
+198:     }
+199: }
+200: /**
+201:  * Strategy: TrackArtStrategy
+202:  * Focuses on a single image (the album art).
+203:  * It disables the automatic "fade out" cycle to keep the art visible 
+204:  * as long as the track is playing.
+205:  */
+206: // strategies/AnimationStrategies.js
+207: export class TrackArtStrategy extends BaseAnimation {
+208:     constructor(config = {}) {
+209:         super(config);
+210:         this.type = 'track-art';
+211:         this.isTrackChanging = false;
+212:         this.floatOffset = 0;
+213:         this.floatSpeed = 0.02; // Adjust for faster/slower floating
+214:     }
+215:     update() {
+216:         // 1. Handle Track Change Transitions
+217:         if (this.isTrackChanging) {
+218:             this.alphaCoef -= this.config.fadeSpeed;
+219:             if (this.alphaCoef <= 0) {
+220:                 this.alphaCoef = 0;
+221:                 this.isTrackChanging = false;
+222:                 return true; // Signal manager to swap to NEW track art
+223:             }
+224:         } else if (this.alphaCoef < this.config.maxAlphaCoef) {
+225:             this.alphaCoef += this.config.fadeSpeed;
+226:         }
+227:         // 2. Continuous Floating Animation
+228:         // We use a sine wave to create a smooth up/down motion
+229:         this.floatOffset += this.floatSpeed;
+230:         return false; // Prevent auto-cycling to random images
+231:     }
+232:     triggerTrackChange() {
+233:         console.log('triggerTrackChange');
+234:         this.isTrackChanging = true;
+235:     }
+236:     getTransform(canvas, img) {
+237:         if (!img) return { scale: 0, alpha: 0 };
+238:         const canvasW = canvas.attribute('width');
+239:         const canvasH = canvas.attribute('height');
+240:         // 1. "Fit" (Contain) Logic
+241:         // Calculate scale to fit the image entirely within the canvas
+242:         const scaleW = canvasW / img.width;
+243:         const scaleH = canvasH / img.height;
+244:         const fitScale = Math.min(scaleW, scaleH) * 0.8; // 0.8 adds a nice margin
+245:         // 2. Apply Alpha
+246:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+247:         // 3. Apply Floating Animation to Y offset
+248:         const offsetY = Math.sin(this.floatOffset) * 15; // 15px float range
+249:         return { 
+250:             scale: fitScale, 
+251:             alpha: alpha, 
+252:             offsetX: 0, 
+253:             offsetY: offsetY 
+254:         };
+255:     }
+256: }
+257: AnimationFactory.register('track-art', TrackArtStrategy);
+258: AnimationFactory.register('static', StaticStrategy);
+259: AnimationFactory.register('pulse-zoom', PulseZoomStrategy);
+260: AnimationFactory.register('glitch', GlitchStrategy);
+261: AnimationFactory.register('pan-scan', PanScanStrategy);
+262: AnimationFactory.register('smart-pan', SmartPanStrategy);
+263: AnimationFactory.register('crossfade', CrossfadeStrategy);
+</file>
+
+<file path="Registry.js">
+1: import { AnimationFactory } from "./strategies/AnimationFactory.js";
+2: import { ImageRenderer } from "./renderers/ImageRenderer.js";
+3: import { ImageProviderFactory } from "./imageproviders/ImageProviderFactory.js";
+4: import './strategies/AnimationStrategies.js';
+5: import './imageproviders/ImageProviders.js'
+6: export { AnimationFactory, ImageRenderer, ImageProviderFactory };
+</file>
+
+<file path="repomix.config.json">
+ 1: {
+ 2:   "output": {
+ 3:     "filePath": "repomix-output.txt",
+ 4:     "removeComments": false,
+ 5:     "showLineNumbers": true,
+ 6:     "removeEmptyLines": true
+ 7:   },
+ 8:   "ignore": {
+ 9:     "customPatterns": [
+10:       "**/node_modules/**",
+11:       ".venv/**",
+12:       ".git/**",
+13:       ".gitignore",
+14:       ".pg_pass",
+15:       "*.log",
+16:       "dist/**",
+17:       "build/**"
+18:     ],
+19:     "useGitignore": true,
+20:     "useDefaultPatterns": true
+21:   }
+22: }
+</file>
+
+</files>

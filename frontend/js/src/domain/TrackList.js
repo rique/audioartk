@@ -603,7 +603,7 @@ const TrackListManager =  {
         const tracklist = this.getTrackList();
         let oldIdx = tracklist.getIndex();
         tracklist.setTrackIndex(newIdx - 1);
-        this.trackListEvents.trigger('onTrackManagerIndexChange', oldIdx, newIdx);
+        this.trackListEvents.trigger('onTrackManagerIndexChange', oldIdx, newIdx, this.getCurrentTrack());
     },
     getTracksNumber() {
         return this.tracklist.length();

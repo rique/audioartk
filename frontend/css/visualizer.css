@@ -7,8 +7,8 @@
     gap: 10px;
     height: auto;
     position: absolute;
-    top: 0;
-    right: 104px;
+    top: 14px;
+    right: 14px;
     border-radius: 8px;
     transition: opacity 0.36s ease;
     opacity: 0;
@@ -16,6 +16,7 @@
 }
 
 .visualizer-selects select {
+    appearance: base-select;
     cursor: pointer;
     background: rgba(0,0,0,0.3);
     color: #e3e3e3;

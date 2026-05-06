@@ -245,6 +245,9 @@ def loadTrackList(request):
 def loadBGImages(request):
     img_dir = 'imgc/'
     img_list = TrackFileSystemService.get_background_images(img_dir).model_dump()
+    """img_list = {
+        'img_list': []
+    }"""
     return JsonResponse(data={"success": True, 'img_list': img_list['img_list']})
 
 

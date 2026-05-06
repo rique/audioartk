@@ -4,6 +4,7 @@ import { whileMousePressed, whileMousePressedAndMove } from "../core/Utils.js";
 import { ResourceManager } from "./StateManager.js";
 
 export class AudioPlayer {
+    static audioEvents = new ListEvents();
     constructor(audioEngine) {
         this.audioElem = new Audio();
         this.audioPlayerEvents = new ListEvents();
@@ -36,6 +37,7 @@ export class AudioPlayer {
         whileMousePressedAndMove(this.volumeBarElem, handleVolumeMove);
 
         TrackListManager.onTrackManagerIndexChange(() => {
+            console.log('AudioPlayer onTrackManagerIndexChange');
             this.setCurrentTrackFromTrackList(false);
             this.play();
         });
@@ -179,6 +181,7 @@ export class AudioPlayer {
 
         if (!track) return console.error('AudioPlayer: Track fetch failed');
         this.setPlayerSong(track, index, autoPlay);
+        AudioPlayer.audioEvents.trigger('onSetCurrentTrackFromTrackList', track);
     }
 
     setPlayerSong(track, trackIdx, autoPlay) {
@@ -195,6 +198,7 @@ export class AudioPlayer {
     }
 
     audioEnded() {
+        console.log('audioEnded');
         this.audioPlayerEvents.trigger('onAudioEnded', this.currentTrack);
         
         const isLast = TrackListManager.isLastTrack();
@@ -213,6 +217,7 @@ export class AudioPlayer {
                 }
             }
         }
+
         this.setCurrentTrackFromTrackList(autoPlay);
     }
 
@@ -254,4 +259,8 @@ export class AudioPlayer {
     onStop(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onStop'); }
     onTrackNearEnd(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onTrackNearEnd'); }
     onTrackTimeReset(cb, subscriber) { this.audioPlayerEvents.onEventRegister({cb, subscriber}, 'onTrackTimeReset'); }
+    static onSetCurrentTrackFromTrackList(cb, subscriber) { AudioPlayer.audioEvents.onEventRegister({cb, subscriber}, 'onSetCurrentTrackFromTrackList'); };
+    static unsubscribeEVent(eventKey, subscriber) {
+        AudioPlayer.audioEvents.unsubscribeEVent({eventKey, subscriber});
+    }
 }

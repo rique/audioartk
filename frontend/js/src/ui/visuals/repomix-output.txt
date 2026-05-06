@@ -1,0 +1,1966 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where empty lines have been removed, line numbers have been added.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: **/node_modules/**, .venv/**, .git/**, .gitignore, .pg_pass, *.log, dist/**, build/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Empty lines have been removed from all files
+- Line numbers have been added to the beginning of each line
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+canvas/
+  CanvasItem.js
+Gradient/
+  Renderers/
+    BarRenderer.js
+    BaseRenderer.js
+    HorizontalGradientRenderer.js
+    RadialGradientRenderer.js
+    RendererFactory.js
+    VerticalGradientRenderer.js
+graphs/
+  barchart/
+    BarChartColorVizualizer.js
+  basevisualizers/
+    BaseChartColorVisualizer.js
+    BaseVisualizer.js
+    BaseWaveColorVisualizer.js
+  engines/
+    BaseEngine.js
+    EngineFactory.js
+    VisualizerEngines.js
+  waveform/
+    WaveformVisualizer.js
+  Factory.js
+  Registry.js
+slideshows/
+  renderers/
+    ImageRenderer.js
+  strategies/
+    AnimationFactory.js
+    AnimationStrategies.js
+  Registry.js
+  repomix-output.txt
+Main.js
+repomix.config.json
+VisualizerManager.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="canvas/CanvasItem.js">
+ 1: import {HTMLItems} from '../../grid/RowTemplates.js';
+ 2: export class CanvasItem extends HTMLItems {
+ 3:     constructor({width, height, padWidth = 0, padHeight = 0, autoResize = false}) {
+ 4:         super('canvas');
+ 5:         this.attribute('width', width - padWidth)
+ 6:                 .attribute('height', height - padHeight)
+ 7:                 .width(width - padWidth)
+ 8:                 .height(height - padHeight);
+ 9:         this.padWidth = padWidth;
+10:         this.padHeight = padHeight;
+11:         if (autoResize)
+12:             this.#_setUpAutoResize(); 
+13:     }
+14:     context(type='2d') {
+15:         return this.render().getContext(type);
+16:     }
+17:     #_setUpAutoResize() {
+18:         window.addEventListener('resize', (evt) => {
+19:             this.attribute('width', window.innerWidth - this.padWidth);
+20:             this.attribute('height', window.innerHeight - this.padHeight);
+21:         });
+22:     }
+23: }
+</file>
+
+<file path="Gradient/Renderers/BarRenderer.js">
+ 1: import BaseRenderer from "./BaseRenderer.js";
+ 2: export class BarRenderer extends BaseRenderer {
+ 3:     render(renderContext, graph) {
+ 4:         const {ctx, canvasHeight, bufferLength, canvasWidth} = renderContext;
+ 5:         const barWidth = (canvasWidth / bufferLength);
+ 6:         let posX = 0;
+ 7:         // 1. Prepare the graph for the frame
+ 8:         graph.initialize(renderContext);
+ 9:         for (let i = 0; i < bufferLength; i++) {
+10:             const audioValue = renderContext.dataArray[i];
+11:             const barHeight = (audioValue + 140) * 2;
+12:             const posY = canvasHeight - barHeight * 2;
+13:             // 2. Get the specific color for THIS bar from the graph
+14:             const { h, s, l, a } = graph.getColorAt(i, renderContext);
+15:             // 3. Apply the color and draw the bar
+16:             ctx.fillStyle = `hsla(${h}, ${s}%, ${l}%, ${a})`;
+17:             ctx.fillRect(posX, posY, barWidth, barHeight * 2);
+18:             // 4. Draw the text label
+19:             ctx.fillStyle = `#f1f1f1`;
+20:             ctx.fillText(
+21:                 Math.round(barHeight).toString(), 
+22:                 posX + (barWidth / 2), 
+23:                 posY - 5
+24:             );
+25:             posX += barWidth + 1;
+26:         }
+27:     }
+28: }
+</file>
+
+<file path="Gradient/Renderers/BaseRenderer.js">
+1: export default class BaseRenderer {
+2:     constructor(graph) {
+3:         this.graph = graph;
+4:     }
+5:     setGraph(graph) {
+6:         this.graph = graph;
+7:     }
+8:     render(context) {}
+9: }
+</file>
+
+<file path="Gradient/Renderers/HorizontalGradientRenderer.js">
+ 1: import BaseRenderer from "./BaseRenderer.js";
+ 2: export class HorizontalGradientRenderer extends BaseRenderer {
+ 3:     render(renderContext, graph) {
+ 4:         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
+ 5:         const sliceWidth = canvasWidth / bufferLength;
+ 6:         let x = 0;
+ 7:         // 1. START OPTIMIZATION: Prepare a single path
+ 8:         ctx.beginPath();
+ 9:         // 2. GRADIENT OPTIMIZATION: Create a gradient for the whole width
+10:         const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0);
+11:         let r, g, b;
+12:         for (let i = 0; i < bufferLength; i++) {
+13:             const audioValue = dataArray[i];
+14:             const v = audioValue / 128.0;
+15:             const y = (v * canvasHeight) / 2;
+16:             renderContext.audioValue = audioValue;
+17:             renderContext.i = i;
+18:             // 3. Get color components from the subclass
+19:             ({ r, g, b } = graph.getColorAt(i, renderContext));
+20:             // 4. Add a color stop for this specific point (i / bufferLength is 0.0 to 1.0)
+21:             // Note: Adding 2048 stops can be heavy; usually 10-20 stops is enough.
+22:             if (i % 16 === 0 || i === bufferLength - 1) {
+23:                 gradient.addColorStop(i / (bufferLength - 1), `rgba(${r}, ${g}, ${b}, .6)`);
+24:             }
+25:             // 5. Connect the coordinates
+26:             graph.draw(x, y, i, r, g, b, ctx);
+27:             x += sliceWidth;
+28:         }
+29:         // 6. SINGLE STROKE: Apply the gradient and draw once
+30:         ctx.strokeStyle = gradient;
+31:         /*ctx.shadowBlur = 25;
+32:         ctx.shadowColor = `rgba(255, 50, 50, 0.6)`; // Add a purple glow*/
+33:         ctx.stroke();
+34:     }
+35: }
+</file>
+
+<file path="Gradient/Renderers/RadialGradientRenderer.js">
+ 1: import BaseRenderer from "./BaseRenderer.js";
+ 2: export class RadialGradientRenderer extends BaseRenderer {
+ 3:     render(renderContext, graph) {
+ 4:         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
+ 5:         const step = Math.max(1, Math.floor(bufferLength / 900));
+ 6:         const sliceWidth = (canvasWidth / bufferLength) * step;
+ 7:         const centerY = (canvasHeight / 2) | 0;
+ 8:         // 2. GRADIENT OPTIMIZATION: Create a gradient for the whole width
+ 9:         // Center of the canvas
+10:         const centerX = canvasWidth / 2;
+11:         // Start radius 0, End radius max
+12:         // const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvasWidth / 2);
+13:         const gradient = ctx.createRadialGradient(canvasWidth / 2, centerY, 0, canvasWidth / 2, centerY, canvasWidth / 2);
+14:         gradient.addColorStop(0, `white`); 
+15:         gradient.addColorStop(.1, 'rgb(255, 218, 96)');
+16:         gradient.addColorStop(.20, 'rgb(255, 240, 109)');
+17:         gradient.addColorStop(.4, 'rgb(253, 255, 125)');
+18:         gradient.addColorStop(.65, 'rgb(255, 172, 104)');
+19:         gradient.addColorStop(.8, 'rgb(255, 105, 105)');
+20:         gradient.addColorStop(1.0, 'rgb(83, 163, 255)');
+21:         // 1. START OPTIMIZATION: Prepare a single path
+22:         ctx.beginPath();
+23:         let r, g, b, x = 0;
+24:         // PASS 1: FORWARD (Always happens)
+25:         for (let i = 0; i < bufferLength; i += step) {
+26:             const audioValue = dataArray[i];
+27:             const v = audioValue / 128.0;
+28:             const y = (v * canvasHeight) / 2;
+29:             renderContext.audioValue = audioValue;
+30:             renderContext.i = i;
+31:             // Get colors from subclass
+32:             ({ r, g, b } = graph.getColorAt(i, renderContext));
+33:             // Call draw with your exact signature
+34:             graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'top');
+35:             x += sliceWidth;
+36:         }
+37:         // PASS 2: BACKWARD (Conditional)
+38:         // Access the static property from the instance's constructor
+39:         if (graph.constructor.isMirror) {
+40:         // Reset X to the end to walk backwards
+41:             x = canvasWidth; 
+42:             for (let i = bufferLength - 1; i >= 0; i -= step) {
+43:                 const audioValue = dataArray[i];
+44:                 const v = audioValue / 128.0;
+45:                 const y = (v * canvasHeight) / 2;
+46:                 renderContext.audioValue = audioValue;
+47:                 renderContext.i = i;
+48:                 ({ r, g, b } = graph.getColorAt(i, renderContext));
+49:                 // Call draw backwards
+50:                 graph.draw(x | 0, y | 0, i, r, g, b, ctx, 'bottom');
+51:                 x -= sliceWidth;
+52:             }
+53:             ctx.closePath();
+54:             ctx.fillStyle = gradient;
+55:             ctx.fill();
+56:         } else {
+57:             // For non-mirrored, we just stroke the line
+58:             ctx.strokeStyle = gradient;
+59:             ctx.stroke();
+60:         }
+61:         // gradient.addColorStop(.1, `rgba(${r}, ${g}, ${b}, 1)`); 
+62:         // gradient.addColorStop(.5, `rgba(${b}, ${r}, ${g}, 1)`);
+63:         // gradient.addColorStop(1, `rgba(${g}, ${b}, ${r}, 1)`);
+64:     }
+65: }
+</file>
+
+<file path="Gradient/Renderers/RendererFactory.js">
+ 1: import { HorizontalGradientRenderer } from "./HorizontalGradientRenderer.js";
+ 2: import { VerticalGradientRenderer } from "./VerticalGradientRenderer.js";
+ 3: import { RadialGradientRenderer } from "./RadialGradientRenderer.js";
+ 4: import { BarRenderer } from "./BarRenderer.js";
+ 5: const RendererFactory = {
+ 6:     // Map categories to Engine classes
+ 7:     mapping: {
+ 8:         'horizontal': HorizontalGradientRenderer,
+ 9:         'vertical': VerticalGradientRenderer,
+10:         'radial': RadialGradientRenderer,
+11:         'bar': BarRenderer
+12:     },
+13:     create(renderer, graph) {
+14:         const RendererClass = this.mapping[renderer];
+15:         if (!RendererClass) {
+16:             // Default to BarChartEngine if category isn't found
+17:             console.warn(`No renderer found for ${renderer}, defaulting to HorizontalGradientRenderer.`);
+18:             return new HorizontalGradientRenderer(graph);
+19:         }
+20:         return new RendererClass(graph);
+21:     }
+22: };
+23: export default RendererFactory;
+</file>
+
+<file path="Gradient/Renderers/VerticalGradientRenderer.js">
+ 1: import BaseRenderer from "./BaseRenderer.js";
+ 2: export class VerticalGradientRenderer extends BaseRenderer {
+ 3:     render(renderContext, graph) {
+ 4:         const { dataArray, bufferLength, canvasWidth, canvasHeight, ctx } = renderContext;
+ 5:         const sliceWidth = canvasWidth / bufferLength;
+ 6:         let x = 0;
+ 7:         // 1. START OPTIMIZATION: Prepare a single path
+ 8:         ctx.beginPath();
+ 9:         // 2. GRADIENT OPTIMIZATION: Create a gradient for the whole width
+10:         const gradient = ctx.createLinearGradient(0, 0, canvasWidth, 0);
+11:         // const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+12:         gradient.addColorStop(0.0, 'red');    // Peak (Loud)
+13:         gradient.addColorStop(0.08, 'red'); 
+14:         gradient.addColorStop(0.25, 'orange');
+15:         gradient.addColorStop(0.5, 'purple'); // Silence (Center)
+16:         gradient.addColorStop(0.75, 'orange');
+17:         gradient.addColorStop(0.92, 'red');
+18:         gradient.addColorStop(1.0, 'red');    // Trough (Loud)
+19:         let r, g, b;
+20:         for (let i = 0; i < bufferLength; i++) {
+21:             const audioValue = dataArray[i];
+22:             const v = audioValue / 128.0;
+23:             const y = (v * canvasHeight) / 2;
+24:             renderContext.audioValue = audioValue;
+25:             renderContext.i = i;
+26:             // 3. Get color components from the subclass
+27:             ({ r, g, b } = graph.getColorAt(i, renderContext));
+28:             // 5. Connect the coordinates
+29:             graph.draw(x, y, i, r, g, b, ctx);
+30:             x += sliceWidth;
+31:         }
+32:         // 6. SINGLE STROKE: Apply the gradient and draw once
+33:         ctx.strokeStyle = gradient;
+34:         /*ctx.shadowBlur = 25;
+35:         ctx.shadowColor = `rgba(255, 50, 50, 0.6)`; // Add a purple glow*/
+36:         ctx.stroke();
+37:     }
+38: }
+</file>
+
+<file path="graphs/barchart/BarChartColorVizualizer.js">
+  1: import { BaseChartColorVisualizer } from "../basevisualizers/BaseChartColorVisualizer.js";
+  2: import VisualizerFactory from '../Factory.js';
+  3: import { withNumericContext } from '../../../../core/Decorators/ContextDecorators.js'
+  4: import { decorate } from '../../../../core/Decorators/Utils.js'
+  5: class ClassicRed extends BaseChartColorVisualizer {
+  6:     static name = 'classic red';
+  7:     static key = 'classic-red';
+  8:     getColorAt(i, {dataArray}) {
+  9:         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
+ 10:         return this._rgbaToHsla(Math.floor((barHeight / 1.4) + 140), 50, 50, 0.66);
+ 11:     }
+ 12: }
+ 13: class MonoColor extends BaseChartColorVisualizer {
+ 14:     static name = 'mono color';
+ 15:     static key = 'mono-color';
+ 16:     getColorAt(i, {dataArray, ctx, hue, saturation, light, alpha, pulse = false}) {
+ 17:         if (pulse) {
+ 18:             const barHeight = this._defaultCalculationBarHeight(i, dataArray);
+ 19:             const pulsed = this._pulseLigthness(barHeight);
+ 20:             light = pulsed;
+ 21:         }
+ 22:         return {h: hue, s: saturation, l: light, a: alpha}
+ 23:     }
+ 24: }
+ 25: decorate(MonoColor, 'getColorAt', withNumericContext({
+ 26:     hue: 180,
+ 27:     saturation: 100,
+ 28:     light: 75,
+ 29:     alpha: .6
+ 30: }));
+ 31: class RedToPurpel extends BaseChartColorVisualizer {
+ 32:     static name = 'red to purple';
+ 33:     static key = 'red-to-purple';
+ 34:     /**
+ 35:      * COLOR: Runs for every bar.
+ 36:      * Takes the barHeight and determines the "Warm to Cold" color.
+ 37:      */
+ 38:     getColorAt(i, renderContext) {
+ 39:         // 1. Get the specific height for this bar
+ 40:         const barHeight = this._defaultCalculationBarHeight(i, renderContext.dataArray);
+ 41:         const maxRange = 190; 
+ 42:         const intensity = Math.min(barHeight / maxRange, 1);
+ 43:         // 2. The "Warm to Cold" Formula
+ 44:         // Low intensity (0) = 280 (Purple) -> High intensity (1) = 0 (Red)
+ 45:         const hue = 280 - (intensity * 280);
+ 46:         let light = 75;
+ 47:         if (renderContext.pulse) {
+ 48:             light = this._pulseLigthness(barHeight);
+ 49:         }
+ 50:         // Return the color components
+ 51:         return { 
+ 52:             h: hue, 
+ 53:             s: 100, 
+ 54:             l: light, 
+ 55:             a: 0.6 
+ 56:         };
+ 57:     }
+ 58: }
+ 59: class RedAndPurpel extends BaseChartColorVisualizer {
+ 60:     static name = 'red and purple';
+ 61:     static key = 'red-and-purple';
+ 62:     getColorAt(i, {dataArray, saturation, light, alpha, ctx, pulse = false}) {
+ 63:         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
+ 64:         const minThreshold = 40;  // Everything below this is pure Purple
+ 65:         const maxThreshold = 180; // Everything above this is pure Red
+ 66:         // Normalize barHeight to a 0-1 value within our specific window
+ 67:         return this._applyCompression(barHeight, minThreshold, maxThreshold, 280, saturation, light, alpha, pulse, ctx);
+ 68:     }
+ 69: }
+ 70: decorate(RedAndPurpel, 'getColorAt', withNumericContext({
+ 71:     saturation: 100,
+ 72:     light: 75,
+ 73:     alpha: .6
+ 74: }));
+ 75: class RedToOrange extends BaseChartColorVisualizer {
+ 76:     static name = 'red to orange';
+ 77:     static key = 'red-to-orange';
+ 78:     getColorAt(i, {dataArray, saturation, light, alpha, ctx, pulse = false}) {
+ 79:         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
+ 80:         const minThreshold = 50; 
+ 81:         const maxThreshold = 178;
+ 82:         return this._applyCompression(barHeight, minThreshold, maxThreshold, 35,  saturation, light, alpha, pulse, ctx);
+ 83:     }
+ 84: }
+ 85: decorate(RedToOrange, 'getColorAt', withNumericContext({
+ 86:     saturation: 100,
+ 87:     light: 75,
+ 88:     alpha: .6
+ 89: }));
+ 90: class RippleWaves extends BaseChartColorVisualizer {
+ 91:     static name = 'ripple waves';
+ 92:     static key = 'ripple-waves';
+ 93:     getColorAt(i, {time, saturation, light, alpha, ctx, pulse = false}) {
+ 94:         const wave = Math.sin(i * 0.1 + time); 
+ 95:         const hue = 36 + (wave * 40);
+ 96:         if (pulse) {
+ 97:             const pulsed = this._pulseLigthness(barHeight);
+ 98:             light = pulsed;
+ 99:         }
+100:         return {h: hue, s: saturation, l: light, a: alpha};
+101:     }
+102: }
+103: decorate(RippleWaves, 'getColorAt', withNumericContext({
+104:     saturation: 100,
+105:     light: 75,
+106:     alpha: .6
+107: }));
+108: class TrigBasedRGBPlasma extends BaseChartColorVisualizer {
+109:     static name = 'trigonometry based RGB';
+110:     static key = 'trigbased-rgb-plasma';
+111:     getColorAt(i, {dataArray, alpha, ctx}) {
+112:         // Normalize: Divide barHeight by your typical "max" (e.g., 300 or 400)
+113:         // This ensures intensity stays between 0 and 1
+114:         const barHeight = this._defaultCalculationBarHeight(i, dataArray);
+115:         let intensity = barHeight / 1500;
+116:         const timeOffset = Date.now() * 0.002;
+117:         const dynamicIntensity = intensity + timeOffset;
+118:         intensity = Math.min(1, Math.max(0, intensity)) //+ (timeOffset / 10);
+119:         const r = Math.abs(Math.sin(intensity * Math.PI) * 255);
+120:         const g = Math.abs(Math.cos(intensity * Math.PI * 0.5) * 255);
+121:         const b = Math.abs(Math.sin(intensity * Math.PI + 2) * 255);
+122:         return this._rgbaToHsla(r, g, b, alpha);
+123:     }
+124: }
+125: decorate(TrigBasedRGBPlasma, 'getColorAt', withNumericContext({
+126:     alpha: .6
+127: }));
+128: VisualizerFactory.register('barchart', 'classic-red', ClassicRed);
+129: VisualizerFactory.register('barchart', 'mono-color', MonoColor);
+130: VisualizerFactory.register('barchart', 'red-to-purple', RedToPurpel);
+131: VisualizerFactory.register('barchart', 'red-and-purple', RedAndPurpel);
+132: VisualizerFactory.register('barchart', 'red-to-orange', RedToOrange);
+133: VisualizerFactory.register('barchart', 'ripple-waves', RippleWaves);
+134: VisualizerFactory.register('barchart', 'trigbased-rgb-plasma', TrigBasedRGBPlasma);
+</file>
+
+<file path="graphs/basevisualizers/BaseChartColorVisualizer.js">
+ 1: import BaseVisualizer from "./BaseVisualizer.js"
+ 2: import {getFormatedDate} from '../../../../core/Utils.js';
+ 3: export class BaseChartColorVisualizer extends BaseVisualizer {
+ 4:     initialize(renderContext) {
+ 5:         const {ctx} = renderContext;
+ 6:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+ 7:         ctx.font = "12px sans-serif";
+ 8:         ctx.textAlign = 'center';
+ 9:     }
+10:     _pulseLigthness(barHeight) {
+11:         let intensity = barHeight / 250;
+12:         // Map intensity to a radian (0 to PI)
+13:         const angle = intensity * Math.PI //+ (timeOffset / 2);
+14:         // Lightness will be highest (70%) when intensity is at 0.5PI (the peak of the curve)
+15:         // and lowest at the ends.
+16:         return 40 + Math.sin(angle) * 30;
+17:     }
+18:     _applyCompression = (barHeight, minThreshold, maxThreshold, coef, saturation, light, alpha, pulse = false, ctx) => {
+19:         let intensity = (barHeight - minThreshold) / (maxThreshold - minThreshold);
+20:         // Clamp the value between 0 and 1 so the math doesn't "loop" the color wheel
+21:         intensity = Math.max(0, Math.min(1, intensity));
+22:         // --- RANGE COMPRESSION END ---
+23:         // Apply the same Warm-to-Cold formula
+24:         const hue = coef - (intensity * coef);
+25:         if (pulse) {
+26:             const pulsed = this._pulseLigthness(barHeight);
+27:             light = pulsed;
+28:         }
+29:         return {h: hue, s: saturation, l: light, a: alpha};
+30:     }
+31:     process(renderContext, renderer) {
+32:         const {ctx} = renderContext;
+33:         renderer.render(renderContext, this);
+34:         this._displayOverlay(getFormatedDate(), ctx);
+35:     }
+36:     _displayOverlay(dateText, ctx) {
+37:         ctx.font = "25px sans-serif";
+38:         ctx.textAlign = 'left';
+39:         ctx.fillStyle = `#f1f1f1`;
+40:         ctx.fillText(dateText, 10, 36);
+41:     }
+42:     _defaultCalculationBarHeight(i, dataArray) {
+43:         return (dataArray[i] + 140) * 2;
+44:     }
+45: }
+</file>
+
+<file path="graphs/basevisualizers/BaseVisualizer.js">
+ 1: export default class BaseVisualizer {
+ 2:     static name = '';
+ 3:     static key = '';
+ 4:     constructor(renderer) {
+ 5:         // this.renderer = renderer;
+ 6:         // this.renderer.setGraph(this); // circular reference here
+ 7:     }
+ 8:     initialize({...args}) {}
+ 9:     getColorAt(i, renderContext, ...args) {}
+10:     draw(...args) {}
+11:     process() {}
+12:     _displayOverlay(...args) {}
+13:     /**
+14:      * Converts RGBA to HSLA.
+15:      * @param {number} r 0-255
+16:      * @param {number} g 0-255
+17:      * @param {number} b 0-255
+18:      * @param {number} a 0-1 (optional)
+19:      * @returns {object} { h, s, l, a }
+20:      */
+21:     _rgbaToHsla(r, g, b, a = 1) {
+22:         r /= 255;
+23:         g /= 255;
+24:         b /= 255;
+25:         const max = Math.max(r, g, b);
+26:         const min = Math.min(r, g, b);
+27:         let h, s, l = (max + min) / 2;
+28:         if (max === min) {
+29:             h = s = 0; // Achromatic (gray)
+30:         } else {
+31:             const d = max - min;
+32:             s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+33:             switch (max) {
+34:                 case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+35:                 case g: h = (b - r) / d + 2; break;
+36:                 case b: h = (r - g) / d + 4; break;
+37:             }
+38:             h /= 6;
+39:         }
+40:         return {
+41:             h: Math.round(h * 360),
+42:             s: Math.round(s * 100),
+43:             l: Math.round(l * 100),
+44:             a: a
+45:         };
+46:     }
+47: }
+</file>
+
+<file path="graphs/basevisualizers/BaseWaveColorVisualizer.js">
+ 1: import BaseVisualizer from "./BaseVisualizer.js";
+ 2: import {getFormatedDate} from '../../../../core/Utils.js';
+ 3: export class BaseWaveColorVisualizer extends BaseVisualizer {
+ 4:     initialize({ time }) {
+ 5:         this.baseHue = (time * 126) % 360;
+ 6:         // We don't return {r,g,b} here anymore because the Renderer 
+ 7:         // will ask getColorAt for them inside the loop.
+ 8:     }
+ 9:     // 2. SAMPLING: Calculate the color for a specific point "i"
+10:     getColorAt(i, renderContext) {
+11:         // We take the base (time) and add a shift based on position (i)
+12:         // Adjust '0.2' to make the rainbow colors closer together or further apart
+13:         const pointHue = (this.baseHue + (i * 0.2)) % 360;
+14:         return this._hslToRgb(pointHue, 100, 70);
+15:     }
+16:     process(renderContext, renderer) {
+17:         this.initialize(renderContext);
+18:         const dateText = getFormatedDate();
+19:         const {ctx} = renderContext;
+20:         renderer.render(renderContext, this);
+21:         this._displayOverlay(dateText, ctx);
+22:     }
+23:     _displayOverlay(dateText, ctx) {
+24:         ctx.font = "25px sans-serif";
+25:         ctx.textAlign = 'left';
+26:         ctx.fillStyle = `#f1f1f1`;
+27:         ctx.fillText(dateText, 10, 36);
+28:     }
+29: }
+30: export class BaseMirrorWaveColorVisualizer extends BaseWaveColorVisualizer {
+31:     static isMirror = true;
+32: }
+</file>
+
+<file path="graphs/engines/BaseEngine.js">
+ 1: import { AudioEngine } from "../../../../domain/sounds/AudioEngine.js";
+ 2: export default class BaseEngine {
+ 3:     constructor() {
+ 4:         this.context = {};
+ 5:         this.audioEngine = AudioEngine;
+ 6:     }
+ 7:     setup(audioPlayer, fftSize) {}
+ 8:     getContext() {
+ 9:         return this.context;
+10:     }
+11:     mergeContext(context) {
+12:         this.context = {...this.context, ...context};
+13:     }
+14:     update() {}
+15:     _buildContext() {
+16:         for (const [key, val] of Object.entries(this)) {
+17: 			if (key === 'context') continue;
+18: 			this.context[key] = val;
+19: 		}
+20:     }
+21: }
+</file>
+
+<file path="graphs/engines/EngineFactory.js">
+ 1: // graphs/engines/EngineFactory.js
+ 2: import { BarChartEngine, WaveformEngine } from './VisualizerEngines.js';
+ 3: const EngineFactory = {
+ 4:     // Map categories to Engine classes
+ 5:     mapping: {
+ 6:         'barchart': BarChartEngine,
+ 7:         'waveform': WaveformEngine,
+ 8:         // 'particles': ParticlePhysicsEngine,  <-- Future expansion
+ 9:         // 'webgl': ThreeJSEngine,              <-- Future expansion
+10:     },
+11:     create(category) {
+12:         const EngineClass = this.mapping[category];
+13:         if (!EngineClass) {
+14:             // Default to BarChartEngine if category isn't found
+15:             console.warn(`No engine found for ${category}, defaulting to BarChart.`);
+16:             return new BarChartEngine();
+17:         }
+18:         return new EngineClass();
+19:     }
+20: };
+21: export default EngineFactory;
+</file>
+
+<file path="graphs/engines/VisualizerEngines.js">
+ 1: import BaseEngine from "./BaseEngine.js";
+ 2: export class BarChartEngine extends BaseEngine {
+ 3:     async setup(audioPlayer, fftSize = 256) {
+ 4:         // 1. Connect the source (the "Input Jack")
+ 5:         this.audioSourceNode = this.audioEngine.connectSource(audioPlayer.audioElem);
+ 6:         // 2. Configure the analyzer via the engine service
+ 7:         const { analyser, bufferLength } = this.audioEngine.analyser().setAnalyserConfig(fftSize ?? 256);
+ 8:         this.analyserNode = analyser;
+ 9:         this.bufferLength = bufferLength;
+10:         // 3. Prepare the data array specifically for BarChart requirements
+11:         // BarCharts typically use Frequency data (Float32)
+12:         this.dataArray = new Float32Array(this.bufferLength);
+13:         this._buildContext();
+14:     }
+15:     update() {
+16:         if (!this.analyserNode) return;
+17:         // This method pulls fresh data from the hardware
+18:         this.analyserNode.getFloatFrequencyData(this.dataArray);
+19:     }
+20: }
+21: export class WaveformEngine extends BaseEngine {
+22:     async setup(audioPlayer, fftSize = 2048) {
+23:         this.audioSourceNode = this.audioEngine.connectSource(audioPlayer.audioElem);
+24:         // 2. Configure the analyzer via the engine service
+25:         const { analyser, bufferLength } = this.audioEngine.analyser().setAnalyserConfig(fftSize ?? 2048);
+26:         this.analyserNode = analyser;
+27:         this.bufferLength = bufferLength;
+28:         this.dataArray = new Uint8Array(this.bufferLength);
+29:         // console.log(this.audioEngine.source.connect(this.audioEngine.ctx.destination));
+30:         this._buildContext();
+31:     }
+32:     update() {
+33:         if (!this.analyserNode) return;
+34:         this.analyserNode.getByteTimeDomainData(this.dataArray);
+35:     }
+36: }
+</file>
+
+<file path="graphs/waveform/WaveformVisualizer.js">
+  1: import { BaseWaveColorVisualizer, BaseMirrorWaveColorVisualizer } from "../basevisualizers/BaseWaveColorVisualizer.js";
+  2: import VisualizerFactory from '../Factory.js';
+  3: class WaveformVisualizer extends BaseWaveColorVisualizer {
+  4:     static name = 'wave form visualizer';
+  5:     static key = 'waveform-visualizer';
+  6:     /**
+  7:      * SETUP: Called once per frame.
+  8:      * Use this to set the 'base' state for the frame.
+  9:      */
+ 10:     initialize({ ctx, time }) {
+ 11:         // We can define a base hue that shifts over time
+ 12:         this.currentBaseHue = (time * 50) % 360;
+ 13:         // Set global styles for the stroke
+ 14:         ctx.lineWidth = 2;
+ 15:         ctx.lineCap = 'round';
+ 16:         ctx.lineJoin = 'round';
+ 17:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+ 18:     }
+ 19:     /**
+ 20:      * COLOR: Called by the Renderer inside the loop.
+ 21:      * This defines the "Color Personality".
+ 22:      */
+ 23:     getColorAt(i, renderContext) {
+ 24:         // For a classic oscilloscope green:
+ 25:         return { r: 0, g: 255, b: 0 };
+ 26:         // OR for a subtle rainbow shift:
+ 27:         // const pointHue = (this.currentBaseHue + (i * 0.1)) % 360;
+ 28:         // return this._hslToRgb(pointHue, 100, 50);
+ 29:     }
+ 30:     /**
+ 31:      * COORDINATES: Called by the Renderer inside the loop.
+ 32:      * This defines the "Shape Personality".
+ 33:      */
+ 34:     draw(x, y, i, r, g, b, ctx) {
+ 35:         // The Renderer handles the 'beginPath' and 'stroke'.
+ 36:         // We only handle the line segments.
+ 37:         if (i === 0) {
+ 38:             ctx.moveTo(x, y);
+ 39:         } else {
+ 40:             ctx.lineTo(x, y);
+ 41:         }
+ 42:     }
+ 43: }
+ 44: class NeonPulseWave extends BaseWaveColorVisualizer {
+ 45:     static name = 'neon pulse wave';
+ 46:     static key = 'neon-pulse-wave';
+ 47:     initialize({ ctx, time }) {
+ 48:         // Setup global frame state
+ 49:         this.time = time;
+ 50:         ctx.lineWidth = 3;
+ 51:         ctx.shadowBlur = 20;
+ 52:         // We can't calculate a single intensity here if we want the 
+ 53:         // colors to ripple along the wave.
+ 54:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+ 55:     }
+ 56:     getColorAt(i, { dataArray, time }) {
+ 57:         // 1. Get the intensity for THIS specific point in the audio
+ 58:         const audioValue = dataArray[i];
+ 59:         const intensity = Math.abs(audioValue - 128) / 128;
+ 60:         // 2. Use that local intensity to calculate the RGB
+ 61:         // Using Math.sin/cos creates that "pulsing" neon transition
+ 62:         const r = Math.abs(Math.sin(intensity * Math.PI + time) * 255);
+ 63:         const g = Math.abs(Math.cos(intensity * Math.PI) * 255);
+ 64:         const b = 200; 
+ 65:         return { r, g, b };
+ 66:     }
+ 67:     draw(x, y, i, r, g, b, ctx) {
+ 68:         if (i === 0) {
+ 69:             ctx.moveTo(x, y);
+ 70:         } else {
+ 71:             ctx.lineTo(x, y);
+ 72:         }
+ 73:     }
+ 74: }
+ 75: class MirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
+ 76:     static name = 'mirror oscilloscope';
+ 77:     static key = 'mirror-oscilloscope-wave';
+ 78:     initialize({ ctx, time }) {
+ 79:         this.time = time;
+ 80:         // Setup styles once per frame
+ 81:         ctx.lineWidth = 2; // Moved from draw() for performance
+ 82:         ctx.lineJoin = 'miter'; 
+ 83:         // Note: You had shadowBlur set to 20, but no shadowColor.
+ 84:         // If you want a glow, uncomment the line below:
+ 85:         // ctx.shadowBlur = 20;
+ 86:         // ctx.shadowColor = 'rgba(0, 191, 255, 0.5)'; 
+ 87:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+ 88:     }
+ 89:     getColorAt(i) {
+ 90:         const r = this._shiftColor(0, i), 
+ 91:               g = this._shiftColor(191, i), 
+ 92:               b = 255;
+ 93:         return { r, g, b };
+ 94:     }
+ 95:     // Normalized to accept 'side'
+ 96:     draw(x, y, i, r, g, b, ctx, side) {
+ 97:         const centerY = (ctx.canvas.height / 2) | 0;
+ 98:         const offset = (y - centerY) | 0;
+ 99:         if (side === 'top') {
+100:             // Forward Path
+101:             if (i === 0) ctx.moveTo(x, centerY + offset);
+102:             else ctx.lineTo(x, centerY + offset);
+103:         } else {
+104:             // Backward Path (Mirrored)
+105:             ctx.lineTo(x, centerY - offset);
+106:         }
+107:     }
+108:     _shiftColor(colorVal, i) {
+109:         // We use Math.sin to make the color "wave" back and forth 
+110:         // rather than just hitting 255 and staying there (clamping).
+111:         // 0.05 is a 'speed' multiplier for the spatial shift.
+112:         const shift = Math.sin(this.time + i * 0.05) * 50; 
+113:         return Math.floor(Math.max(0, Math.min(255, colorVal + shift)));
+114:     }
+115: }
+116: class CyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
+117:     static name = 'cycling mirror oscilloscope';
+118:     static key = 'cycling-mirror-oscilloscope-wave';
+119:     initialize({ time, ctx }) {
+120:         // 1. Store time for the getColorAt method
+121:         this.time = time;
+122:         // 2. Setup styles once per frame (Performance win!)
+123:         ctx.lineWidth = 2;
+124:         ctx.lineJoin = 'miter'; // 'miter' is faster than 'round' for complex paths
+125:         ctx.lineCap = 'butt';
+126:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+127:     }
+128:     // Added 'renderContext' as a second argument to access data if needed
+129:     getColorAt(i, { time }) {
+130:         // Fix: Use the 'time' passed from the context or 'this.time'
+131:         // Using (i / 2) creates a nice spatial spread across the wave
+132:         const hue = (time * 50 + (i / 2)) % 360;
+133:         return this._hslToRgb(hue, 100, 70);
+134:     }
+135:     draw(x, y, i, r, g, b, ctx, side) {
+136:         const centerY = (ctx.canvas.height / 2) | 0;
+137:         const offset = (y - centerY) | 0;
+138:         if (side === 'top') {
+139:             // If it's the start of the buffer, move to position
+140:             if (i === 0) ctx.moveTo(x, centerY + offset);
+141:             else ctx.lineTo(x, centerY + offset);
+142:         } else {
+143:             // This draws the mirrored part (Pass 2)
+144:             // No moveTo needed here if we want a closed loop, 
+145:             // the last lineTo from the top pass connects to the first of the bottom pass
+146:             ctx.lineTo(x, centerY - offset);
+147:         }
+148:     }
+149:     _hslToRgb(h, s, l) {
+150:         l /= 100;
+151:         const a = s * Math.min(l, 1 - l) / 100;
+152:         const f = n => {
+153:             const k = (n + h / 30) % 12;
+154:             const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+155:             return Math.round(255 * color);
+156:         };
+157:         return { r: f(0), g: f(8), b: f(4) };
+158:     }
+159: }
+160: class HeatmapCyclingMirrorOscilloscope extends BaseMirrorWaveColorVisualizer {
+161:     static name = 'heatmap cycling mirror oscilloscope';
+162:     static key = 'heatmap-cycling-mirror-oscilloscope-wave';
+163:     initialize({ ctx, time }) {
+164:         this.rollingBaseline = (time * 0.4) % 360;
+165:         ctx.lineWidth = 3;
+166:         ctx.lineCap = 'round';
+167:         ctx.lineJoin = 'round';
+168:         ctx.shadowBlur = 15;
+169:         // Setting a global fallback shadow based on the rolling baseline is safer 
+170:         // for single-fill paths than per-vertex shadows.
+171:         const fallbackRgb = this._hslToRgb(this.rollingBaseline, 100, 50);
+172:         ctx.shadowColor = `rgba(${fallbackRgb.r}, ${fallbackRgb.g}, ${fallbackRgb.b}, 0.6)`;
+173:     }
+174:     getColorAt(i, { dataArray }) {
+175:         const audioValue = dataArray[i];
+176:         const deviation = Math.abs(audioValue - 128);
+177:         const intensity = Math.min(1, deviation / 128); 
+178:         const reactiveHue = intensity * 270; 
+179:         const finalHue = (this.rollingBaseline + reactiveHue) % 360;
+180:         return this._hslToRgb(finalHue, 100, 50);
+181:     }
+182:     // 2. NORMALIZE DRAW METHOD: Match the signature and use the 'side' logic
+183:     draw(x, y, i, r, g, b, ctx, side) {
+184:         // Optional: Update the shadow color dynamically. 
+185:         // Be aware that only the final computed color of the loop will apply to the fill.
+186:         ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.6)`; 
+187:         const centerY = (ctx.canvas.height / 2) | 0;
+188:         const offset = (y - centerY) | 0;
+189:         if (side === 'top') {
+190:             // Forward Path
+191:             if (i === 0) ctx.moveTo(x, centerY + offset);
+192:             else ctx.lineTo(x, centerY + offset);
+193:         } else {
+194:             // Backward Path
+195:             ctx.lineTo(x, centerY - offset);
+196:         }
+197:     }
+198:     _hslToRgb(h, s, l) {
+199:         l /= 100;
+200:         const a = s * Math.min(l, 1 - l) / 100;
+201:         const f = n => {
+202:             const k = (n + h / 30) % 12;
+203:             const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+204:             return Math.round(255 * color);
+205:         };
+206:         return { r: f(0), g: f(8), b: f(4) };
+207:     }
+208: }
+209: class RainbowMirrorWave extends BaseMirrorWaveColorVisualizer {
+210:     static name = 'rainbow mirror oscilloscope';
+211:     static key = 'rainbow-mirror-oscilloscope-wave'; // Fixed: This was accidentally 'name' before
+212:     /**
+213:      * SETUP: Runs once per frame.
+214:      */
+215:     initialize({ ctx, time }) {
+216:         // We calculate the base starting point for the rainbow.
+217:         // Storing it on 'this' allows us to reference it in getColorAt.
+218:         this.baseHue = (time * 126) % 360;
+219:         // Set global styles for the frame.
+220:         ctx.lineWidth = 2;
+221:         ctx.lineCap = 'round';
+222:         ctx.lineJoin = 'miter'; // Recommended for single continuous paths to prevent vertex lag
+223:         ctx.shadowColor = 'rgba(255, 255, 255, 0)';
+224:     }
+225:     /**
+226:      * COLOR: Called by the Renderer for the gradient stops.
+227:      * This turns the "Solid Color" into a "Spatial Rainbow".
+228:      */
+229:     getColorAt(i) {
+230:         // (i * 0.2) determines how many colors are visible at once.
+231:         // Smaller numbers = subtle transition. Larger = full rainbow.
+232:         const pointHue = (this.baseHue + (i * 0.2)) % 360;
+233:         return this._hslToRgb(pointHue, 100, 70);
+234:     }
+235:     /**
+236:      * DRAW: Carves the mirrored path.
+237:      * Normalized to use the 'side' parameter for two-pass rendering.
+238:      */
+239:     draw(x, y, i, r, g, b, ctx, side) {
+240:         const centerY = (ctx.canvas.height / 2) | 0;
+241:         const offset = (y - centerY) | 0;
+242:         if (side === 'top') {
+243:             // Forward Path
+244:             if (i === 0) ctx.moveTo(x | 0, (centerY + offset) | 0);
+245:             else ctx.lineTo(x | 0, (centerY + offset) | 0);
+246:         } else {
+247:             // Backward Path (Mirrored)
+248:             ctx.lineTo(x | 0, (centerY - offset) | 0);
+249:         }
+250:     }
+251:     _hslToRgb(h, s, l) {
+252:         l /= 100;
+253:         const a = s * Math.min(l, 1 - l) / 100;
+254:         const f = n => {
+255:             const k = (n + h / 30) % 12;
+256:             const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+257:             return Math.round(255 * color);
+258:         };
+259:         return { r: f(0), g: f(8), b: f(4) };
+260:     }
+261: }
+262: class SolidMountainWave extends BaseWaveColorVisualizer {
+263:     static name = 'solid mountain wave';
+264:     static key = 'solid-mountain-wave';
+265:     /**
+266:      * SETUP: Runs once per frame.
+267:      */
+268:     initialize({ ctx, time }) {
+269:         this.time = time;
+270:         // For a "Mountain", a subtle glow at the top edge looks great
+271:         ctx.shadowBlur = 10;
+272:         ctx.shadowColor = 'rgba(255, 50, 255, 0.3)';
+273:     }
+274:     /**
+275:      * COLOR: Defines the shifting purple/pink spectrum.
+276:      */
+277:     getColorAt(i, { time }) {
+278:         // We use the same math you had, but now it can shift per-point
+279:         // adding (i * 0.01) creates a slight color drift across the mountain range
+280:         const r = Math.abs(Math.sin(time + i * 0.01) * 100) + 155;
+281:         const g = 50;
+282:         const b = 255;
+283:         return { r, g, b };
+284:     }
+285:     /**
+286:      * DRAW: Defines the "Mountain" silhouette.
+287:      */
+288:     draw(x, y, i, r, g, b, ctx) {
+289:         const canvasHeight = ctx.canvas.height;
+290:         const canvasWidth = ctx.canvas.width;
+291:         if (i === 0) {
+292:             // 1. Start at the bottom-left corner
+293:             ctx.moveTo(0, canvasHeight); 
+294:             // 2. Line up to the first audio data point
+295:             ctx.lineTo(x, y);
+296:         } else {
+297:             // 3. Trace the waveform
+298:             ctx.lineTo(x, y);
+299:         }
+300:         // 4. On the last point, drop down to the bottom-right and close the shape
+301:         // Note: Check if your renderer passes bufferLength, otherwise use renderContext
+302:         if (i === 2047) { // Assuming bufferLength - 1
+303:             ctx.lineTo(canvasWidth, canvasHeight);
+304:             ctx.closePath();
+305:             /* CRITICAL PEER NOTE:
+306:                Since your base 'process' method likely calls ctx.stroke(), 
+307:                you should call ctx.fill() here. 
+308:                The renderer will apply the gradient to the fill!
+309:             */
+310:             ctx.fillStyle = ctx.strokeStyle; // Syncs the gradient to the fill
+311:             ctx.fill();
+312:         }
+313:     }
+314: }
+315: class DigitalFragmentWave extends BaseWaveColorVisualizer {
+316:     static name = 'digital fragment wave';
+317:     static key = 'digital-fragment-wave';
+318:     /**
+319:      * SETUP: Runs once per frame.
+320:      */
+321:     initialize({ ctx }) {
+322:         // Since we are drawing individual blocks, we don't need a glow on a path,
+323:         // but a shadow on the context can make the fragments look like they are glowing.
+324:         ctx.shadowBlur = 8;
+325:         ctx.shadowColor = 'rgba(94, 255, 94, 0.5)';
+326:     }
+327:     /**
+328:      * COLOR: Calculates the yellow-to-white intensity for each fragment.
+329:      */
+330:     getColorAt(i, { dataArray }) {
+331:         const audioValue = dataArray[i];
+332:         const intensity = Math.abs(audioValue - 128) / 128;
+333:         // As intensity increases, it moves from Yellow towards pure White
+334:         return { 
+335:             r: Math.floor(127 * intensity),
+336:             g: 255, 
+337:             b: Math.floor(255 * intensity) // Adding a bit of blue at high intensity makes it "whiter" 'rgba(0, 255, 0, 0.8)'
+338:         };
+339:     }
+340:     /**
+341:      * DRAW: Draws the digital particles.
+342:      */
+343:     draw(x, y, i, r, g, b, ctx) {
+344:         // 1. Every 4th point check to maintain your performance optimization
+345:         if (i % 4 === 0) {
+346:             // 2. Set the color for this specific fragment
+347:             ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+348:             // 3. Draw the 3x3 square
+349:             ctx.fillRect(x, y, 3, 3);
+350:             // 4. Optional: Add a "mirror" fragment for symmetry if you like that look
+351:             // const centerY = ctx.canvas.height / 2;
+352:             // const offset = y - centerY;
+353:             // ctx.fillRect(x, centerY - offset, 3, 3);
+354:         }
+355:         /* PEER NOTE: 
+356:            Since the Renderer will call ctx.stroke() at the end of the loop,
+357:            and we haven't used moveTo/lineTo, it will effectively do nothing.
+358:            This is fine! It keeps the class compatible with the logic flow.
+359:         */
+360:     }
+361: }
+362: VisualizerFactory.register('waveform', 'waveform-visualizer', WaveformVisualizer);
+363: VisualizerFactory.register('waveform', 'neon-pulse-wave', NeonPulseWave);
+364: VisualizerFactory.register('waveform', 'mirror-oscilloscope-wave', MirrorOscilloscope);
+365: VisualizerFactory.register('waveform', 'solid-mountain-wave', SolidMountainWave);
+366: VisualizerFactory.register('waveform', 'digital-fragment-wave', DigitalFragmentWave);
+367: VisualizerFactory.register('waveform', 'cycling-mirror-oscilloscope-wave', CyclingMirrorOscilloscope);
+368: VisualizerFactory.register('waveform', 'rainbow-mirror-oscilloscope-wave', RainbowMirrorWave);
+369: VisualizerFactory.register('waveform', 'heatmap-cycling-mirror-oscilloscope-wave', HeatmapCyclingMirrorOscilloscope);
+</file>
+
+<file path="graphs/Factory.js">
+ 1: const VisualizerFactory = {
+ 2:     // Structure: { 'bar': Map, 'radial': Map, 'physics': Map }
+ 3:     categories: new Map(),
+ 4:     register(category, type, cls) {
+ 5:         if (!this.categories.has(category)) {
+ 6:             this.categories.set(category, new Map());
+ 7:         }
+ 8:         this.categories.get(category).set(type, cls);
+ 9:     },
+10:     create(category, type, ...args) {
+11:         const cat = this.categories.get(category);
+12:         if (!cat) throw new Error(`Category ${category} not found`);
+13:         const cls = cat.get(type);
+14:         if (!cls) throw new Error(`Type ${type} not found in ${category}`);
+15:         return new cls(...args);
+16:     },
+17:     getManifest() {
+18:         const manifest = {};
+19:         this.categories.forEach((map, catName) => {
+20:             manifest[catName] = Array.from(map.values().map(visCls => [visCls.name, visCls.key]));
+21:         });
+22:         return manifest;
+23:     }
+24: }
+25: export default VisualizerFactory;
+</file>
+
+<file path="graphs/Registry.js">
+1: import VisualizerFactory from './Factory.js';
+2: import EngineFactory from './engines/EngineFactory.js'
+3: import "./barchart/BarChartColorVizualizer.js";
+4: import './waveform/WaveformVisualizer.js';
+5: import './engines/VisualizerEngines.js';
+6: const manifest = VisualizerFactory.getManifest();
+7: console.log({manifest});
+8: export {manifest as visualizerManifest, EngineFactory, VisualizerFactory};
+</file>
+
+<file path="slideshows/renderers/ImageRenderer.js">
+ 1: export class ImageRenderer {
+ 2:     static render(renderContext, img, transform) {
+ 3:         const { ctx, canvasWidth, canvasHeight } = renderContext;
+ 4:         const { scale, alpha, offsetX = 0, offsetY = 0 } = transform;
+ 5:         // 1. Clear the frame
+ 6:         ctx.fillStyle = "#181717";
+ 7:         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+ 8:         if (!img) return;
+ 9:         // 2. Calculate dimensions based on the scale provided by the strategy
+10:         const w = img.width * scale;
+11:         const h = img.height * scale;
+12:         // 3. Center the image
+13:         const x = (canvasWidth / 2) - (w / 2) + offsetX; // Apply the glitch shift!
+14:         const y = (canvasHeight / 2) - (h / 2) + offsetY;
+15:         // 4. Paint
+16:         ctx.globalAlpha = alpha;
+17:         ctx.drawImage(img, x, y, w, h);
+18:         ctx.globalAlpha = 1;
+19:     }
+20: }
+</file>
+
+<file path="slideshows/strategies/AnimationFactory.js">
+ 1: // AnimationFactory.js
+ 2: export class AnimationFactory {
+ 3:     // Private registry of strategies
+ 4:     static #registry = new Map();
+ 5:     /**
+ 6:      * Registers a new animation strategy.
+ 7:      * @param {string} key - The name used to identify the animation.
+ 8:      * @param {class} StrategyClass - The class definition.
+ 9:      */
+10:     static register(key, StrategyClass) {
+11:         this.#registry.set(key, StrategyClass);
+12:         console.log(`Animation registered: ${key}`);
+13:     }
+14:     /**
+15:      * Creates an instance of a registered strategy.
+16:      */
+17:     static create(key, config = {}) {
+18:         const StrategyClass = this.#registry.get(key);
+19:         if (!StrategyClass) {
+20:             console.warn(`Strategy "${key}" not found. Falling back to default.`);
+21:             // You can return a default or the first one registered
+22:             const DefaultClass = this.#registry.values().next().value;
+23:             return DefaultClass ? new DefaultClass(config) : null;
+24:         }
+25:         return new StrategyClass(config);
+26:     }
+27:     static getAvailableTypes() {
+28:         return Array.from(this.#registry.keys());
+29:     }
+30: }
+</file>
+
+<file path="slideshows/strategies/AnimationStrategies.js">
+  1: import { BaseProcessor, api } from "../../VisualizerManager.js";
+  2: import { AnimationFactory } from "./AnimationFactory.js";
+  3: class BaseAnimation {
+  4:     constructor(config = {}) {
+  5:         this.alphaCoef = 0;
+  6:         this.doFadeIn = true;
+  7:         this.config = {
+  8:             maxAlphaCoef: 2328,
+  9:             zoomThreshold: 610,
+ 10:             fadeSpeed: 10,
+ 11:             ...config
+ 12:         };
+ 13:     }
+ 14:     // This replaces the logic inside your process loop
+ 15:     update() {
+ 16:         if (this.doFadeIn) {
+ 17:             this.alphaCoef += this.config.fadeSpeed;
+ 18:             if (this.alphaCoef >= this.config.maxAlphaCoef) this.doFadeIn = false;
+ 19:         } else {
+ 20:             this.alphaCoef -= this.config.fadeSpeed;
+ 21:             if (this.alphaCoef <= 0) {
+ 22:                 this.alphaCoef = 0;
+ 23:                 this.doFadeIn = true;
+ 24:                 return true; // Signal that the cycle finished (time to swap images)
+ 25:             }
+ 26:         }
+ 27:         return false;
+ 28:     }
+ 29:     getTransform(canvas, img) {
+ 30:         throw new Error("getTransform must be implemented by subclass");
+ 31:     }
+ 32: }
+ 33: export class PulseZoomStrategy extends BaseAnimation {
+ 34:     getTransform(canvas, img) {
+ 35:         if (!img)
+ 36:             return { scale: 0, alpha: 0 };
+ 37:         const canvasH = canvas.attribute('height');
+ 38:         const coef = (canvasH / img.height) * (1.05 + (this.alphaCoef / 3008));
+ 39:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 40:         return { scale: coef, alpha: alpha };
+ 41:     }
+ 42: }
+ 43: // Strategy 2: A simple static fade (no movement)
+ 44: export class StaticStrategy extends BaseAnimation {
+ 45:     getTransform(canvas, img) {
+ 46:         const canvasH = canvas.attribute('height');
+ 47:         const scale = (canvasH / img.height) * 1.05; // Fixed scale
+ 48:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 49:         return { scale, alpha };
+ 50:     }
+ 51: }
+ 52: export class GlitchStrategy extends BaseAnimation {
+ 53:     constructor(config = {}) {
+ 54:         super(config);
+ 55:         this.jitterX = 0;
+ 56:         this.jitterY = 0;
+ 57:     }
+ 58:     update() {
+ 59:         // 1. Run the normal fade in/out logic
+ 60:         const cycleFinished = super.update();
+ 61:         // 2. Add some "Randomness"
+ 62:         // Most of the time (95%), no jitter. 
+ 63:         // 5% of the time, create a sudden offset.
+ 64:         if (Math.random() > 0.95) {
+ 65:             this.jitterX = (Math.random() - 0.5) * 40; // Shift up to 20px
+ 66:             this.jitterY = (Math.random() - 0.5) * 40;
+ 67:         } else {
+ 68:             // Quickly "ease" back to zero jitter
+ 69:             this.jitterX *= 0.8;
+ 70:             this.jitterY *= 0.8;
+ 71:         }
+ 72:         return cycleFinished;
+ 73:     }
+ 74:     getTransform(canvas, img) {
+ 75:         const canvasH = canvas.attribute('height');
+ 76:         // Base scale + a tiny bit of "shiver" from the jitter
+ 77:         const scale = (canvasH / img.height) * (1.05 + (Math.abs(this.jitterX) / 2000));
+ 78:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+ 79:         return { 
+ 80:             scale, 
+ 81:             alpha,
+ 82:             // We can pass extra data like offsets to our Renderer!
+ 83:             offsetX: this.jitterX,
+ 84:             offsetY: this.jitterY
+ 85:         };
+ 86:     }
+ 87: }
+ 88: export class PanScanStrategy extends BaseAnimation {
+ 89:     constructor(config = {}) {
+ 90:         super(config);
+ 91:         // We want to track the "horizontal progress"
+ 92:         this.panProgress = 0;
+ 93:         this.direction = Math.random() > 0.5 ? 1 : -1;
+ 94:     }
+ 95:     update() {
+ 96:         const cycleFinished = super.update();
+ 97:         // While the image is fading in/staying visible, we move the pan
+ 98:         // We use a very small increment so it looks smooth
+ 99:         if (this.alphaCoef > 0) {
+100:             this.panProgress += 0.001; 
+101:         }
+102:         // Reset the pan when the image is fully hidden
+103:         if (cycleFinished) {
+104:             this.direction = Math.random() > 0.5 ? 1 : -1;
+105:             this.panProgress = 0;
+106:         }
+107:         return cycleFinished;
+108:     }
+109:     getTransform(canvas, img) {
+110:         const canvasH = canvas.attribute('height');
+111:         // 1. We scale it slightly larger than the screen so we have "room" to slide
+112:         const scale = (canvasH / img.height) * 1.2;
+113:         // 2. Standard Alpha logic
+114:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+115:         // 3. Calculate the Pan Offset
+116:         // We figure out how much "extra" width we have, then multiply by progress
+117:         const scaledWidth = img.width * scale;
+118:         const extraWidth = scaledWidth - canvas.attribute('width');
+119:         // Slide from +extraWidth/2 to -extraWidth/2
+120:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+121:         return { 
+122:             scale, 
+123:             alpha,
+124:             offsetX: offsetX * this.direction,
+125:             offsetY: 0 
+126:         };
+127:     }
+128: }
+129: export class SmartPanStrategy extends BaseAnimation {
+130:     constructor(config = {}) {
+131:         super(config);
+132:         this.panProgress = 0;
+133:         this.direction = Math.random() > 0.5 ? 1 : -1;
+134:     }
+135:     update() {
+136:         const cycleFinished = super.update();
+137:         // Only progress the pan if we are in a visible state
+138:         if (this.alphaCoef > 0) {
+139:             this.panProgress += 0.001; 
+140:         }
+141:         if (cycleFinished) {
+142:             this.panProgress = 0;
+143:             this.direction = Math.random() > 0.5 ? 1 : -1;
+144:         }
+145:         return cycleFinished;
+146:     }
+147:     getTransform(canvas, img) {
+148:         const canvasW = canvas.attribute('width');
+149:         const canvasH = canvas.attribute('height');
+150:         // 1. "Cover" Logic: Ensure the image at least fills the whole canvas
+151:         const scaleW = canvasW / img.width;
+152:         const scaleH = canvasH / img.height;
+153:         // Use the larger of the two scales so no black bars are visible,
+154:         // then add our 1.1 buffer to guarantee room for movement.
+155:         const scale = Math.max(scaleW, scaleH) * 1.1; 
+156:         const scaledWidth = img.width * scale;
+157:         const extraWidth = scaledWidth - canvasW;
+158:         // 2. The Pan Logic
+159:         // Even if it's portrait, it's now wide enough to slide
+160:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+161:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+162:         return { 
+163:             scale, 
+164:             alpha, 
+165:             offsetX, 
+166:             offsetY: 0 
+167:         };
+168:     }
+169: }
+170: export class CrossfadeStrategy extends BaseAnimation {
+171:     constructor(config = {}) {
+172:         super(config);
+173:         this.nextAlpha = 0;
+174:     }
+175:     update() {
+176:         // 1. Fade the current one out
+177:         if (this.alphaCoef > 0) {
+178:             this.alphaCoef -= this.config.fadeSpeed;
+179:         }
+180:         // 2. Fade the next one in at the same time
+181:         this.nextAlpha += this.config.fadeSpeed;
+182:         // 3. Cycle ends when the next image is fully opaque
+183:         if (this.nextAlpha >= this.config.maxAlphaCoef) {
+184:             this.alphaCoef = this.config.maxAlphaCoef; // Reset for next cycle
+185:             this.nextAlpha = 0;
+186:             return true; 
+187:         }
+188:         return false;
+189:     }
+190:     getTransform(canvas, img, isNext = false) {
+191:         const canvasH = canvas.attribute('height');
+192:         const scale = (canvasH / img.height) * 1.05;
+193:         // Use the correct alpha depending on if we are drawing the "Outgoing" or "Incoming" image
+194:         const targetCoef = isNext ? this.nextAlpha : this.alphaCoef;
+195:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, targetCoef)) / 1000;
+196:         return { scale, alpha };
+197:     }
+198: }
+199: AnimationFactory.register('static', StaticStrategy);
+200: AnimationFactory.register('pulse-zoom', PulseZoomStrategy);
+201: AnimationFactory.register('glitch', GlitchStrategy);
+202: AnimationFactory.register('pan-scan', PanScanStrategy);
+203: AnimationFactory.register('smart-pan', SmartPanStrategy);
+204: AnimationFactory.register('crossfade', CrossfadeStrategy);
+</file>
+
+<file path="slideshows/Registry.js">
+1: import { AnimationFactory } from "./strategies/AnimationFactory.js";
+2: import { ImageRenderer } from "./renderers/ImageRenderer.js";
+3: import './strategies/AnimationStrategies.js';
+4: export { AnimationFactory, ImageRenderer };
+</file>
+
+<file path="slideshows/repomix-output.txt">
+  1: This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+  2: The content has been processed where empty lines have been removed, line numbers have been added.
+  3: 
+  4: <file_summary>
+  5: This section contains a summary of this file.
+  6: 
+  7: <purpose>
+  8: This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+  9: It is designed to be easily consumable by AI systems for analysis, code review,
+ 10: or other automated processes.
+ 11: </purpose>
+ 12: 
+ 13: <file_format>
+ 14: The content is organized as follows:
+ 15: 1. This summary section
+ 16: 2. Repository information
+ 17: 3. Directory structure
+ 18: 4. Repository files (if enabled)
+ 19: 5. Multiple file entries, each consisting of:
+ 20:   - File path as an attribute
+ 21:   - Full contents of the file
+ 22: </file_format>
+ 23: 
+ 24: <usage_guidelines>
+ 25: - This file should be treated as read-only. Any changes should be made to the
+ 26:   original repository files, not this packed version.
+ 27: - When processing this file, use the file path to distinguish
+ 28:   between different files in the repository.
+ 29: - Be aware that this file may contain sensitive information. Handle it with
+ 30:   the same level of security as you would the original repository.
+ 31: </usage_guidelines>
+ 32: 
+ 33: <notes>
+ 34: - Some files may have been excluded based on .gitignore rules and Repomix's configuration
+ 35: - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+ 36: - Files matching these patterns are excluded: **/node_modules/**, .venv/**, .git/**, .gitignore, .pg_pass, *.log, dist/**, build/**
+ 37: - Files matching patterns in .gitignore are excluded
+ 38: - Files matching default ignore patterns are excluded
+ 39: - Empty lines have been removed from all files
+ 40: - Line numbers have been added to the beginning of each line
+ 41: - Files are sorted by Git change count (files with more changes are at the bottom)
+ 42: </notes>
+ 43: 
+ 44: </file_summary>
+ 45: 
+ 46: <directory_structure>
+ 47: renderers/
+ 48:   ImageRenderer.js
+ 49: strategies/
+ 50:   AnimationFactory.js
+ 51:   AnimationStrategies.js
+ 52: Registry.js
+ 53: repomix.config.json
+ 54: </directory_structure>
+ 55: 
+ 56: <files>
+ 57: This section contains the contents of the repository's files.
+ 58: 
+ 59: <file path="renderers/ImageRenderer.js">
+ 60:  1: export class ImageRenderer {
+ 61:  2:     static render(renderContext, img, transform) {
+ 62:  3:         const { ctx, canvasWidth, canvasHeight } = renderContext;
+ 63:  4:         const { scale, alpha, offsetX = 0, offsetY = 0 } = transform;
+ 64:  5:         // 1. Clear the frame
+ 65:  6:         ctx.fillStyle = "#181717";
+ 66:  7:         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+ 67:  8:         if (!img) return;
+ 68:  9:         // 2. Calculate dimensions based on the scale provided by the strategy
+ 69: 10:         const w = img.width * scale;
+ 70: 11:         const h = img.height * scale;
+ 71: 12:         // 3. Center the image
+ 72: 13:         const x = (canvasWidth / 2) - (w / 2) + offsetX; // Apply the glitch shift!
+ 73: 14:         const y = (canvasHeight / 2) - (h / 2) + offsetY;
+ 74: 15:         // 4. Paint
+ 75: 16:         ctx.globalAlpha = alpha;
+ 76: 17:         ctx.drawImage(img, x, y, w, h);
+ 77: 18:         ctx.globalAlpha = 1;
+ 78: 19:     }
+ 79: 20: }
+ 80: </file>
+ 81: 
+ 82: <file path="strategies/AnimationFactory.js">
+ 83:  1: // AnimationFactory.js
+ 84:  2: export class AnimationFactory {
+ 85:  3:     // Private registry of strategies
+ 86:  4:     static #registry = new Map();
+ 87:  5:     /**
+ 88:  6:      * Registers a new animation strategy.
+ 89:  7:      * @param {string} key - The name used to identify the animation.
+ 90:  8:      * @param {class} StrategyClass - The class definition.
+ 91:  9:      */
+ 92: 10:     static register(key, StrategyClass) {
+ 93: 11:         this.#registry.set(key, StrategyClass);
+ 94: 12:         console.log(`Animation registered: ${key}`);
+ 95: 13:     }
+ 96: 14:     /**
+ 97: 15:      * Creates an instance of a registered strategy.
+ 98: 16:      */
+ 99: 17:     static create(key, config = {}) {
+100: 18:         const StrategyClass = this.#registry.get(key);
+101: 19:         if (!StrategyClass) {
+102: 20:             console.warn(`Strategy "${key}" not found. Falling back to default.`);
+103: 21:             // You can return a default or the first one registered
+104: 22:             const DefaultClass = this.#registry.values().next().value;
+105: 23:             return DefaultClass ? new DefaultClass(config) : null;
+106: 24:         }
+107: 25:         return new StrategyClass(config);
+108: 26:     }
+109: 27:     static getAvailableTypes() {
+110: 28:         return Array.from(this.#registry.keys());
+111: 29:     }
+112: 30: }
+113: </file>
+114: 
+115: <file path="strategies/AnimationStrategies.js">
+116:   1: import { BaseProcessor, api } from "../../VisualizerManager.js";
+117:   2: import { AnimationFactory } from "./AnimationFactory.js";
+118:   3: class BaseAnimation {
+119:   4:     constructor(config = {}) {
+120:   5:         this.alphaCoef = 0;
+121:   6:         this.doFadeIn = true;
+122:   7:         this.config = {
+123:   8:             maxAlphaCoef: 2328,
+124:   9:             zoomThreshold: 610,
+125:  10:             fadeSpeed: 10,
+126:  11:             ...config
+127:  12:         };
+128:  13:     }
+129:  14:     // This replaces the logic inside your process loop
+130:  15:     update() {
+131:  16:         if (this.doFadeIn) {
+132:  17:             this.alphaCoef += this.config.fadeSpeed;
+133:  18:             if (this.alphaCoef >= this.config.maxAlphaCoef) this.doFadeIn = false;
+134:  19:         } else {
+135:  20:             this.alphaCoef -= this.config.fadeSpeed;
+136:  21:             if (this.alphaCoef <= 0) {
+137:  22:                 this.alphaCoef = 0;
+138:  23:                 this.doFadeIn = true;
+139:  24:                 return true; // Signal that the cycle finished (time to swap images)
+140:  25:             }
+141:  26:         }
+142:  27:         return false;
+143:  28:     }
+144:  29:     getTransform(canvas, img) {
+145:  30:         throw new Error("getTransform must be implemented by subclass");
+146:  31:     }
+147:  32: }
+148:  33: export class PulseZoomStrategy extends BaseAnimation {
+149:  34:     getTransform(canvas, img) {
+150:  35:         if (!img)
+151:  36:             return { scale: 0, alpha: 0 };
+152:  37:         const canvasH = canvas.attribute('height');
+153:  38:         const coef = (canvasH / img.height) * (1.05 + (this.alphaCoef / 3008));
+154:  39:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+155:  40:         return { scale: coef, alpha: alpha };
+156:  41:     }
+157:  42: }
+158:  43: // Strategy 2: A simple static fade (no movement)
+159:  44: export class StaticStrategy extends BaseAnimation {
+160:  45:     getTransform(canvas, img) {
+161:  46:         const canvasH = canvas.attribute('height');
+162:  47:         const scale = (canvasH / img.height) * 1.05; // Fixed scale
+163:  48:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+164:  49:         return { scale, alpha };
+165:  50:     }
+166:  51: }
+167:  52: export class GlitchStrategy extends BaseAnimation {
+168:  53:     constructor(config = {}) {
+169:  54:         super(config);
+170:  55:         this.jitterX = 0;
+171:  56:         this.jitterY = 0;
+172:  57:     }
+173:  58:     update() {
+174:  59:         // 1. Run the normal fade in/out logic
+175:  60:         const cycleFinished = super.update();
+176:  61:         // 2. Add some "Randomness"
+177:  62:         // Most of the time (95%), no jitter. 
+178:  63:         // 5% of the time, create a sudden offset.
+179:  64:         if (Math.random() > 0.95) {
+180:  65:             this.jitterX = (Math.random() - 0.5) * 40; // Shift up to 20px
+181:  66:             this.jitterY = (Math.random() - 0.5) * 40;
+182:  67:         } else {
+183:  68:             // Quickly "ease" back to zero jitter
+184:  69:             this.jitterX *= 0.8;
+185:  70:             this.jitterY *= 0.8;
+186:  71:         }
+187:  72:         return cycleFinished;
+188:  73:     }
+189:  74:     getTransform(canvas, img) {
+190:  75:         const canvasH = canvas.attribute('height');
+191:  76:         // Base scale + a tiny bit of "shiver" from the jitter
+192:  77:         const scale = (canvasH / img.height) * (1.05 + (Math.abs(this.jitterX) / 2000));
+193:  78:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+194:  79:         return { 
+195:  80:             scale, 
+196:  81:             alpha,
+197:  82:             // We can pass extra data like offsets to our Renderer!
+198:  83:             offsetX: this.jitterX,
+199:  84:             offsetY: this.jitterY
+200:  85:         };
+201:  86:     }
+202:  87: }
+203:  88: export class PanScanStrategy extends BaseAnimation {
+204:  89:     constructor(config = {}) {
+205:  90:         super(config);
+206:  91:         // We want to track the "horizontal progress"
+207:  92:         this.panProgress = 0;
+208:  93:         this.direction = Math.random() > 0.5 ? 1 : -1;
+209:  94:     }
+210:  95:     update() {
+211:  96:         const cycleFinished = super.update();
+212:  97:         // While the image is fading in/staying visible, we move the pan
+213:  98:         // We use a very small increment so it looks smooth
+214:  99:         if (this.alphaCoef > 0) {
+215: 100:             this.panProgress += 0.001; 
+216: 101:         }
+217: 102:         // Reset the pan when the image is fully hidden
+218: 103:         if (cycleFinished) {
+219: 104:             this.direction = Math.random() > 0.5 ? 1 : -1;
+220: 105:             this.panProgress = 0;
+221: 106:         }
+222: 107:         return cycleFinished;
+223: 108:     }
+224: 109:     getTransform(canvas, img) {
+225: 110:         const canvasH = canvas.attribute('height');
+226: 111:         // 1. We scale it slightly larger than the screen so we have "room" to slide
+227: 112:         const scale = (canvasH / img.height) * 1.2;
+228: 113:         // 2. Standard Alpha logic
+229: 114:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+230: 115:         // 3. Calculate the Pan Offset
+231: 116:         // We figure out how much "extra" width we have, then multiply by progress
+232: 117:         const scaledWidth = img.width * scale;
+233: 118:         const extraWidth = scaledWidth - canvas.attribute('width');
+234: 119:         // Slide from +extraWidth/2 to -extraWidth/2
+235: 120:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+236: 121:         return { 
+237: 122:             scale, 
+238: 123:             alpha,
+239: 124:             offsetX: offsetX * this.direction,
+240: 125:             offsetY: 0 
+241: 126:         };
+242: 127:     }
+243: 128: }
+244: 129: export class SmartPanStrategy extends BaseAnimation {
+245: 130:     constructor(config = {}) {
+246: 131:         super(config);
+247: 132:         this.panProgress = 0;
+248: 133:         this.direction = Math.random() > 0.5 ? 1 : -1;
+249: 134:     }
+250: 135:     update() {
+251: 136:         const cycleFinished = super.update();
+252: 137:         // Only progress the pan if we are in a visible state
+253: 138:         if (this.alphaCoef > 0) {
+254: 139:             this.panProgress += 0.001; 
+255: 140:         }
+256: 141:         if (cycleFinished) {
+257: 142:             this.panProgress = 0;
+258: 143:             this.direction = Math.random() > 0.5 ? 1 : -1;
+259: 144:         }
+260: 145:         return cycleFinished;
+261: 146:     }
+262: 147:     getTransform(canvas, img) {
+263: 148:         const canvasW = canvas.attribute('width');
+264: 149:         const canvasH = canvas.attribute('height');
+265: 150:         // 1. "Cover" Logic: Ensure the image at least fills the whole canvas
+266: 151:         const scaleW = canvasW / img.width;
+267: 152:         const scaleH = canvasH / img.height;
+268: 153:         // Use the larger of the two scales so no black bars are visible,
+269: 154:         // then add our 1.1 buffer to guarantee room for movement.
+270: 155:         const scale = Math.max(scaleW, scaleH) * 1.1; 
+271: 156:         const scaledWidth = img.width * scale;
+272: 157:         const extraWidth = scaledWidth - canvasW;
+273: 158:         // 2. The Pan Logic
+274: 159:         // Even if it's portrait, it's now wide enough to slide
+275: 160:         const offsetX = (extraWidth / 2) - (this.panProgress * extraWidth);
+276: 161:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, this.alphaCoef)) / 1000;
+277: 162:         return { 
+278: 163:             scale, 
+279: 164:             alpha, 
+280: 165:             offsetX, 
+281: 166:             offsetY: 0 
+282: 167:         };
+283: 168:     }
+284: 169: }
+285: 170: export class CrossfadeStrategy extends BaseAnimation {
+286: 171:     constructor(config = {}) {
+287: 172:         super(config);
+288: 173:         this.nextAlpha = 0;
+289: 174:     }
+290: 175:     update() {
+291: 176:         // 1. Fade the current one out
+292: 177:         if (this.alphaCoef > 0) {
+293: 178:             this.alphaCoef -= this.config.fadeSpeed;
+294: 179:         }
+295: 180:         // 2. Fade the next one in at the same time
+296: 181:         this.nextAlpha += this.config.fadeSpeed;
+297: 182:         // 3. Cycle ends when the next image is fully opaque
+298: 183:         if (this.nextAlpha >= this.config.maxAlphaCoef) {
+299: 184:             this.alphaCoef = this.config.maxAlphaCoef; // Reset for next cycle
+300: 185:             this.nextAlpha = 0;
+301: 186:             return true; 
+302: 187:         }
+303: 188:         return false;
+304: 189:     }
+305: 190:     getTransform(canvas, img, isNext = false) {
+306: 191:         const canvasH = canvas.attribute('height');
+307: 192:         const scale = (canvasH / img.height) * 1.05;
+308: 193:         // Use the correct alpha depending on if we are drawing the "Outgoing" or "Incoming" image
+309: 194:         const targetCoef = isNext ? this.nextAlpha : this.alphaCoef;
+310: 195:         const alpha = Math.min(this.config.zoomThreshold, Math.max(0, targetCoef)) / 1000;
+311: 196:         return { scale, alpha };
+312: 197:     }
+313: 198: }
+314: 199: AnimationFactory.register('static', StaticStrategy);
+315: 200: AnimationFactory.register('pulse-zoom', PulseZoomStrategy);
+316: 201: AnimationFactory.register('glitch', GlitchStrategy);
+317: 202: AnimationFactory.register('pan-scan', PanScanStrategy);
+318: 203: AnimationFactory.register('smart-pan', SmartPanStrategy);
+319: 204: AnimationFactory.register('crossfade', CrossfadeStrategy);
+320: </file>
+321: 
+322: <file path="Registry.js">
+323: 1: import { AnimationFactory } from "./strategies/AnimationFactory.js";
+324: 2: import { ImageRenderer } from "./renderers/ImageRenderer.js";
+325: 3: import './strategies/AnimationStrategies.js';
+326: 4: export { AnimationFactory, ImageRenderer };
+327: </file>
+328: 
+329: <file path="repomix.config.json">
+330:  1: {
+331:  2:   "output": {
+332:  3:     "filePath": "repomix-output.txt",
+333:  4:     "removeComments": false,
+334:  5:     "showLineNumbers": true,
+335:  6:     "removeEmptyLines": true
+336:  7:   },
+337:  8:   "ignore": {
+338:  9:     "customPatterns": [
+339: 10:       "**/node_modules/**",
+340: 11:       ".venv/**",
+341: 12:       ".git/**",
+342: 13:       ".gitignore",
+343: 14:       ".pg_pass",
+344: 15:       "*.log",
+345: 16:       "dist/**",
+346: 17:       "build/**"
+347: 18:     ],
+348: 19:     "useGitignore": true,
+349: 20:     "useDefaultPatterns": true
+350: 21:   }
+351: 22: }
+352: </file>
+353: 
+354: </files>
+</file>
+
+<file path="Main.js">
+1: import VisualizerManager, {BGImagesProcessor, GraphProcessor} from './VisualizerManager.js'
+2: import { visualizerManifest } from './graphs/Registry.js';
+3: import { AnimationFactory, ImageRenderer } from './slideshows/Registry.js';
+4: VisualizerManager.init();
+5: export {VisualizerManager, AnimationFactory, ImageRenderer, BGImagesProcessor, GraphProcessor, visualizerManifest}
+</file>
+
+<file path="repomix.config.json">
+ 1: {
+ 2:   "output": {
+ 3:     "filePath": "repomix-output.txt",
+ 4:     "removeComments": false,
+ 5:     "showLineNumbers": true,
+ 6:     "removeEmptyLines": true
+ 7:   },
+ 8:   "ignore": {
+ 9:     "customPatterns": [
+10:       "**/node_modules/**",
+11:       ".venv/**",
+12:       ".git/**",
+13:       ".gitignore",
+14:       ".pg_pass",
+15:       "*.log",
+16:       "dist/**",
+17:       "build/**"
+18:     ],
+19:     "useGitignore": true,
+20:     "useDefaultPatterns": true
+21:   }
+22: }
+</file>
+
+<file path="VisualizerManager.js">
+  1: import { CanvasItem } from './canvas/CanvasItem.js';
+  2: import {VisualizerFactory, EngineFactory, visualizerManifest} from './graphs/Registry.js';
+  3: import { API } from '../../core/HttpClient.js';
+  4: import { BarChartEngine, WaveformEngine } from './graphs/engines/VisualizerEngines.js';
+  5: import RendererFactory from './Gradient/Renderers/RendererFactory.js';
+  6: import { VisualizerDropdownComponent, VisualSelectManager } from '../components/GroupeSelectItem.js';
+  7: import { HTMLItems } from '../grid/RowTemplates.js';
+  8: import { ListEvents } from '../../core/EventBus.js';
+  9: import { AnimationFactory, ImageRenderer } from './Main.js';
+ 10: export const api = new API();
+ 11: export class BaseProcessor {
+ 12:     constructor() {
+ 13:         this.canvas = VisualizerManager.getCanvas();
+ 14:         this.canvasCtx = VisualizerManager.getContext();
+ 15:     }
+ 16:     setup(...args) {}
+ 17:     process(...args) {}
+ 18: }
+ 19: export class BGImagesProcessor extends BaseProcessor {
+ 20:     constructor(strategyType = 'pulse-zoom') {
+ 21:         super();
+ 22:         this.imgIdx = 0;
+ 23:         this.imgList = [];
+ 24:         this.background = null;
+ 25:         // Use a Factory to set the behavior
+ 26:         this.strategy = AnimationFactory.create(strategyType); 
+ 27:     }
+ 28:     async setup() {
+ 29:         // this.curImg = "def_geo.jpg";
+ 30:         // this.curImg = 'img1.jpg';
+ 31:         // this.curImg =  'binikini.jpg';
+ 32:         // this.curImg =  'space.jpg';
+ 33:         // Load the "Welcome" image first
+ 34:         await this._loadNext(`static/img1.jpg`);
+ 35:         // Load the list in the background
+ 36:         const res = await api.loadBGImages();
+ 37:         this.imgList = res['img_list'] || [];
+ 38:     }
+ 39:     async _loadNext(path) {
+ 40:         // Ensure we aren't encoding the "https://" or the slashes in the path 
+ 41:         // but we are handling special characters in the filenames.
+ 42:         const baseUrl = "https://audioartk.me/";
+ 43:         // If the path already has 'static/', we just encode the URI components 
+ 44:         // to handle spaces or special symbols in filenames safely.
+ 45:         const cleanPath = path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+ 46:         const url = `${baseUrl}${cleanPath}`;
+ 47:         console.log(`Loading image ${url}`);
+ 48:         const img = new Image();
+ 49:         img.src = url;
+ 50:         try {
+ 51:             // We update this.background only after the new image has fully loaded
+ 52:             this.background = await this.imageLoader(img);
+ 53:         } catch (e) {
+ 54:             console.error(`Failed to load background image at ${url}`, e);
+ 55:         }
+ 56:     }
+ 57:     process() {
+ 58:         // 1. Logic: Update the strategy (the "Film")
+ 59:         const cycleFinished = this.strategy.update();
+ 60:         // 2. Management: Swap image if the "Film" is done
+ 61:         if (cycleFinished && this.imgList.length > 0) {
+ 62:             this._loadNext(this.imgList[this.imgIdx]);
+ 63:             this.imgIdx = (this.imgIdx + 1) % this.imgList.length;
+ 64:         }
+ 65:         // 3. Rendering: Hand everything to the Renderer
+ 66:         const renderContext = {
+ 67:             ctx: this.canvasCtx,
+ 68:             canvasWidth: this.canvas.attribute('width'),
+ 69:             canvasHeight: this.canvas.attribute('height')
+ 70:         };
+ 71:         const transform = this.strategy.getTransform(this.canvas, this.background);
+ 72:         // The Processor no longer draws! It just calls the Renderer.
+ 73:         ImageRenderer.render(renderContext, this.background, transform);
+ 74:     }
+ 75:     async imageLoader(img) {
+ 76:         return new Promise((resolve, reject) => {
+ 77:             img.onload = () => resolve(img);
+ 78:             img.onerror = reject;
+ 79:         })
+ 80:     }
+ 81: }
+ 82: export class GraphProcessor extends BaseProcessor {
+ 83:     constructor(audioPlayer, category = 'waveform', chartName = 'heatmap-cycling-mirror-oscilloscope-wave', renderer = 'radial') {
+ 84:         super();
+ 85:         this.audioPlayer = audioPlayer;
+ 86:         this.isReady = false;
+ 87:         // 1. Synchronously create the initial engine/graph so .setup() works immediately
+ 88:         this.graph = VisualizerFactory.create(category, chartName);
+ 89:         this.renderer = RendererFactory.create(renderer);
+ 90:         this.engine = EngineFactory.create(category);
+ 91:         VisualizerManager.onSwitchVisualizer(this.setChart.bind(this), this);
+ 92:     }
+ 93:     async setup(fftSize) {
+ 94:         await this.engine.setup(this.audioPlayer, fftSize);
+ 95:         this.isReady = true;
+ 96:     }
+ 97:     process() {
+ 98:         this.engine.update();
+ 99:         const audioContext = this.engine.getContext();
+100:         const renderContext = {
+101:             ...audioContext,
+102:             canvasWidth: this.canvas.attribute('width'),
+103:             canvasHeight: this.canvas.attribute('height'),
+104:             ctx: this.canvasCtx,
+105:             canvas: this.canvas,
+106:             time: Date.now() * 0.002
+107:         };
+108:         this.graph.process(renderContext, this.renderer);
+109:     }
+110:     async setChart(category, chartName, renderer) {
+111:         if (!category || !chartName) return;
+112:         if (!renderer) renderer = category === 'waveform' ? 'radial' : 'bar';
+113:         // 2. Background creation for "Hot Swapping"
+114:         const newGraph = VisualizerFactory.create(category, chartName);
+115:         const newRenderer = RendererFactory.create(renderer);
+116:         const newEngine = EngineFactory.create(category);
+117:         // Await the setup of the NEW engine without touching the current one
+118:         await newEngine.setup(this.audioPlayer);
+119:         // 3. Atomic swap
+120:         this.graph = newGraph;
+121:         this.renderer = newRenderer;
+122:         this.engine = newEngine;
+123:         console.log("Visualizer swapped seamlessly.", {category, chartName, renderer});
+124:     }
+125: }
+126: const VisualizerManager = {
+127:     init() {
+128:         this._initCanvas();
+129:         this._processors = [];
+130:         this.isRunning = false;
+131:         this.animationId = null;
+132:         this._events = new ListEvents();
+133:         this._initVisualizerSelector();
+134:     },
+135:     addProcessor(processor, ...args) {
+136:         this._processors.push({processor, args});
+137:     },
+138:     async executeProcessors() {
+139:         if (this.isRunning) return;
+140:         const tasks = this._processors.map(({processor, args}) => processor.setup(...args));
+141:         try {
+142:             await Promise.all(tasks);
+143:         } catch(e) {
+144:             console.trace(e);
+145:             return console.error(e);
+146:         }
+147:         this.isRunning = true;
+148:         this._stop = false;
+149:         this._startMainLoop();
+150:     },
+151:     getCanvas() {
+152:         return this.canvas;
+153:     },
+154:     getContext() {
+155:         return this.canvasCtx;
+156:     },
+157:     requestStopAnimation() {
+158:         if (this.animationId) {
+159:             cancelAnimationFrame(this.animationId);
+160:             this.animationId = null;
+161:         }
+162:         this.isRunning = false;
+163:     },
+164:     _startMainLoop() {
+165:         const loop = () => {
+166:             if (!this.isRunning) return;
+167:             // We keep the canvas clearing and rendering at 60fps
+168:             this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
+169:             // This will now call processor.process(), which checks its own "isReady" flag
+170:             this._processors.forEach(({processor}) => processor.process());
+171:             this.animationId = requestAnimationFrame(loop);
+172:         };
+173:         this.animationId = requestAnimationFrame(loop);
+174:     },
+175:     _initCanvas() {
+176:         this.container = new HTMLItems('div').css({
+177:             position: 'relative',
+178:             width: 'fit-content',
+179:             margin: 'auto'
+180:         }).appendTo(document.body);
+181:         this.canvas = new CanvasItem({
+182:             width: window.innerWidth, 
+183:             height: window.innerHeight, 
+184:             padWidth: 36, 
+185:             padHeight: 182, 
+186:             autoResize: true
+187:         }).css({
+188:             display: 'block',
+189:             margin: 'auto'
+190:         }).appendTo(this.container.render());
+191:         this.canvasCtx = this.canvas.context('2d');
+192:     },
+193:     _initVisualizerSelector() {
+194:         VisualSelectManager.init(this.container);
+195:         VisualSelectManager.onCategoryChange((category, graphName, renderer) => {
+196:             // NOTICE: We no longer call requestStopAnimation() here!
+197:             // We just tell the processors to start their background swap.
+198:             this._events.trigger('onSwitchVisualizer', category, graphName, renderer);
+199:         });
+200:     },
+201:     onSwitchVisualizer(cb, subscriber) {
+202:         this._events.onEventRegister({cb, subscriber}, 'onSwitchVisualizer');
+203:     }
+204: }
+205: export default VisualizerManager;
+</file>
+
+</files>
