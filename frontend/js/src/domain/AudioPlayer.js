@@ -106,11 +106,13 @@ export class AudioPlayer {
     }
 
     next() {
+        this.audioEngine.gain().fadeIn(.15);
         this.audioPlayerEvents.trigger('onAudioEnded', this.currentTrack);
         this.setCurrentTrackFromTrackList(true, false);
     }
 
     prev() {
+        this.audioEngine.gain().fadeIn(.15);
         if (this.getCurrentTime() > 3.6) {
             this.setCurrentTime(0);
             this.audioPlayerEvents.trigger('onTrackTimeReset', this.currentTrack);
@@ -222,20 +224,18 @@ export class AudioPlayer {
     }
 
     // Helpers & Getters
-    increaseVolume() { 
-        const volume = this.audioEngine.gain().volume() + this.volumeStep;
-        this._updateVolumeBar(volume);
-        this.audioEngine.gain().setVolume(volume); 
+    async increaseVolume() {
+        let volume = await this.audioEngine.gain().increaseVolume();
+        this._updateVolumeBar(await volume);
     }
-    decreaseVolume() { 
-        const volume = this.audioEngine.gain().volume() - this.volumeStep;
+    async decreaseVolume() { 
+        const volume = await this.audioEngine.gain().decreaseVolume();
         this._updateVolumeBar(volume);
-        this.audioEngine.gain().setVolume(volume); 
     }
     setCurrentTime(time) { this.audioElem.currentTime = time; }
     getCurrentTime() { return this.audioElem.currentTime; }
     getDuration() { return this.audioElem.duration; }
-    getVolume() { return this.audioEngine.gain().volume(); }
+    getVolume() { return this.audioEngine.gain().getUserVolume(); }
     isMuted() { return this.audioEngine.gain().isMuted; }
     async mute() { await this.audioEngine.gain().mute(); }
 

@@ -190,6 +190,7 @@ export const TrackEditor = {
 };
 
 export const TrackSearch = function(searchableGrid) {
+    console.log({searchableGrid});
     this.searchEvents = new ListEvents();
     this.term = '';
     this.searchableGrid = searchableGrid;

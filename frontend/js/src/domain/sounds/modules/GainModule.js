@@ -5,18 +5,36 @@ export class GainModule extends BaseAudioModule {
         super(ctx)
         this.node = this.ctx.createGain();
         this.userVolume = 1.0;
-        this.isMuted = false;
+        this.muted = false;
+        this.volumeStep = .02
     }
 
     setVolume(value, duration = 0.01) {
         this.userVolume = Math.max(0.0001, Math.min(1, value));
         const now = this.node.context.currentTime;
         this.node.gain.cancelScheduledValues(now);
-        this.node.gain.linearRampToValueAtTime(this.userVolume, now + duration);
+        return new Promise((resolve, reject) => {
+            this.node.gain.linearRampToValueAtTime(this.userVolume, now + duration);
+            resolve(this.userVolume);
+        })
     }
 
     volume() {
         return this.node.gain.value;
+    }
+
+    async increaseVolume() {
+        const newVolume = Math.min((this.volume() * 100  << 0) + (this.volumeStep * 100), 100);
+        return await this.setVolume((newVolume + (newVolume % 2)) / 100);
+    }
+
+    async decreaseVolume() {
+        const newVolume = Math.max(0, (this.volume() * 100 << 0) - (this.volumeStep * 100));
+        return await this.setVolume((newVolume + (newVolume % 2)) / 100);
+    }
+
+    getUserVolume() {
+        return this.userVolume;
     }
 
     async fadeIn(duration = 1.0, mode = 'linear') {
@@ -55,14 +73,15 @@ export class GainModule extends BaseAudioModule {
         return new Promise(resolve => setTimeout(resolve, duration * 1000));
     }
 
+    isMuted() {
+        return this.muted;
+    }
+
     async mute() {
-        console.log('mute1', this.isMuted, this.volume())
-        if (this.isMuted)
+        if (this.muted)
             await this.fadeIn(.1);
         else
             await this.fadeOut(.1);
-        console.log('mute2', this.isMuted);
-        this.isMuted = !this.isMuted;
-        console.log('mute3', this.isMuted);
-    }   
+        this.muted = !this.muted;
+    }
 }

@@ -8,7 +8,6 @@ import { HTMLItems } from '../grid/RowTemplates.js';
 import { ListEvents } from '../../core/EventBus.js';
 import { AnimationFactory, ImageRenderer, ImageProviderFactory } from './Main.js';
 import { ResourceManager } from '../../domain/StateManager.js';
-import { TrackListManager } from '../../domain/TrackList.js';
 
 export const api = new API();
 
@@ -40,8 +39,6 @@ export class BGImagesProcessor extends BaseProcessor {
         // this.curImg = 'img1.jpg';
         // this.curImg =  'binikini.jpg';
         // this.curImg =  'space.jpg';
-        // Load the "Welcome" image first
-        // await this._loadNext(`static/img1.jpg`);
         
         await this.imageProvider.setup();
         this.background = await this.imageProvider.getNextImage();
@@ -67,13 +64,6 @@ export class BGImagesProcessor extends BaseProcessor {
 
         // The Processor no longer draws! It just calls the Renderer.
         ImageRenderer.render(renderContext, this.background, transform);
-    }
-
-    async imageLoader(img) {
-        return new Promise((resolve, reject) => {
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-        })
     }
 }
 
@@ -130,8 +120,6 @@ export class GraphProcessor extends BaseProcessor {
         this.graph = newGraph;
         this.renderer = newRenderer;
         this.engine = newEngine;
-        
-        console.log("Visualizer swapped seamlessly.", {category, chartName, renderer});
     }
 }
 
@@ -163,7 +151,6 @@ const VisualizerManager = {
         }
         
         this.isRunning = true;
-        this._stop = false;
         this._startMainLoop();
     },
 
@@ -189,7 +176,6 @@ const VisualizerManager = {
 
             // We keep the canvas clearing and rendering at 60fps
             this.canvasCtx.clearRect(0, 0, this.canvas.attribute('width'), this.canvas.attribute('height'));
-            
             // This will now call processor.process(), which checks its own "isReady" flag
             this._processors.forEach(({processor}) => processor.process());
 
@@ -225,7 +211,7 @@ const VisualizerManager = {
             // NOTICE: We no longer call requestStopAnimation() here!
             // We just tell the processors to start their background swap.
             this._events.trigger('onSwitchVisualizer', category, graphName, renderer);
-        });
+        }, this);
     },
 
     onSwitchVisualizer(cb, subscriber) {

@@ -272,7 +272,6 @@ export class TrackArtStrategy extends BaseAnimation {
     update() {
         // 1. Handle Track Change Transitions
         if (this.isTrackChanging) {
-            console.log('initiating track switch', this.alphaCoef, this.config.maxAlphaCoef, this.config.fadeSpeed)
             this.alphaCoef -= this.config.fadeSpeed;
             if (this.alphaCoef <= 0) {
                 this.alphaCoef = 0;

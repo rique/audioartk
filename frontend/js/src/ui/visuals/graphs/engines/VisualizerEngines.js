@@ -20,7 +20,6 @@ export class BarChartEngine extends BaseEngine {
 
     update() {
         if (!this.analyserNode) return;
-        // This method pulls fresh data from the hardware
         this.analyserNode.getFloatFrequencyData(this.dataArray);
     }
 }

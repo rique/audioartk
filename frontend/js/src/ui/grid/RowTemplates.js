@@ -102,8 +102,8 @@ export class HTMLItems {
             this._isStaged = false;
         }
     }
-    // FIXME: Change to isStaged
-    isTaged() {
+    
+    isStaged() {
         return !!this._isStaged;
     }
 
@@ -115,10 +115,10 @@ export class HTMLItems {
         return this;
     }
 
-    width(w, unit) {
-        if (typeof w === 'number') {
-            w = w.toString() + '' + unit;
-            this.css({ width: w });
+    width(width, unit) {
+        if (typeof width === 'number') {
+            width = width.toString() + '' + unit;
+            this.css({ width });
             return this;
         } else {
             return this.render().style.width;
@@ -616,13 +616,13 @@ class ShapeSVGItem extends SVGItem {
     }
 }
 
-class MAINSVGItem extends ShapeSVGItem {
+export class MAINSVGItem extends ShapeSVGItem {
     constructor() {
         super('svg');
     }
 }
 
-class RectSVGItem extends ShapeSVGItem {
+export class RectSVGItem extends ShapeSVGItem {
     constructor() {
         super('rect');
     }

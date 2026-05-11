@@ -7,7 +7,7 @@ import {MetadataMediator} from './src/ui/mediators/MetadataMediator.js';
 import {AudioPlayerControlsMediator} from './src/ui/mediators/AudioPlayerControlsMediator.js';
 import {TrackListManager} from './src/domain/TrackList.js';
 import {MetadataIndex} from './src/domain/MetadataIndex.js';
-import {TracklistGrid, library} from './src/ui/grid/GridView.js';
+import {library} from './src/ui/grid/GridView.js';
 import {AudioPlayerDisplay, PlayerControls, PlayerButtons} from './src/ui/player/PlayerUI.js';
 import {AudioPlayer} from './src/domain/AudioPlayer.js'
 import {keyCotrols} from './src/core/EventBus.js';
@@ -21,6 +21,7 @@ import {
 } from './src/ui/components/SideBarItem.js';
 import {VisualizerManager, BGImagesProcessor, GraphProcessor, visualizerManifest} from "./src/ui/visuals/Main.js"
 import { AudioEngine } from "./src/domain/sounds/AudioEngine.js"
+import { TracklistGrid } from './src/ui/components/tracklist/TracklistGrid.js';
 
 const api = new API();
 
